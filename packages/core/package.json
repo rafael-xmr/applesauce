@@ -1,0 +1,29 @@
+{
+  "name": "applesauce-core",
+  "version": "0.1.0",
+  "description": "",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "nostr"
+  ],
+  "author": "hzrd149",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "json-stringify-deterministic": "^1.0.12",
+    "nanoid": "^5.0.7",
+    "nostr-tools": "^2.7.2",
+    "tiny-lru": "^11.2.11"
+  },
+  "devDependencies": {
+    "@types/zen-observable": "^0.8.7",
+    "zen-observable": "^0.10.0"
+  }
+}

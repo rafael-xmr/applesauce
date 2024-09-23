@@ -1,0 +1,20 @@
+{
+  "name": "applesauce",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@changesets/cli": "^2.27.8"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5",
+    "turbo": "^2.1.2",
+    "typescript": "^5.4.5"
+  },
+  "packageManager": "pnpm@9.9.0",
+  "engines": {
+    "node": ">=20"
+  }
+}
