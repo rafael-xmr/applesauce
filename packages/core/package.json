@@ -17,12 +17,14 @@
     "dist"
   ],
   "dependencies": {
+    "debug": "^4.3.7",
     "json-stringify-deterministic": "^1.0.12",
     "nanoid": "^5.0.7",
     "nostr-tools": "^2.7.2",
     "tiny-lru": "^11.2.11"
   },
   "devDependencies": {
+    "@types/debug": "^4.1.12",
     "@types/zen-observable": "^0.8.7",
     "zen-observable": "^0.10.0"
   }

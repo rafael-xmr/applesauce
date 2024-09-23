@@ -12,10 +12,14 @@ declare module "nostr-tools" {
   }
 }
 
+export function isReplaceable(kind: number) {
+  return kinds.isReplaceableKind(kind) || kinds.isParameterizedReplaceableKind(kind);
+}
+
 /** returns the events Unique ID */
 export function getEventUID(event: NostrEvent) {
   if (!event[EventUID]) {
-    if (kinds.isReplaceableKind(event.kind) || kinds.isParameterizedReplaceableKind(event.kind)) {
+    if (isReplaceable(event.kind)) {
       const d = event.tags.find((t) => t[0] === "d")?.[1];
       event[EventUID] = getReplaceableUID(event.kind, event.pubkey, d);
     } else {

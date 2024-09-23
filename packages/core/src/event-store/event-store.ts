@@ -15,17 +15,19 @@ export class EventStore {
   }
 
   add(event: NostrEvent) {
-    this.events.addEvent(event);
+    const inserted = this.events.addEvent(event);
 
-    // forward to single event requests
-    const eventUID = getEventUID(event);
-    for (const [control, uid] of this.singles) {
-      if (eventUID === uid) control.next(event);
-    }
+    if (inserted === event) {
+      // forward to single event requests
+      const eventUID = getEventUID(event);
+      for (const [control, uid] of this.singles) {
+        if (eventUID === uid) control.next(event);
+      }
 
-    // forward to streams
-    for (const [control, filters] of this.streams) {
-      if (matchFilters(filters, event)) control.next(event);
+      // forward to streams
+      for (const [control, filters] of this.streams) {
+        if (matchFilters(filters, event)) control.next(event);
+      }
     }
   }
 

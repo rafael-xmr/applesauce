@@ -60,5 +60,8 @@ export function stateful<T extends unknown>(observable: Observable<T>) {
   // @ts-expect-error
   statefulObservable._value = undefined;
 
+  // @ts-expect-error
+  statefulObservable._observers = observers;
+
   return statefulObservable;
 }

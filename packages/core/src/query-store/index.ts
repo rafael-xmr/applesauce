@@ -6,7 +6,8 @@ import stringify from "json-stringify-deterministic";
 import { EventStore } from "../event-store/event-store.js";
 import { stateful } from "../observable/stateful.js";
 import { getProfileContent, ProfileContent } from "../helpers/profile.js";
-import { getReplaceableUID } from "../helpers/event.js";
+import { getEventUID, getReplaceableUID, isReplaceable } from "../helpers/event.js";
+import { getInboxes, getOutboxes } from "../helpers/mailboxes.js";
 
 export class QueryStore {
   store: EventStore;
@@ -49,12 +50,41 @@ export class QueryStore {
   }
 
   reactions = new LRU<Observable<NostrEvent[]>>();
-  getEventReactions(id: string) {
-    if (!this.reactions.has(id)) {
-      const observable = this.getTimeline([{ kinds: [kinds.Reaction], "#e": [id] }]);
-      this.reactions.set(id, observable);
+  getReactions(event: NostrEvent) {
+    const uid = getEventUID(event);
+
+    if (!this.reactions.has(uid)) {
+      const observable = this.getTimeline(
+        isReplaceable(event.kind)
+          ? [
+              { kinds: [kinds.Reaction], "#e": [event.id] },
+              { kinds: [kinds.Reaction], "#a": [uid] },
+            ]
+          : [
+              {
+                kinds: [kinds.Reaction],
+                "#e": [event.id],
+              },
+            ],
+      );
+      this.reactions.set(uid, observable);
     }
 
-    return this.reactions.get(id)!;
+    return this.reactions.get(uid)!;
+  }
+
+  mailboxes = new LRU<Observable<{ inboxes: Set<string>; outboxes: Set<string> }>>();
+  getMailboxes(pubkey: string) {
+    if (!this.mailboxes.has(pubkey)) {
+      const observable = stateful(
+        this.getReplaceable(kinds.RelayList, pubkey).map((event) => ({
+          inboxes: getInboxes(event),
+          outboxes: getOutboxes(event),
+        })),
+      );
+      this.mailboxes.set(pubkey, observable);
+    }
+
+    return this.mailboxes.get(pubkey)!;
   }
 }

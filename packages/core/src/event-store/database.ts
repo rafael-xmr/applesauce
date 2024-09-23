@@ -3,8 +3,11 @@ import { LRU } from "tiny-lru";
 
 import { binarySearch, getEventUID, getIndexableTags, insertSorted } from "../helpers/event.js";
 import { INDEXABLE_TAGS } from "./common.js";
+import { logger } from "../logger.js";
 
 export class Database {
+  log = logger.extend("Database");
+
   /** Max number of events to hold */
   max?: number;
 
@@ -35,11 +38,13 @@ export class Database {
       // build new tag index from existing events
       const events = new Set<NostrEvent>();
 
+      const ts = Date.now();
       for (const event of this.events.values()) {
         if (getIndexableTags(event).has(tagAndValue)) {
           events.add(event);
         }
       }
+      this.log(`Built new ${tagAndValue} index ${Date.now() - ts}ms`);
 
       this.tags.set(tagAndValue, events);
     }
@@ -57,6 +62,8 @@ export class Database {
   addEvent(event: NostrEvent) {
     const uid = getEventUID(event);
 
+    if (this.events.has(uid)) return this.events.get(uid)!;
+
     this.events.set(uid, event);
     this.getKindIndex(event.kind).add(event);
     this.getAuthorsIndex(event.pubkey).add(event);
@@ -68,6 +75,8 @@ export class Database {
     }
 
     insertSorted(this.created_at, event);
+
+    return event;
   }
 
   deleteEvent(eventOrId: string | NostrEvent) {
