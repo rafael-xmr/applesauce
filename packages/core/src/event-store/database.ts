@@ -1,7 +1,7 @@
 import { Filter, NostrEvent } from "nostr-tools";
 import { LRU } from "tiny-lru";
 
-import { binarySearch, getEventUID, insertSorted } from "../helpers/event.js";
+import { binarySearch, getEventUID, getIndexableTags, insertSorted } from "../helpers/event.js";
 import { INDEXABLE_TAGS } from "./common.js";
 
 export class Database {
@@ -11,7 +11,7 @@ export class Database {
   /** Indexes */
   kinds = new Map<number, Set<NostrEvent>>();
   authors = new Map<string, Set<NostrEvent>>();
-  tags = new Map<string, Set<NostrEvent>>();
+  tags = new LRU<Set<NostrEvent>>();
   created_at: NostrEvent[] = [];
 
   /** LRU cache of last events touched */
@@ -30,9 +30,20 @@ export class Database {
     if (!this.authors.has(author)) this.authors.set(author, new Set());
     return this.authors.get(author)!;
   }
-  private getTagIndex(tag: string) {
-    if (!this.tags.has(tag)) this.tags.set(tag, new Set());
-    return this.tags.get(tag)!;
+  private getTagIndex(tagAndValue: string) {
+    if (!this.tags.has(tagAndValue)) {
+      // build new tag index from existing events
+      const events = new Set<NostrEvent>();
+
+      for (const event of this.events.values()) {
+        if (getIndexableTags(event).has(tagAndValue)) {
+          events.add(event);
+        }
+      }
+
+      this.tags.set(tagAndValue, events);
+    }
+    return this.tags.get(tagAndValue)!;
   }
 
   touch(event: NostrEvent) {
@@ -50,9 +61,9 @@ export class Database {
     this.getKindIndex(event.kind).add(event);
     this.getAuthorsIndex(event.pubkey).add(event);
 
-    for (const tag of event.tags) {
-      if (INDEXABLE_TAGS.has(tag[0]) && tag[1]) {
-        this.getTagIndex(tag[0] + ":" + tag[1]).add(event);
+    for (const tag of getIndexableTags(event)) {
+      if (this.tags.has(tag)) {
+        this.getTagIndex(tag).add(event);
       }
     }
 
@@ -71,9 +82,9 @@ export class Database {
     this.getAuthorsIndex(event.pubkey).delete(event);
     this.getKindIndex(event.kind).delete(event);
 
-    for (const tag of event.tags) {
-      if (INDEXABLE_TAGS.has(tag[0]) && tag[1]) {
-        this.getTagIndex(tag[0] + ":" + tag[1]).delete(event);
+    for (const tag of getIndexableTags(event)) {
+      if (this.tags.has(tag)) {
+        this.getTagIndex(tag).delete(event);
       }
     }
 
@@ -98,7 +109,7 @@ export class Database {
 
   *iterateTag(tag: string, values: Iterable<string>) {
     for (const value of values) {
-      const events = this.tags.get(tag + ":" + value);
+      const events = this.getTagIndex(tag + ":" + value);
 
       if (events) {
         for (const event of events) yield event;

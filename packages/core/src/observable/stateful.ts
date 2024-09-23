@@ -9,7 +9,7 @@ export function stateful<T extends unknown>(observable: Observable<T>) {
   let subscription: ZenObservable.Subscription | undefined = undefined;
   let observers: ZenObservable.SubscriptionObserver<T>[] = [];
 
-  return new Observable<T>((observer) => {
+  const statefulObservable = new Observable<T>((observer) => {
     // add observer to list
     observers.push(observer);
 
@@ -21,10 +21,14 @@ export function stateful<T extends unknown>(observable: Observable<T>) {
     // subscribe if not already
     if (!subscription) {
       subscription = observable.subscribe({
-        next: (value) => {
-          for (const observer of observers) observer.next(value);
+        next: (v) => {
+          // @ts-expect-error
+          value = statefulObservable._value = v;
+          for (const observer of observers) observer.next(v);
         },
         error: (err) => {
+          // @ts-expect-error
+          error = statefulObservable._error = err;
           for (const observer of observers) observer.error(err);
         },
         complete: () => {
@@ -52,4 +56,9 @@ export function stateful<T extends unknown>(observable: Observable<T>) {
       }
     };
   });
+
+  // @ts-expect-error
+  statefulObservable._value = undefined;
+
+  return statefulObservable;
 }

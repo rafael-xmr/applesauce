@@ -1,11 +1,14 @@
 import { kinds, NostrEvent } from "nostr-tools";
+import { INDEXABLE_TAGS } from "../event-store/common.js";
 
 export const EventUID = Symbol.for("event-uid");
+export const EventIndexableTags = Symbol.for("indexable-tags");
 
 // extend type
 declare module "nostr-tools" {
   export interface Event {
     [EventUID]?: string;
+    [EventIndexableTags]?: Set<string>;
   }
 }
 
@@ -15,8 +18,9 @@ export function getEventUID(event: NostrEvent) {
     if (kinds.isReplaceableKind(event.kind) || kinds.isParameterizedReplaceableKind(event.kind)) {
       const d = event.tags.find((t) => t[0] === "d")?.[1];
       event[EventUID] = getReplaceableUID(event.kind, event.pubkey, d);
+    } else {
+      event[EventUID] = event.id;
     }
-    event[EventUID] = event.id;
   }
 
   return event[EventUID];
@@ -46,4 +50,20 @@ export function binarySearch(arr: NostrEvent[], target: number): number {
   }
 
   return left;
+}
+
+export function getIndexableTags(event: NostrEvent) {
+  if (!event[EventIndexableTags]) {
+    const tags = new Set<string>();
+
+    for (const tag of event.tags) {
+      if (tag[0] && INDEXABLE_TAGS.has(tag[0]) && tag[1]) {
+        tags.add(tag[0] + ":" + tag[1]);
+      }
+    }
+
+    event[EventIndexableTags] = tags;
+  }
+
+  return event[EventIndexableTags]!;
 }

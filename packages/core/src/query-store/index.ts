@@ -8,7 +8,7 @@ import { stateful } from "../observable/stateful.js";
 import { getProfileContent, ProfileContent } from "../helpers/profile.js";
 import { getReplaceableUID } from "../helpers/event.js";
 
-export class QueryCache {
+export class QueryStore {
   store: EventStore;
   constructor(store: EventStore) {
     this.store = store;
