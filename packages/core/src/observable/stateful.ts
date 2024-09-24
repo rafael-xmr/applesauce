@@ -8,7 +8,7 @@ export type StatefulObservable<T> = Observable<T> & {
 };
 
 /** Wraps an observable and makes it stateful */
-export function stateful<T extends unknown>(observable: Observable<T>) {
+export function stateful<T extends unknown>(observable: Observable<T>, cleanup = false) {
   let subscription: ZenObservable.Subscription | undefined = undefined;
   let observers: ZenObservable.SubscriptionObserver<T>[] = [];
 
@@ -50,9 +50,11 @@ export function stateful<T extends unknown>(observable: Observable<T>) {
           subscription = undefined;
 
           // reset cached values
-          delete self.value;
-          delete self.error;
-          delete self.complete;
+          if (cleanup) {
+            delete self.value;
+            delete self.error;
+            delete self.complete;
+          }
         }
       }
     };

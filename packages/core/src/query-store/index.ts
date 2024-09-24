@@ -30,7 +30,8 @@ export class QueryStore {
   }
 
   timelines = new LRU<Observable<NostrEvent[]>>();
-  getTimeline(filters: Filter[], key = stringify(filters)) {
+  getTimeline(filters: Filter[]) {
+    const key = stringify(filters);
     if (!this.singleEvents.has(key)) {
       const observable = stateful(this.store.timeline(filters));
       this.timelines.set(key, observable);

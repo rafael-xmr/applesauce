@@ -16,6 +16,28 @@
   "files": [
     "dist"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./helpers": {
+      "import": "./dist/helpers/index.js",
+      "types": "./dist/helpers/index.d.ts"
+    },
+    "./observable": {
+      "import": "./dist/observable/index.js",
+      "types": "./dist/observable/index.d.ts"
+    },
+    "./query-store": {
+      "import": "./dist/query-store/index.js",
+      "types": "./dist/query-store/index.d.ts"
+    },
+    "./event-store": {
+      "import": "./dist/event-store/index.js",
+      "types": "./dist/event-store/index.d.ts"
+    }
+  },
   "dependencies": {
     "debug": "^4.3.7",
     "json-stringify-deterministic": "^1.0.12",

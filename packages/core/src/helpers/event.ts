@@ -24,28 +24,6 @@ export function getReplaceableUID(kind: number, pubkey: string, d?: string) {
   return d ? `${kind}:${pubkey}:${d}` : `${kind}:${pubkey}`;
 }
 
-export function insertSorted(arr: NostrEvent[], event: NostrEvent): NostrEvent[] {
-  const index = binarySearch(arr, event.created_at);
-  arr.splice(index, 0, event);
-  return arr;
-}
-
-export function binarySearch(arr: NostrEvent[], target: number): number {
-  let left = 0;
-  let right = arr.length;
-
-  while (left < right) {
-    const mid = Math.floor((left + right) / 2);
-    if (arr[mid].created_at < target) {
-      left = mid + 1;
-    } else {
-      right = mid;
-    }
-  }
-
-  return left;
-}
-
 export function getIndexableTags(event: NostrEvent) {
   if (!event[EventIndexableTags]) {
     const tags = new Set<string>();

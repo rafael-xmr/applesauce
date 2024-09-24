@@ -1,11 +1,14 @@
 import { NostrEvent } from "nostr-tools";
 import { FromRelays } from "./symbols.js";
 
-export function addEventRelay(event: NostrEvent, relay: string) {
+export function addSeenRelay(event: NostrEvent, relay: string) {
   if (!event[FromRelays]) event[FromRelays] = new Set();
 
   event[FromRelays].add(relay);
 
+  return event[FromRelays];
+}
+export function getSeenRelays(event: NostrEvent) {
   return event[FromRelays];
 }
 

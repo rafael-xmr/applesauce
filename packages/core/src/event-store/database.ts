@@ -1,9 +1,10 @@
 import { Filter, NostrEvent } from "nostr-tools";
 import { LRU } from "tiny-lru";
 
-import { binarySearch, getEventUID, getIndexableTags, insertSorted } from "../helpers/event.js";
+import { getEventUID, getIndexableTags, getReplaceableUID } from "../helpers/event.js";
 import { INDEXABLE_TAGS } from "./common.js";
 import { logger } from "../logger.js";
+import { binarySearch, insertEventIntoDescendingList } from "nostr-tools/utils";
 
 export class Database {
   log = logger.extend("Database");
@@ -56,8 +57,18 @@ export class Database {
     this.events.set(getEventUID(event), event);
   }
 
+  hasEvent(uid: string) {
+    return this.events.get(uid);
+  }
   getEvent(uid: string) {
     return this.events.get(uid);
+  }
+
+  hasReplaceable(kind: number, pubkey: string, d?: string) {
+    return this.events.has(getReplaceableUID(kind, pubkey, d));
+  }
+  getReplaceable(kind: number, pubkey: string, d?: string) {
+    return this.events.get(getReplaceableUID(kind, pubkey, d));
   }
 
   addEvent(event: NostrEvent) {
@@ -76,7 +87,7 @@ export class Database {
       }
     }
 
-    insertSorted(this.created_at, event);
+    insertEventIntoDescendingList(this.created_at, event);
 
     return event;
   }
@@ -139,12 +150,30 @@ export class Database {
   }
 
   *iterateTime(since: number | undefined, until: number | undefined) {
-    const start = until ? binarySearch(this.created_at, until) : 0;
-    const end = since ? binarySearch(this.created_at, since) : this.created_at.length - 1;
+    let untilIndex = 0;
+    let sinceIndex = this.created_at.length - 1;
+
+    let start = until
+      ? binarySearch(this.created_at, (mid) => {
+          if (mid.created_at === until) return -1;
+          return mid.created_at - until;
+        })
+      : undefined;
+
+    if (start && start[1]) untilIndex = start[0];
+
+    const end = since
+      ? binarySearch(this.created_at, (mid) => {
+          if (mid.created_at === since) return 1;
+          return since - mid.created_at;
+        })
+      : undefined;
+
+    if (end && end[1]) sinceIndex = end[0];
 
     const events = new Set<NostrEvent>();
 
-    for (let i = start; i <= end; i++) {
+    for (let i = untilIndex; i <= sinceIndex; i++) {
       events.add(this.created_at[i]);
     }
 
