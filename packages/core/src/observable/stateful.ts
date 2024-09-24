@@ -1,38 +1,39 @@
 import Observable from "zen-observable";
 
+export type StatefulObservable<T> = Observable<T> & {
+  _stateful?: true;
+  value?: T;
+  error?: Error;
+  complete?: boolean;
+};
+
 /** Wraps an observable and makes it stateful */
 export function stateful<T extends unknown>(observable: Observable<T>) {
-  let value: T | undefined = undefined;
-  let error: any;
-  let complete = false;
-
   let subscription: ZenObservable.Subscription | undefined = undefined;
   let observers: ZenObservable.SubscriptionObserver<T>[] = [];
 
-  const statefulObservable = new Observable<T>((observer) => {
+  const self: StatefulObservable<T> = new Observable<T>((observer) => {
     // add observer to list
     observers.push(observer);
 
     // pass any cached values
-    if (value) observer.next(value);
-    if (error) observer.error(error);
-    if (complete) observer.complete();
+    if (self.value) observer.next(self.value);
+    if (self.error) observer.error(self.error);
+    if (self.complete) observer.complete();
 
     // subscribe if not already
     if (!subscription) {
       subscription = observable.subscribe({
         next: (v) => {
-          // @ts-expect-error
-          value = statefulObservable._value = v;
+          self.value = v;
           for (const observer of observers) observer.next(v);
         },
         error: (err) => {
-          // @ts-expect-error
-          error = statefulObservable._error = err;
+          self.error = err;
           for (const observer of observers) observer.error(err);
         },
         complete: () => {
-          complete = true;
+          self.complete = true;
           for (const observer of observers) observer.complete();
         },
       });
@@ -49,19 +50,22 @@ export function stateful<T extends unknown>(observable: Observable<T>) {
           subscription = undefined;
 
           // reset cached values
-          value = undefined;
-          error = undefined;
-          complete = false;
+          delete self.value;
+          delete self.error;
+          delete self.complete;
         }
       }
     };
   });
 
-  // @ts-expect-error
-  statefulObservable._value = undefined;
+  self._stateful = true;
 
-  // @ts-expect-error
-  statefulObservable._observers = observers;
+  return self;
+}
 
-  return statefulObservable;
+export function isStateful<T extends unknown>(
+  observable: Observable<T> | StatefulObservable<T>,
+): observable is StatefulObservable<T> {
+  // @ts-expect-error
+  return observable._stateful;
 }
