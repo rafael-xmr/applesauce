@@ -1,20 +1,12 @@
 import { NostrEvent } from "nostr-tools";
-
-export const EventRelays = Symbol.for("event-relays");
-
-// extend type
-declare module "nostr-tools" {
-  export interface Event {
-    [EventRelays]?: Set<string>;
-  }
-}
+import { FromRelays } from "./symbols.js";
 
 export function addEventRelay(event: NostrEvent, relay: string) {
-  if (!event[EventRelays]) event[EventRelays] = new Set();
+  if (!event[FromRelays]) event[FromRelays] = new Set();
 
-  event[EventRelays].add(relay);
+  event[FromRelays].add(relay);
 
-  return event[EventRelays];
+  return event[FromRelays];
 }
 
 // Relay URLs

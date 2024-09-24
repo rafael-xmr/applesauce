@@ -1,13 +1,5 @@
 import { NostrEvent } from "nostr-tools";
-
-export const ProfileContent = Symbol.for("profile-content");
-
-// extend type
-declare module "nostr-tools" {
-  export interface Event {
-    [ProfileContent]?: ProfileContent | Error;
-  }
-}
+import { ProfileContent } from "./symbols.js";
 
 export type ProfileContent = {
   name?: string;
@@ -44,7 +36,7 @@ export function getProfileContent(event: NostrEvent, quite = false) {
   }
 
   if (cached === undefined) {
-    throw new Error("Failed to get profile");
+    throw new Error("Failed to parse profile");
   } else if (cached instanceof Error) {
     if (!quite) throw cached;
     else return cached;

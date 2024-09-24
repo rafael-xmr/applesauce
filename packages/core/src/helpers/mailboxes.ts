@@ -1,16 +1,6 @@
 import { NostrEvent } from "nostr-tools";
 import { safeRelayUrl } from "./relays.js";
-
-export const MailboxesInboxes = Symbol.for("mailboxes-inboxes");
-export const MailboxesOutboxes = Symbol.for("mailboxes-outboxes");
-
-// extend type
-declare module "nostr-tools" {
-  export interface Event {
-    [MailboxesInboxes]?: Set<string>;
-    [MailboxesOutboxes]?: Set<string>;
-  }
-}
+import { MailboxesInboxes, MailboxesOutboxes } from "./symbols.js";
 
 export function getInboxes(event: NostrEvent) {
   if (!event[MailboxesInboxes]) {

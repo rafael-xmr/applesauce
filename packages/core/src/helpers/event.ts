@@ -1,16 +1,6 @@
 import { kinds, NostrEvent } from "nostr-tools";
 import { INDEXABLE_TAGS } from "../event-store/common.js";
-
-export const EventUID = Symbol.for("event-uid");
-export const EventIndexableTags = Symbol.for("indexable-tags");
-
-// extend type
-declare module "nostr-tools" {
-  export interface Event {
-    [EventUID]?: string;
-    [EventIndexableTags]?: Set<string>;
-  }
-}
+import { EventIndexableTags, EventUID } from "./symbols.js";
 
 export function isReplaceable(kind: number) {
   return kinds.isReplaceableKind(kind) || kinds.isParameterizedReplaceableKind(kind);
