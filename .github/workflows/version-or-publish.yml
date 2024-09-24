@@ -39,7 +39,8 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm publish --no-git-checks
+          version: pnpm version-packages
+          publish: pnpm release
         env:
           HOME: ${{ github.workspace }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
