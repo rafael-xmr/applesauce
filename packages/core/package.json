@@ -39,11 +39,12 @@
     }
   },
   "dependencies": {
+    "@types/zen-push": "^0.1.4",
     "debug": "^4.3.7",
     "json-stringify-deterministic": "^1.0.12",
     "nanoid": "^5.0.7",
     "nostr-tools": "^2.7.2",
-    "tiny-lru": "^11.2.11"
+    "zen-push": "^0.3.1"
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",

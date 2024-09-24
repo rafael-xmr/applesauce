@@ -1,8 +1,10 @@
 import { Filter, NostrEvent } from "nostr-tools";
 import { getIndexableTags } from "./event.js";
 
-// Copied from https://github.com/nbd-wtf/nostr-tools/blob/a61cde77eacc9518001f11d7f67f1a50ae05fd80/filter.ts
-// And modified to use getIndexableTags
+/**
+ * Copied from nostr-tools and modified to use getIndexableTags
+ * @see https://github.com/nbd-wtf/nostr-tools/blob/a61cde77eacc9518001f11d7f67f1a50ae05fd80/filter.ts
+ */
 export function matchFilter(filter: Filter, event: NostrEvent): boolean {
   if (filter.ids && filter.ids.indexOf(event.id) === -1) {
     return false;
@@ -31,6 +33,7 @@ export function matchFilter(filter: Filter, event: NostrEvent): boolean {
   return true;
 }
 
+/** Copied from nostr-tools */
 export function matchFilters(filters: Filter[], event: NostrEvent): boolean {
   for (let i = 0; i < filters.length; i++) {
     if (matchFilter(filters[i], event)) {

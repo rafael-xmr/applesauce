@@ -1,40 +1,48 @@
 import { Filter, NostrEvent } from "nostr-tools";
-import { LRU } from "tiny-lru";
+import { binarySearch, insertEventIntoDescendingList } from "nostr-tools/utils";
+import PushStream from "zen-push";
 
 import { getEventUID, getIndexableTags, getReplaceableUID } from "../helpers/event.js";
 import { INDEXABLE_TAGS } from "./common.js";
 import { logger } from "../logger.js";
-import { binarySearch, insertEventIntoDescendingList } from "nostr-tools/utils";
+import { LRU } from "../utils/lru.js";
 
+/**
+ * An in-memory database for nostr events
+ */
 export class Database {
   log = logger.extend("Database");
 
-  /** Max number of events to hold */
-  max?: number;
-
   /** Indexes */
-  kinds = new Map<number, Set<NostrEvent>>();
-  authors = new Map<string, Set<NostrEvent>>();
-  tags = new LRU<Set<NostrEvent>>();
-  created_at: NostrEvent[] = [];
+  protected kinds = new Map<number, Set<NostrEvent>>();
+  protected authors = new Map<string, Set<NostrEvent>>();
+  protected tags = new LRU<Set<NostrEvent>>();
+  protected created_at: NostrEvent[] = [];
 
   /** LRU cache of last events touched */
   events = new LRU<NostrEvent>();
 
-  constructor(max?: number) {
-    this.max = max;
-  }
+  private insertedSignal = new PushStream<NostrEvent>();
+  private deletedSignal = new PushStream<NostrEvent>();
+
+  /** A stream of events inserted into the database */
+  inserted = this.insertedSignal.observable;
+
+  /** A stream of events removed of the database */
+  deleted = this.deletedSignal.observable;
+
+  protected claims = new WeakMap<NostrEvent, any>();
 
   /** Index helper methods */
-  private getKindIndex(kind: number) {
+  protected getKindIndex(kind: number) {
     if (!this.kinds.has(kind)) this.kinds.set(kind, new Set());
     return this.kinds.get(kind)!;
   }
-  private getAuthorsIndex(author: string) {
+  protected getAuthorsIndex(author: string) {
     if (!this.authors.has(author)) this.authors.set(author, new Set());
     return this.authors.get(author)!;
   }
-  private getTagIndex(tagAndValue: string) {
+  protected getTagIndex(tagAndValue: string) {
     if (!this.tags.has(tagAndValue)) {
       // build new tag index from existing events
       const events = new Set<NostrEvent>();
@@ -53,6 +61,7 @@ export class Database {
     return this.tags.get(tagAndValue)!;
   }
 
+  /** Moves an event to the top of the LRU cache */
   touch(event: NostrEvent) {
     this.events.set(getEventUID(event), event);
   }
@@ -64,9 +73,11 @@ export class Database {
     return this.events.get(uid);
   }
 
+  /** Checks if the database contains a replaceable event without touching it */
   hasReplaceable(kind: number, pubkey: string, d?: string) {
     return this.events.has(getReplaceableUID(kind, pubkey, d));
   }
+  /** Gets a replaceable event and touches it */
   getReplaceable(kind: number, pubkey: string, d?: string) {
     return this.events.get(getReplaceableUID(kind, pubkey, d));
   }
@@ -89,11 +100,13 @@ export class Database {
 
     insertEventIntoDescendingList(this.created_at, event);
 
+    this.insertedSignal.next(event);
+
     return event;
   }
 
-  deleteEvent(eventOrId: string | NostrEvent) {
-    let event = typeof eventOrId === "string" ? this.events.get(eventOrId) : eventOrId;
+  deleteEvent(eventOrUID: string | NostrEvent) {
+    let event = typeof eventOrUID === "string" ? this.events.get(eventOrUID) : eventOrUID;
     if (!event) throw new Error("Missing event");
 
     const uid = getEventUID(event);
@@ -116,7 +129,32 @@ export class Database {
 
     this.events.delete(uid);
 
+    this.deletedSignal.next(event);
+
     return true;
+  }
+
+  /** Sets the claim on the event and touches it */
+  claimEvent(event: NostrEvent, claim: any) {
+    if (!this.claims.has(event)) {
+      this.claims.set(event, claim);
+    }
+
+    // always touch event
+    this.touch(event);
+  }
+  /** Checks if an event is claimed by anything */
+  isClaimed(event: NostrEvent) {
+    return this.claims.has(event);
+  }
+  /** Removes a claim from an event */
+  removeClaim(event: NostrEvent, claim: any) {
+    const current = this.claims.get(event);
+    if (current === claim) this.claims.delete(event);
+  }
+  /** Removes all claims on an event */
+  clearClaim(event: NostrEvent) {
+    this.claims.delete(event);
   }
 
   *iterateAuthors(authors: Iterable<string>) {
@@ -186,6 +224,7 @@ export class Database {
     }
   }
 
+  /** Returns all events that match the filter */
   getEventsForFilter(filter: Filter): Set<NostrEvent> {
     // search is not supported, return an empty set
     if (filter.search) return new Set();
@@ -256,18 +295,22 @@ export class Database {
     return events;
   }
 
-  prune() {
-    if (!this.max) return;
-
+  /** Remove the oldest events that are not claimed */
+  prune(limit = 1000) {
     let removed = 0;
 
-    while (this.events.size > this.max) {
-      const event = this.events.first;
+    let cursor = this.events.first;
+    while (cursor) {
+      const event = cursor.value;
 
-      if (event) {
+      if (!this.isClaimed(event)) {
         this.deleteEvent(event);
         removed++;
+
+        if (removed >= limit) break;
       }
+
+      cursor = cursor.next;
     }
 
     return removed;

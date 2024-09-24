@@ -1,5 +1,4 @@
 import Observable from "zen-observable";
-import { LRU } from "tiny-lru";
 import { Filter, kinds, NostrEvent } from "nostr-tools";
 import stringify from "json-stringify-deterministic";
 
@@ -8,6 +7,7 @@ import { stateful } from "../observable/stateful.js";
 import { getProfileContent, ProfileContent } from "../helpers/profile.js";
 import { getEventUID, getReplaceableUID, isReplaceable } from "../helpers/event.js";
 import { getInboxes, getOutboxes } from "../helpers/mailboxes.js";
+import { LRU } from "../utils/lru.js";
 
 export class QueryStore {
   store: EventStore;
@@ -15,7 +15,7 @@ export class QueryStore {
     this.store = store;
   }
 
-  singleEvents = new LRU<Observable<NostrEvent>>();
+  singleEvents = new LRU<Observable<NostrEvent | undefined>>();
   getEvent(id: string) {
     if (!this.singleEvents.has(id)) {
       const observable = stateful(this.store.single(id));
@@ -40,10 +40,12 @@ export class QueryStore {
     return this.timelines.get(key)!;
   }
 
-  profiles = new LRU<Observable<ProfileContent>>();
+  profiles = new LRU<Observable<ProfileContent | undefined>>();
   getProfile(pubkey: string) {
     if (!this.profiles.has(pubkey)) {
-      const observable = stateful(this.getReplaceable(kinds.Metadata, pubkey).map((event) => getProfileContent(event)));
+      const observable = stateful(
+        this.getReplaceable(kinds.Metadata, pubkey).map((event) => event && getProfileContent(event)),
+      );
       this.profiles.set(pubkey, observable);
     }
 
@@ -74,14 +76,17 @@ export class QueryStore {
     return this.reactions.get(uid)!;
   }
 
-  mailboxes = new LRU<Observable<{ inboxes: Set<string>; outboxes: Set<string> }>>();
+  mailboxes = new LRU<Observable<{ inboxes: Set<string>; outboxes: Set<string> } | undefined>>();
   getMailboxes(pubkey: string) {
     if (!this.mailboxes.has(pubkey)) {
       const observable = stateful(
-        this.getReplaceable(kinds.RelayList, pubkey).map((event) => ({
-          inboxes: getInboxes(event),
-          outboxes: getOutboxes(event),
-        })),
+        this.getReplaceable(kinds.RelayList, pubkey).map(
+          (event) =>
+            event && {
+              inboxes: getInboxes(event),
+              outboxes: getOutboxes(event),
+            },
+        ),
       );
       this.mailboxes.set(pubkey, observable);
     }

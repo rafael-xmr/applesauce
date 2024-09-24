@@ -2,6 +2,10 @@ import { kinds, NostrEvent } from "nostr-tools";
 import { INDEXABLE_TAGS } from "../event-store/common.js";
 import { EventIndexableTags, EventUID } from "./symbols.js";
 
+/**
+ * Returns if a kind is replaceable ( 10000 <= n < 20000 || n == 0 || n == 3 )
+ * or parameterized replaceable ( 30000 <= n < 40000 )
+ */
 export function isReplaceable(kind: number) {
   return kinds.isReplaceableKind(kind) || kinds.isParameterizedReplaceableKind(kind);
 }
