@@ -44,7 +44,8 @@ export class Database {
           events.add(event);
         }
       }
-      this.log(`Built new ${tagAndValue} index ${Date.now() - ts}ms`);
+      const took = Date.now() - ts;
+      if (took > 100) this.log(`Built index ${tagAndValue} took ${took}ms`);
 
       this.tags.set(tagAndValue, events);
     }
@@ -62,7 +63,8 @@ export class Database {
   addEvent(event: NostrEvent) {
     const uid = getEventUID(event);
 
-    if (this.events.has(uid)) return this.events.get(uid)!;
+    const current = this.events.get(uid);
+    if (current && event.created_at <= current.created_at) return current;
 
     this.events.set(uid, event);
     this.getKindIndex(event.kind).add(event);
