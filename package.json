@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
+    "test": "turbo test",
     "format": "prettier --write .",
     "docs": "typedoc",
     "version-packages": "changeset version && pnpm install --no-frozen-lockfile && pnpm format",
