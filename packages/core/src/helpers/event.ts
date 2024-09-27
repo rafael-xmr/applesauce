@@ -1,6 +1,14 @@
 import { kinds, NostrEvent } from "nostr-tools";
 import { INDEXABLE_TAGS } from "../event-store/common.js";
-import { EventIndexableTags, EventUID } from "./symbols.js";
+
+export const EventUIDSymbol = Symbol.for("event-uid");
+export const EventIndexableTagsSymbol = Symbol.for("indexable-tags");
+declare module "nostr-tools" {
+  export interface Event {
+    [EventUIDSymbol]?: string;
+    [EventIndexableTagsSymbol]?: Set<string>;
+  }
+}
 
 /**
  * Returns if a kind is replaceable ( 10000 <= n < 20000 || n == 0 || n == 3 )
@@ -12,16 +20,16 @@ export function isReplaceable(kind: number) {
 
 /** returns the events Unique ID */
 export function getEventUID(event: NostrEvent) {
-  if (!event[EventUID]) {
+  if (!event[EventUIDSymbol]) {
     if (isReplaceable(event.kind)) {
       const d = event.tags.find((t) => t[0] === "d")?.[1];
-      event[EventUID] = getReplaceableUID(event.kind, event.pubkey, d);
+      event[EventUIDSymbol] = getReplaceableUID(event.kind, event.pubkey, d);
     } else {
-      event[EventUID] = event.id;
+      event[EventUIDSymbol] = event.id;
     }
   }
 
-  return event[EventUID];
+  return event[EventUIDSymbol];
 }
 
 export function getReplaceableUID(kind: number, pubkey: string, d?: string) {
@@ -29,7 +37,7 @@ export function getReplaceableUID(kind: number, pubkey: string, d?: string) {
 }
 
 export function getIndexableTags(event: NostrEvent) {
-  if (!event[EventIndexableTags]) {
+  if (!event[EventIndexableTagsSymbol]) {
     const tags = new Set<string>();
 
     for (const tag of event.tags) {
@@ -38,8 +46,8 @@ export function getIndexableTags(event: NostrEvent) {
       }
     }
 
-    event[EventIndexableTags] = tags;
+    event[EventIndexableTagsSymbol] = tags;
   }
 
-  return event[EventIndexableTags]!;
+  return event[EventIndexableTagsSymbol]!;
 }

@@ -1,15 +1,22 @@
 import { NostrEvent } from "nostr-tools";
-import { FromRelays } from "./symbols.js";
 
+export const SeenRelaysSymbol = Symbol.for("seen-relays");
+declare module "nostr-tools" {
+  export interface Event {
+    [SeenRelaysSymbol]?: Set<string>;
+  }
+}
+
+// Seen relays
 export function addSeenRelay(event: NostrEvent, relay: string) {
-  if (!event[FromRelays]) event[FromRelays] = new Set();
+  if (!event[SeenRelaysSymbol]) event[SeenRelaysSymbol] = new Set();
 
-  event[FromRelays].add(relay);
+  event[SeenRelaysSymbol].add(relay);
 
-  return event[FromRelays];
+  return event[SeenRelaysSymbol];
 }
 export function getSeenRelays(event: NostrEvent) {
-  return event[FromRelays];
+  return event[SeenRelaysSymbol];
 }
 
 // Relay URLs

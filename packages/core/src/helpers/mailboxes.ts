@@ -1,12 +1,20 @@
 import { NostrEvent } from "nostr-tools";
 import { safeRelayUrl } from "./relays.js";
-import { MailboxesInboxes, MailboxesOutboxes } from "./symbols.js";
+
+export const MailboxesInboxesSymbol = Symbol.for("mailboxes-inboxes");
+export const MailboxesOutboxesSymbol = Symbol.for("mailboxes-outboxes");
+declare module "nostr-tools" {
+  export interface Event {
+    [MailboxesInboxesSymbol]?: Set<string>;
+    [MailboxesOutboxesSymbol]?: Set<string>;
+  }
+}
 
 /**
- * Parses a 10002 event and stores the inboxes in the event using the {@link MailboxesInboxes} symbol
+ * Parses a 10002 event and stores the inboxes in the event using the {@link MailboxesInboxesSymbol} symbol
  */
 export function getInboxes(event: NostrEvent) {
-  if (!event[MailboxesInboxes]) {
+  if (!event[MailboxesInboxesSymbol]) {
     const inboxes = new Set<string>();
 
     for (const tag of event.tags) {
@@ -16,17 +24,17 @@ export function getInboxes(event: NostrEvent) {
       }
     }
 
-    event[MailboxesInboxes] = inboxes;
+    event[MailboxesInboxesSymbol] = inboxes;
   }
 
-  return event[MailboxesInboxes]!;
+  return event[MailboxesInboxesSymbol]!;
 }
 
 /**
- * Parses a 10002 event and stores the outboxes in the event using the {@link MailboxesOutboxes} symbol
+ * Parses a 10002 event and stores the outboxes in the event using the {@link MailboxesOutboxesSymbol} symbol
  */
 export function getOutboxes(event: NostrEvent) {
-  if (!event[MailboxesOutboxes]) {
+  if (!event[MailboxesOutboxesSymbol]) {
     const outboxes = new Set<string>();
 
     for (const tag of event.tags) {
@@ -36,8 +44,8 @@ export function getOutboxes(event: NostrEvent) {
       }
     }
 
-    event[MailboxesOutboxes] = outboxes;
+    event[MailboxesOutboxesSymbol] = outboxes;
   }
 
-  return event[MailboxesOutboxes]!;
+  return event[MailboxesOutboxesSymbol]!;
 }

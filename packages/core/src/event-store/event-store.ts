@@ -3,7 +3,7 @@ import { insertEventIntoDescendingList } from "nostr-tools/utils";
 import Observable from "zen-observable";
 
 import { Database } from "./database.js";
-import { getEventUID } from "../helpers/event.js";
+import { getEventUID, getReplaceableUID } from "../helpers/event.js";
 import { matchFilters } from "../helpers/filter.js";
 import { addSeenRelay } from "../helpers/relays.js";
 
@@ -45,7 +45,7 @@ export class EventStore {
   }
 
   /** Creates an observable that updates a single event */
-  single(uid: string) {
+  event(uid: string) {
     return new Observable<NostrEvent | undefined>((observer) => {
       let current = this.events.getEvent(uid);
 
@@ -88,6 +88,11 @@ export class EventStore {
         if (current) this.events.removeClaim(current, observer);
       };
     });
+  }
+
+  /** Creates an observable that updates a single replaceable event */
+  replaceable(kind: number, pubkey: string, d?: string) {
+    return this.event(getReplaceableUID(kind, pubkey, d));
   }
 
   /** Creates an observable that streams all events that match the filter */

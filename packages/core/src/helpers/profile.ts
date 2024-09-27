@@ -1,5 +1,11 @@
 import { NostrEvent } from "nostr-tools";
-import { ProfileContent } from "./symbols.js";
+
+export const ProfileContentSymbol = Symbol.for("profile-content");
+declare module "nostr-tools" {
+  export interface Event {
+    [ProfileContentSymbol]?: ProfileContent | Error;
+  }
+}
 
 export type ProfileContent = {
   name?: string;
@@ -20,7 +26,7 @@ export function getProfileContent(event: NostrEvent): ProfileContent;
 export function getProfileContent(event: NostrEvent, quite: false): ProfileContent;
 export function getProfileContent(event: NostrEvent, quite: true): ProfileContent | Error;
 export function getProfileContent(event: NostrEvent, quite = false) {
-  let cached = event[ProfileContent];
+  let cached = event[ProfileContentSymbol];
 
   if (!cached) {
     try {
@@ -29,9 +35,9 @@ export function getProfileContent(event: NostrEvent, quite = false) {
       // ensure nip05 is a string
       if (profile.nip05 && typeof profile.nip05 !== "string") profile.nip05 = String(profile.nip05);
 
-      cached = event[ProfileContent] = profile;
+      cached = event[ProfileContentSymbol] = profile;
     } catch (e) {
-      if (e instanceof Error) cached = event[ProfileContent] = e;
+      if (e instanceof Error) cached = event[ProfileContentSymbol] = e;
     }
   }
 
