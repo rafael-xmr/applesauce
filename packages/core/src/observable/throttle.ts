@@ -1,5 +1,6 @@
 import Observable from "zen-observable";
 
+/** Throttles an {@link Observable} */
 export function throttle<T>(source: Observable<T>, interval: number): Observable<T> {
   return new Observable<T>((observer) => {
     let lastEmissionTime = 0;

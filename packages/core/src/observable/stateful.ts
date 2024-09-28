@@ -7,7 +7,7 @@ export type StatefulObservable<T> = Observable<T> & {
   complete?: boolean;
 };
 
-/** Wraps an observable and makes it stateful */
+/** Wraps an {@link Observable} and makes it stateful */
 export function stateful<T extends unknown>(observable: Observable<T>, cleanup = false) {
   let subscription: ZenObservable.Subscription | undefined = undefined;
   let observers: ZenObservable.SubscriptionObserver<T>[] = [];
