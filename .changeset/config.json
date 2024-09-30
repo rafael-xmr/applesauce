@@ -3,7 +3,7 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [],
-  "linked": [["applesauce-core", "applesauce-user-status", "applesauce-channel"]],
+  "linked": [["applesauce-core", "applesauce-user-status", "applesauce-channel", "applesauce-signer"]],
   "access": "public",
   "baseBranch": "master",
   "updateInternalDependencies": "patch",
