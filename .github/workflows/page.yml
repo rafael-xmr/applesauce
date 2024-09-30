@@ -46,6 +46,9 @@ jobs:
         run: pnpm install
 
       - name: Build
+        run: pnpm build
+
+      - name: Build Docs
         run: pnpm run docs
 
       - name: Setup Pages
