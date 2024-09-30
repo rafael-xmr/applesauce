@@ -1,0 +1,127 @@
+{
+  "name": "applesauce-core",
+  "dist-tags": { "latest": "0.4.0" },
+  "versions": {
+    "0.1.0": {
+      "name": "applesauce-core",
+      "version": "0.1.0",
+      "dependencies": {
+        "debug": "^4.3.7",
+        "nanoid": "^5.0.7",
+        "tiny-lru": "^11.2.11",
+        "nostr-tools": "^2.7.2",
+        "json-stringify-deterministic": "^1.0.12"
+      },
+      "devDependencies": { "@types/debug": "^4.1.12", "zen-observable": "^0.10.0", "@types/zen-observable": "^0.8.7" },
+      "dist": {
+        "shasum": "961b06c0419feb228b63e21bd0146c271005c56b",
+        "tarball": "https://registry.npmjs.org/applesauce-core/-/applesauce-core-0.1.0.tgz",
+        "fileCount": 40,
+        "integrity": "sha512-zvTnhPNqWCS4+Gdp8wTrFY76IcDReE/UJo2k7suriYQW9wtk1USjBvDFtpkiAcAB8obggDEtEJ9ZF3N2ojHZ+w==",
+        "signatures": [
+          {
+            "sig": "MEUCIQCqUN4/R9dqbJsYf4rTjp3FlXqnxyTYh+FgFlQESRD6DQIgI62HrFeEgyX3yAbujcfl3G+MBkswWius9smeUdhuKZQ=",
+            "keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA"
+          }
+        ],
+        "unpackedSize": 32697
+      }
+    },
+    "0.2.0": {
+      "name": "applesauce-core",
+      "version": "0.2.0",
+      "dependencies": {
+        "debug": "^4.3.7",
+        "nanoid": "^5.0.7",
+        "zen-push": "^0.3.1",
+        "nostr-tools": "^2.7.2",
+        "@types/zen-push": "^0.1.4",
+        "json-stringify-deterministic": "^1.0.12"
+      },
+      "devDependencies": { "@types/debug": "^4.1.12", "zen-observable": "^0.10.0", "@types/zen-observable": "^0.8.7" },
+      "dist": {
+        "shasum": "662333b0a97ceb76d7eeaae4cb614959334eb1d0",
+        "tarball": "https://registry.npmjs.org/applesauce-core/-/applesauce-core-0.2.0.tgz",
+        "fileCount": 43,
+        "integrity": "sha512-fSDdn5jokiHbnJmxFLcRu2cn2bf2Y7Z4OVZ0cc9CkAsIsnmbM4abWMUoKERM0ilD/C9423naElkr5cyGik4UJA==",
+        "signatures": [
+          {
+            "sig": "MEUCIQCsw/s3jRPjg/K81OhayJjuCN5/NDoFH3l6gQLVnWWztAIgOl4HF0q7D4AwCBRGjaUgNInIvEz7r6bpfS2rJyIKbJA=",
+            "keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA"
+          }
+        ],
+        "unpackedSize": 48467
+      }
+    },
+    "0.3.0": {
+      "name": "applesauce-core",
+      "version": "0.3.0",
+      "dependencies": {
+        "debug": "^4.3.7",
+        "nanoid": "^5.0.7",
+        "zen-push": "^0.3.1",
+        "nostr-tools": "^2.7.2",
+        "@types/zen-push": "^0.1.4",
+        "json-stringify-deterministic": "^1.0.12"
+      },
+      "devDependencies": {
+        "jest": "^29.7.0",
+        "@types/jest": "^29.5.13",
+        "@types/debug": "^4.1.12",
+        "@jest/globals": "^29.7.0",
+        "jest-extended": "^4.0.2",
+        "zen-observable": "^0.10.0",
+        "@types/zen-observable": "^0.8.7"
+      },
+      "dist": {
+        "shasum": "554a69128cf276bf85753cc26aacce04e07294b7",
+        "tarball": "https://registry.npmjs.org/applesauce-core/-/applesauce-core-0.3.0.tgz",
+        "fileCount": 63,
+        "integrity": "sha512-7lZCj1ei3lRdGM40umlQHe4rovP3HAeC3JdQg/YrSQgXRvfWM2s95jgMIY1KcfDmHo07CNctD3Z5xzdFlqr+Mw==",
+        "signatures": [
+          {
+            "sig": "MEYCIQDotDtgaNdloLfyXzLbJqBia+73de7Ush8fAnsbjxnbpgIhAO4LJjCrEMBEWlrp/Tq045a/1Tw376BtJoNyesBHZ5mX",
+            "keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA"
+          }
+        ],
+        "unpackedSize": 66171
+      }
+    },
+    "0.4.0": {
+      "name": "applesauce-core",
+      "version": "0.4.0",
+      "dependencies": {
+        "@types/zen-push": "^0.1.4",
+        "debug": "^4.3.7",
+        "json-stringify-deterministic": "^1.0.12",
+        "nanoid": "^5.0.7",
+        "nostr-tools": "^2.7.2",
+        "zen-push": "^0.3.1"
+      },
+      "devDependencies": {
+        "@jest/globals": "^29.7.0",
+        "@types/debug": "^4.1.12",
+        "@types/jest": "^29.5.13",
+        "@types/zen-observable": "^0.8.7",
+        "jest": "^29.7.0",
+        "jest-extended": "^4.0.2",
+        "zen-observable": "^0.10.0"
+      },
+      "dist": {
+        "integrity": "sha512-UvzmM+mh9D5g697NHJv6x9bzkXk64uaiFLiIJR5Yb+FpYYOsIRJZGT73fVmgVC8EAWkItZ9jYS25IUi4a0cgrg==",
+        "shasum": "5469a10d2f0a2fa17f5ba094adb99980d3a4a8fb",
+        "tarball": "https://registry.npmjs.org/applesauce-core/-/applesauce-core-0.4.0.tgz",
+        "fileCount": 69,
+        "unpackedSize": 81134,
+        "signatures": [
+          {
+            "keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+            "sig": "MEUCIQCXyfyTE9YS2KRnoP7Fj9O5RTLPHccts9mVTwKOKzyd3wIgfaABdAOyV0k3vPN37u+hYUXm5Nr4tFOmieyq7NwyXm8="
+          }
+        ]
+      }
+    }
+  },
+  "modified": "2024-09-30T18:20:50.866Z",
+  "cachedAt": 1727740077395
+}

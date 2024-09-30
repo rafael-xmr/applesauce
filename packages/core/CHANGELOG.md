@@ -1,5 +1,12 @@
 # applesauce-core
 
+## 0.5.0
+
+### Minor Changes
+
+- b39a005: Move NIP-28 channel helpers to applesauce-channel package
+- ebc5da7: Add promise helpers
+
 ## 0.4.0
 
 ### Minor Changes
