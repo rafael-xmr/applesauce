@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "watch:build": "tsc --watch > /dev/null",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --passWithNoTests",
     "watch:test": "(trap 'kill 0' SIGINT; pnpm run build -w > /dev/null & pnpm run test --watch)"
   },
   "keywords": [
