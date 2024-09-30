@@ -1,6 +1,6 @@
 import { kinds } from "nostr-tools";
-import { Query } from "../index.js";
-import { getMutedHashtags, getMutedPubkeys, getMutedThreads, getMutedWords } from "../../helpers/mute.js";
+import { Query } from "../query-store/index.js";
+import { getMutedHashtags, getMutedPubkeys, getMutedThreads, getMutedWords } from "../helpers/mute.js";
 
 export function UserMuteQuery(
   pubkey: string,

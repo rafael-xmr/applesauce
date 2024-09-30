@@ -18,26 +18,35 @@ export function isReplaceable(kind: number) {
   return kinds.isReplaceableKind(kind) || kinds.isParameterizedReplaceableKind(kind);
 }
 
-/** returns the events Unique ID */
+/**
+ * Returns the events Unique ID
+ * For normal or ephemeral events this is ( event.id )
+ * For replaceable events this is ( event.kind + ":" + event.pubkey )
+ * For parametrized replaceable events this is ( event.kind + ":" + event.pubkey + ":" + event.tags.d.1 )
+ */
 export function getEventUID(event: NostrEvent) {
-  if (!event[EventUIDSymbol]) {
+  let id = event[EventUIDSymbol];
+
+  if (!id) {
     if (isReplaceable(event.kind)) {
       const d = event.tags.find((t) => t[0] === "d")?.[1];
-      event[EventUIDSymbol] = getReplaceableUID(event.kind, event.pubkey, d);
+      id = getReplaceableUID(event.kind, event.pubkey, d);
     } else {
-      event[EventUIDSymbol] = event.id;
+      id = event.id;
     }
   }
 
-  return event[EventUIDSymbol];
+  return id;
 }
 
 export function getReplaceableUID(kind: number, pubkey: string, d?: string) {
   return d ? `${kind}:${pubkey}:${d}` : `${kind}:${pubkey}`;
 }
 
+/** Returns a Set of tag names and values that are indexable */
 export function getIndexableTags(event: NostrEvent) {
-  if (!event[EventIndexableTagsSymbol]) {
+  let indexable = event[EventIndexableTagsSymbol];
+  if (!indexable) {
     const tags = new Set<string>();
 
     for (const tag of event.tags) {
@@ -46,8 +55,13 @@ export function getIndexableTags(event: NostrEvent) {
       }
     }
 
-    event[EventIndexableTagsSymbol] = tags;
+    indexable = event[EventIndexableTagsSymbol] = tags;
   }
 
-  return event[EventIndexableTagsSymbol]!;
+  return indexable;
+}
+
+/** Returns the second index ( tag[1] ) of the first tag that matches the name */
+export function getTagValue(event: NostrEvent, name: string) {
+  return event.tags.find((t) => t[0] === name)?.[1];
 }

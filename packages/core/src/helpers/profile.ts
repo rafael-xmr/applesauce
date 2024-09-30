@@ -22,6 +22,7 @@ export type ProfileContent = {
   nip05?: string;
 };
 
+/** Returns the parsed profile content for a kind 0 event */
 export function getProfileContent(event: NostrEvent): ProfileContent;
 export function getProfileContent(event: NostrEvent, quite: false): ProfileContent;
 export function getProfileContent(event: NostrEvent, quite: true): ProfileContent | Error;

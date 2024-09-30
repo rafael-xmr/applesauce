@@ -1,7 +1,7 @@
 import { kinds, NostrEvent } from "nostr-tools";
 
-import { getEventUID, isReplaceable } from "../../helpers/event.js";
-import { Query } from "../index.js";
+import { getEventUID, isReplaceable } from "../helpers/event.js";
+import { Query } from "../query-store/index.js";
 
 /** Creates a query that returns all reactions to an event (supports replaceable events) */
 export function ReactionsQuery(event: NostrEvent): Query<NostrEvent[]> {

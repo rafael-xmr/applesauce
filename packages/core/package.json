@@ -39,6 +39,10 @@
     "./event-store": {
       "import": "./dist/event-store/index.js",
       "types": "./dist/event-store/index.d.ts"
+    },
+    "./queries": {
+      "import": "./dist/queries/index.js",
+      "types": "./dist/queries/index.d.ts"
     }
   },
   "dependencies": {

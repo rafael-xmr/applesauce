@@ -1,8 +1,8 @@
 import { Filter, NostrEvent } from "nostr-tools";
 import stringify from "json-stringify-deterministic";
 
-import { getReplaceableUID } from "../../helpers/event.js";
-import { Query } from "../index.js";
+import { getReplaceableUID } from "../helpers/event.js";
+import { Query } from "../query-store/index.js";
 
 export function SingleEventQuery(uid: string): Query<NostrEvent | undefined> {
   return {

@@ -1,8 +1,8 @@
 import { Filter, kinds, NostrEvent } from "nostr-tools";
 
-import { Query } from "../index.js";
-import { ChannelMetadataContent, getChannelMetadataContent } from "../../helpers/channel.js";
-import { safeParse } from "../../helpers/json.js";
+import { Query } from "../query-store/index.js";
+import { ChannelMetadataContent, getChannelMetadataContent } from "../helpers/channel.js";
+import { safeParse } from "../helpers/json.js";
 
 /** Creates a query that returns the latest parsed metadata */
 export function ChannelMetadataQuery(channel: NostrEvent): Query<ChannelMetadataContent | undefined> {
