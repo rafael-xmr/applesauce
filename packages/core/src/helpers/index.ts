@@ -5,3 +5,4 @@ export * from "./filter.js";
 export * from "./mailboxes.js";
 export * from "./threading.js";
 export * from "./pointers.js";
+export * from "./string.js";
