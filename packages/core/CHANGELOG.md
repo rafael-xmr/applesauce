@@ -1,5 +1,13 @@
 # applesauce-core
 
+## 0.4.0
+
+### Minor Changes
+
+- ec52c90: Add pointer helpers
+- ec52c90: Add tag helpers
+- ec52c90: Add thread queries and helpers
+
 ## 0.3.0
 
 ### Minor Changes
