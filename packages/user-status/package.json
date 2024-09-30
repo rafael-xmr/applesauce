@@ -1,5 +1,5 @@
 {
-  "name": "applesauce-core",
+  "name": "applesauce-user-status",
   "version": "0.4.0",
   "description": "",
   "type": "module",
@@ -31,34 +31,15 @@
     "./queries": {
       "import": "./dist/queries/index.js",
       "types": "./dist/queries/index.d.ts"
-    },
-    "./observable": {
-      "import": "./dist/observable/index.js",
-      "types": "./dist/observable/index.d.ts"
-    },
-    "./query-store": {
-      "import": "./dist/query-store/index.js",
-      "types": "./dist/query-store/index.d.ts"
-    },
-    "./event-store": {
-      "import": "./dist/event-store/index.js",
-      "types": "./dist/event-store/index.d.ts"
     }
   },
   "dependencies": {
-    "debug": "^4.3.7",
-    "json-stringify-deterministic": "^1.0.12",
-    "nanoid": "^5.0.7",
-    "nostr-tools": "^2.7.2",
-    "zen-push": "^0.3.1",
-    "zen-observable": "^0.10.0"
+    "applesauce-core": "^0.4.0",
+    "nostr-tools": "^2.7.2"
   },
   "devDependencies": {
-    "@types/zen-push": "^0.1.4",
     "@jest/globals": "^29.7.0",
-    "@types/debug": "^4.1.12",
     "@types/jest": "^29.5.13",
-    "@types/zen-observable": "^0.8.7",
     "jest": "^29.7.0",
     "jest-extended": "^4.0.2"
   },

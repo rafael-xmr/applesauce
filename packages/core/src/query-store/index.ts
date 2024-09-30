@@ -49,6 +49,11 @@ export class QueryStore {
     return this.runQuery(Queries.ReplaceableQuery)(kind, pubkey, d);
   }
 
+  /** Returns a directory of events by their UID */
+  replaceableSet(filters: Filter | Filter[]) {
+    return this.runQuery(Queries.ReplaceableSetQuery)(filters);
+  }
+
   /** Returns an array of events that match the filter */
   timeline(filters: Filter | Filter[]) {
     return this.runQuery(Queries.TimelineQuery)(filters);

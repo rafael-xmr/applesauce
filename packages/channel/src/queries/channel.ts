@@ -1,8 +1,14 @@
 import { Filter, kinds, NostrEvent } from "nostr-tools";
-
-import { Query } from "../query-store/index.js";
 import { ChannelMetadataContent, getChannelMetadataContent } from "../helpers/channel.js";
-import { safeParse } from "../helpers/json.js";
+import { Query } from "applesauce-core";
+
+function safeParse<T extends unknown = any>(str: string) {
+  try {
+    return JSON.parse(str) as T;
+  } catch (error) {
+    return undefined;
+  }
+}
 
 /** Creates a query that returns the latest parsed metadata */
 export function ChannelMetadataQuery(channel: NostrEvent): Query<ChannelMetadataContent | undefined> {
