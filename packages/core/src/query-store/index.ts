@@ -74,11 +74,6 @@ export class QueryStore {
     return this.runQuery(Queries.MailboxesQuery)(pubkey);
   }
 
-  /** Returns the parsed mute list for the pubkey */
-  mute(pubkey: string) {
-    return this.runQuery(Queries.UserMuteQuery)(pubkey);
-  }
-
   thread(root: string | EventPointer | AddressPointer) {
     return this.runQuery(Queries.ThreadQuery)(root);
   }

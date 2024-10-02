@@ -1,7 +1,7 @@
 {
   "name": "applesauce-channel",
   "version": "0.5.0",
-  "description": "",
+  "description": "A collection of tools for working with NIP-28 channels",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -89,6 +89,46 @@ importers:
         specifier: ^4.0.2
         version: 4.0.2(jest@29.7.0(@types/node@12.20.55))
 
+  packages/lists:
+    dependencies:
+      "@noble/hashes":
+        specifier: ^1.5.0
+        version: 1.5.0
+      "@noble/secp256k1":
+        specifier: ^1.7.1
+        version: 1.7.1
+      "@scure/base":
+        specifier: ^1.1.9
+        version: 1.1.9
+      "@types/dom-serial":
+        specifier: ^1.0.6
+        version: 1.0.6
+      applesauce-core:
+        specifier: ^0.5.0
+        version: link:../core
+      debug:
+        specifier: ^4.3.7
+        version: 4.3.7
+      nostr-tools:
+        specifier: ^2.7.2
+        version: 2.7.2(typescript@5.6.2)
+    devDependencies:
+      "@jest/globals":
+        specifier: ^29.7.0
+        version: 29.7.0
+      "@types/debug":
+        specifier: ^4.1.12
+        version: 4.1.12
+      "@types/jest":
+        specifier: ^29.5.13
+        version: 29.5.13
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@12.20.55)
+      jest-extended:
+        specifier: ^4.0.2
+        version: 4.0.2(jest@29.7.0(@types/node@12.20.55))
+
   packages/signer:
     dependencies:
       "@noble/hashes":

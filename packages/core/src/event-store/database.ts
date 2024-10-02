@@ -23,10 +23,14 @@ export class Database {
   events = new LRU<NostrEvent>();
 
   private insertedSignal = new PushStream<NostrEvent>();
+  private updatedSignal = new PushStream<NostrEvent>();
   private deletedSignal = new PushStream<NostrEvent>();
 
   /** A stream of events inserted into the database */
   inserted = this.insertedSignal.observable;
+
+  /** A stream of events that have been updated */
+  updated = this.updatedSignal.observable;
 
   /** A stream of events removed of the database */
   deleted = this.deletedSignal.observable;
@@ -82,6 +86,7 @@ export class Database {
     return this.events.get(getReplaceableUID(kind, pubkey, d));
   }
 
+  /** Inserts an event into the database and notifies all subscriptions */
   addEvent(event: NostrEvent) {
     const uid = getEventUID(event);
 
@@ -105,6 +110,14 @@ export class Database {
     return event;
   }
 
+  /** Inserts and event into the database and notifies all subscriptions that the event has updated */
+  updateEvent(event: NostrEvent) {
+    const inserted = this.addEvent(event);
+    this.updatedSignal.next(inserted);
+    return inserted;
+  }
+
+  /** Deletes an event from the database and notifies all subscriptions */
   deleteEvent(eventOrUID: string | NostrEvent) {
     let event = typeof eventOrUID === "string" ? this.events.get(eventOrUID) : eventOrUID;
     if (!event) throw new Error("Missing event");

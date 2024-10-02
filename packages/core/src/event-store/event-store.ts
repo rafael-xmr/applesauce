@@ -8,70 +8,81 @@ import { matchFilters } from "../helpers/filter.js";
 import { addSeenRelay } from "../helpers/relays.js";
 
 export class EventStore {
-  events: Database;
+  database: Database;
 
   private singles = new Map<ZenObservable.SubscriptionObserver<NostrEvent>, string>();
   private streams = new Map<ZenObservable.SubscriptionObserver<NostrEvent>, Filter[]>();
   private timelines = new Map<ZenObservable.SubscriptionObserver<NostrEvent[]>, Filter[]>();
 
   constructor() {
-    this.events = new Database();
+    this.database = new Database();
   }
 
+  /** Adds an event to the database */
   add(event: NostrEvent, fromRelay?: string) {
-    const inserted = this.events.addEvent(event);
+    const inserted = this.database.addEvent(event);
 
     if (fromRelay) addSeenRelay(inserted, fromRelay);
 
     return inserted;
   }
 
+  /** Add an event to the store and notifies all subscribes it has updated */
+  update(event: NostrEvent) {
+    return this.database.updateEvent(event);
+  }
+
   getAll(filters: Filter[]) {
-    return this.events.getForFilters(filters);
+    return this.database.getForFilters(filters);
   }
 
   hasEvent(uid: string) {
-    return this.events.hasEvent(uid);
+    return this.database.hasEvent(uid);
   }
   getEvent(uid: string) {
-    return this.events.getEvent(uid);
+    return this.database.getEvent(uid);
   }
 
   hasReplaceable(kind: number, pubkey: string, d?: string) {
-    return this.events.hasReplaceable(kind, pubkey, d);
+    return this.database.hasReplaceable(kind, pubkey, d);
   }
   getReplaceable(kind: number, pubkey: string, d?: string) {
-    return this.events.getReplaceable(kind, pubkey, d);
+    return this.database.getReplaceable(kind, pubkey, d);
   }
 
   /** Creates an observable that updates a single event */
   event(uid: string) {
     return new Observable<NostrEvent | undefined>((observer) => {
-      let current = this.events.getEvent(uid);
+      let current = this.database.getEvent(uid);
 
       if (current) {
         observer.next(current);
-        this.events.claimEvent(current, observer);
+        this.database.claimEvent(current, observer);
       }
 
       // subscribe to future events
-      const inserted = this.events.inserted.subscribe((event) => {
+      const inserted = this.database.inserted.subscribe((event) => {
         if (getEventUID(event) === uid && (!current || event.created_at > current.created_at)) {
           // remove old claim
-          if (current) this.events.removeClaim(current, observer);
+          if (current) this.database.removeClaim(current, observer);
 
           current = event;
           observer.next(event);
 
           // claim new event
-          this.events.claimEvent(current, observer);
+          this.database.claimEvent(current, observer);
         }
       });
 
+      // subscribe to updates
+      const updated = this.database.updated.subscribe((event) => {
+        if (event === current) observer.next(event);
+      });
+
       // subscribe to deleted events
-      const deleted = this.events.deleted.subscribe((event) => {
+      const deleted = this.database.deleted.subscribe((event) => {
         if (getEventUID(event) === uid && current) {
-          this.events.removeClaim(current, observer);
+          this.database.removeClaim(current, observer);
 
           current = undefined;
           observer.next(undefined);
@@ -83,9 +94,10 @@ export class EventStore {
       return () => {
         inserted.unsubscribe();
         deleted.unsubscribe();
+        updated.unsubscribe();
 
         this.singles.delete(observer);
-        if (current) this.events.removeClaim(current, observer);
+        if (current) this.database.removeClaim(current, observer);
       };
     });
   }
@@ -99,21 +111,21 @@ export class EventStore {
   stream(filters: Filter[]) {
     return new Observable<NostrEvent>((observer) => {
       let claimed = new Set<NostrEvent>();
-      let events = this.events.getForFilters(filters);
+      let events = this.database.getForFilters(filters);
 
       for (const event of events) {
         observer.next(event);
 
-        this.events.claimEvent(event, observer);
+        this.database.claimEvent(event, observer);
         claimed.add(event);
       }
 
       // subscribe to future events
-      const sub = this.events.inserted.subscribe((event) => {
+      const sub = this.database.inserted.subscribe((event) => {
         if (matchFilters(filters, event)) {
           observer.next(event);
 
-          this.events.claimEvent(event, observer);
+          this.database.claimEvent(event, observer);
           claimed.add(event);
         }
       });
@@ -125,7 +137,7 @@ export class EventStore {
         this.streams.delete(observer);
 
         // remove all claims
-        for (const event of claimed) this.events.removeClaim(event, observer);
+        for (const event of claimed) this.database.removeClaim(event, observer);
         claimed.clear();
       };
     });
@@ -138,17 +150,17 @@ export class EventStore {
       const timeline: NostrEvent[] = [];
 
       // build initial timeline
-      const events = this.events.getForFilters(filters);
+      const events = this.database.getForFilters(filters);
       for (const event of events) {
         insertEventIntoDescendingList(timeline, event);
 
-        this.events.claimEvent(event, observer);
+        this.database.claimEvent(event, observer);
         seen.set(getEventUID(event), event);
       }
       observer.next([...timeline]);
 
       // subscribe to future events
-      const inserted = this.events.inserted.subscribe((event) => {
+      const inserted = this.database.inserted.subscribe((event) => {
         if (matchFilters(filters, event)) {
           const uid = getEventUID(event);
 
@@ -161,22 +173,29 @@ export class EventStore {
 
               // update the claim
               seen.set(uid, event);
-              this.events.removeClaim(current, observer);
-              this.events.claimEvent(event, observer);
+              this.database.removeClaim(current, observer);
+              this.database.claimEvent(event, observer);
             }
           } else {
             insertEventIntoDescendingList(timeline, event);
             observer.next([...timeline]);
 
             // claim new event
-            this.events.claimEvent(event, observer);
+            this.database.claimEvent(event, observer);
             seen.set(getEventUID(event), event);
           }
         }
       });
 
+      // subscribe to updates
+      const updated = this.database.updated.subscribe((event) => {
+        if (seen.has(getEventUID(event))) {
+          observer.next([...timeline]);
+        }
+      });
+
       // subscribe to removed events
-      const deleted = this.events.deleted.subscribe((event) => {
+      const deleted = this.database.deleted.subscribe((event) => {
         const uid = getEventUID(event);
 
         let current = seen.get(uid);
@@ -187,7 +206,7 @@ export class EventStore {
 
           // remove the claim
           seen.delete(uid);
-          this.events.removeClaim(current, observer);
+          this.database.removeClaim(current, observer);
         }
       });
 
@@ -197,10 +216,11 @@ export class EventStore {
         this.timelines.delete(observer);
         inserted.unsubscribe();
         deleted.unsubscribe();
+        updated.unsubscribe();
 
         // remove all claims
         for (const [_, event] of seen) {
-          this.events.removeClaim(event, observer);
+          this.database.removeClaim(event, observer);
         }
 
         seen.clear();

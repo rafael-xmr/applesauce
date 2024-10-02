@@ -28,9 +28,17 @@
       "import": "./dist/helpers/index.js",
       "types": "./dist/helpers/index.d.ts"
     },
+    "./helpers/*": {
+      "import": "./dist/helpers/*.js",
+      "types": "./dist/helpers/*.d.ts"
+    },
     "./queries": {
       "import": "./dist/queries/index.js",
       "types": "./dist/queries/index.d.ts"
+    },
+    "./queries/*": {
+      "import": "./dist/queries/*.js",
+      "types": "./dist/queries/*.d.ts"
     },
     "./observable": {
       "import": "./dist/observable/index.js",
