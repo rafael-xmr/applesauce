@@ -44,14 +44,19 @@ export class QueryStore {
     return this.runQuery(Queries.SingleEventQuery)(id);
   }
 
+  /** Returns a single event */
+  events(ids: string[]) {
+    return this.runQuery(Queries.MultipleEventsQuery)(ids);
+  }
+
   /** Returns the latest version of a replaceable event */
   replaceable(kind: number, pubkey: string, d?: string) {
     return this.runQuery(Queries.ReplaceableQuery)(kind, pubkey, d);
   }
 
   /** Returns a directory of events by their UID */
-  replaceableSet(filters: Filter | Filter[]) {
-    return this.runQuery(Queries.ReplaceableSetQuery)(filters);
+  replaceableSet(pointers: { kind: number; pubkey: string; identifier?: string }[]) {
+    return this.runQuery(Queries.ReplaceableSetQuery)(pointers);
   }
 
   /** Returns an array of events that match the filter */

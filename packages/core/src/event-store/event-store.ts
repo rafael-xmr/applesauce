@@ -102,6 +102,73 @@ export class EventStore {
     });
   }
 
+  /** Creates an observable that subscribes to multiple events */
+  events(uids: string[]) {
+    return new Observable<Map<string, NostrEvent>>((observer) => {
+      const events = new Map<string, NostrEvent>();
+
+      for (const uid of uids) {
+        const e = this.getEvent(uid);
+        if (e) {
+          events.set(uid, e);
+          this.database.claimEvent(e, observer);
+        }
+      }
+
+      observer.next(events);
+
+      // subscribe to future events
+      const inserted = this.database.inserted.subscribe((event) => {
+        const uid = getEventUID(event);
+        if (uids.includes(uid)) {
+          const current = events.get(uid);
+
+          // remove old claim
+          if (!current || event.created_at > current.created_at) {
+            if (current) this.database.removeClaim(current, observer);
+
+            events.set(uid, event);
+            observer.next(events);
+
+            // claim new event
+            this.database.claimEvent(event, observer);
+          }
+        }
+      });
+
+      // subscribe to updates
+      const updated = this.database.updated.subscribe((event) => {
+        const uid = getEventUID(event);
+        if (uids.includes(uid)) observer.next(events);
+      });
+
+      // subscribe to deleted events
+      const deleted = this.database.deleted.subscribe((event) => {
+        const uid = getEventUID(event);
+        if (uids.includes(uid)) {
+          const current = events.get(uid);
+
+          if (current) {
+            this.database.removeClaim(current, observer);
+
+            events.delete(uid);
+            observer.next(events);
+          }
+        }
+      });
+
+      return () => {
+        inserted.unsubscribe();
+        deleted.unsubscribe();
+        updated.unsubscribe();
+
+        for (const [_uid, event] of events) {
+          this.database.removeClaim(event, observer);
+        }
+      };
+    });
+  }
+
   /** Creates an observable that updates a single replaceable event */
   replaceable(kind: number, pubkey: string, d?: string) {
     return this.event(getReplaceableUID(kind, pubkey, d));

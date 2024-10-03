@@ -1,7 +1,7 @@
 import { Filter, NostrEvent } from "nostr-tools";
 import stringify from "json-stringify-deterministic";
 
-import { getEventUID, getReplaceableUID } from "../helpers/event.js";
+import { getReplaceableUID } from "../helpers/event.js";
 import { Query } from "../query-store/index.js";
 
 /** Creates a Query that returns a single event or undefined */
@@ -9,6 +9,14 @@ export function SingleEventQuery(uid: string): Query<NostrEvent | undefined> {
   return {
     key: uid,
     run: (events) => events.event(uid),
+  };
+}
+
+/** Creates a Query that returns a multiple events in a map */
+export function MultipleEventsQuery(uids: string[]): Query<Map<string, NostrEvent>> {
+  return {
+    key: uids.join(","),
+    run: (events) => events.events(uids),
   };
 }
 
@@ -29,12 +37,13 @@ export function TimelineQuery(filters: Filter | Filter[]): Query<NostrEvent[]> {
 }
 
 /** Creates a Query that returns a directory of events by their UID */
-export function ReplaceableSetQuery(filters: Filter | Filter[]): Query<Record<string, NostrEvent>> {
+export function ReplaceableSetQuery(
+  pointers: { kind: number; pubkey: string; identifier?: string }[],
+): Query<Map<string, NostrEvent>> {
+  const cords = pointers.map((pointer) => getReplaceableUID(pointer.kind, pointer.pubkey, pointer.identifier));
+
   return {
-    key: stringify(filters),
-    run: (events) =>
-      events
-        .timeline(Array.isArray(filters) ? filters : [filters])
-        .map((events) => events.reduce((dir, event) => ({ ...dir, [getEventUID(event)]: event }), {})),
+    key: stringify(pointers),
+    run: (events) => events.events(cords),
   };
 }
