@@ -1,5 +1,14 @@
 # applesauce-core
 
+## 0.6.0
+
+### Minor Changes
+
+- df7756c: Move mute helpers and queries to applesauce-lists
+- 64c99e7: Add "events" query to event store
+- df7756c: Add update method to event store
+- df7756c: Add tag helpers
+
 ## 0.5.0
 
 ### Minor Changes
