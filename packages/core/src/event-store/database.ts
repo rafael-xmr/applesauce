@@ -11,7 +11,7 @@ import { LRU } from "../utils/lru.js";
  * An in-memory database for nostr events
  */
 export class Database {
-  log = logger.extend("Database");
+  protected log = logger.extend("Database");
 
   /** Indexes */
   protected kinds = new Map<number, Set<NostrEvent>>();
@@ -34,6 +34,10 @@ export class Database {
 
   /** A stream of events removed of the database */
   deleted = this.deletedSignal.observable;
+
+  get size() {
+    return this.events.size;
+  }
 
   protected claims = new WeakMap<NostrEvent, any>();
 
