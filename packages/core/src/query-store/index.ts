@@ -2,7 +2,7 @@ import Observable from "zen-observable";
 import { Filter, NostrEvent } from "nostr-tools";
 
 import { EventStore } from "../event-store/event-store.js";
-import { stateful } from "../observable/stateful.js";
+import { stateful, StatefulObservable } from "../observable/stateful.js";
 import { LRU } from "../utils/lru.js";
 
 import * as Queries from "../queries/index.js";
@@ -19,7 +19,7 @@ export class QueryStore {
     this.store = store;
   }
 
-  queries = new LRU<Observable<any>>();
+  queries = new LRU<StatefulObservable<any>>();
 
   /** Creates a cached query */
   runQuery<T extends unknown, Args extends Array<any>>(
