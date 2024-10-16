@@ -2,6 +2,8 @@ import { EventTemplate, NostrEvent } from "nostr-tools";
 import { DecodeResult } from "nostr-tools/nip19";
 import { Node as UnistNode, Parent } from "unist";
 
+import { type Token } from "@cashu/cashu-ts";
+
 export interface CommonData {
   eol?: boolean;
 }
@@ -29,7 +31,8 @@ export interface Mention extends Node {
 
 export interface CashuToken extends Node {
   type: "cashu";
-  token: string;
+  token: Token;
+  raw: string;
 }
 
 export interface LightningInvoice extends Node {

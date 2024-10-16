@@ -8,7 +8,7 @@ import { ComponentMap } from "../helpers/nast.js";
 export { ComponentMap };
 
 /** Returns the parsed and render text content for an event */
-export function useRenderedContent(event: NostrEvent | EventTemplate, components: ComponentMap) {
-  const nast = useMemo(() => getParedTextContent(event), [event]);
+export function useRenderedContent(event: NostrEvent | EventTemplate, components: ComponentMap, content?: string) {
+  const nast = useMemo(() => getParedTextContent(event, content), [event, content]);
   return useRenderNast(nast, components);
 }
