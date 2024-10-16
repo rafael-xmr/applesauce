@@ -1,10 +1,11 @@
 import { EventTemplate, NostrEvent } from "nostr-tools";
 import { getOrComputeCachedValue } from "applesauce-core/helpers/cache";
-import { unified } from "unified";
+import { unified, Transformer } from "unified";
 
 import { parseTextContent } from "./parser.js";
 import { nostrMentions } from "./mentions.js";
 import { cashuTokens } from "./cashu.js";
+import { Root } from "../nast/types.js";
 
 export * from "./mentions.js";
 
@@ -14,11 +15,24 @@ function process(event: NostrEvent | EventTemplate, content?: string) {
   return unified().use(nostrMentions).use(cashuTokens).runSync(parseTextContent(event, content));
 }
 
-export function getParedTextContent(event: NostrEvent | EventTemplate, content?: string) {
-  // override content
-  if (content) return process(event, content);
+export type ParseTextContentOptions = {
+  transformers?: (() => Transformer<Root>)[];
+  overrideContent?: string;
+};
 
-  return getOrComputeCachedValue(event, ParsedTextContentSymbol, () => {
-    return process(event, content);
-  });
+export function getParedTextContent(event: NostrEvent | EventTemplate, opts?: ParseTextContentOptions) {
+  // override content
+  let ats = opts?.overrideContent
+    ? process(event, opts.overrideContent)
+    : getOrComputeCachedValue(event, ParsedTextContentSymbol, () => process(event));
+
+  if (opts?.transformers) {
+    const process = unified();
+    for (const transformer of opts.transformers) {
+      process.use(transformer);
+    }
+    ats = process.runSync(ats) as Root;
+  }
+
+  return ats;
 }

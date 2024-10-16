@@ -35,7 +35,6 @@
 //         properties: { href: "lightning:" + node.invoice },
 //         children: [{ type: "text", value: node.invoice }],
 //       }
-    
 //   }
 // }
 
