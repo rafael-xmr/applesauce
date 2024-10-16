@@ -2,4 +2,4 @@
 "applesauce-react": minor
 ---
 
-Add renderNast helper method
+Add `renderNast` helper method

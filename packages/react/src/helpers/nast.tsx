@@ -8,6 +8,7 @@ export type ComponentMap = Partial<{
   [k in keyof ContentMap]: Component<ExtraProps<ContentMap[k]>>;
 }>;
 
+/** Render a nostr syntax tree to JSX components */
 export function renderNast(root: Root, components: ComponentMap) {
   const indexes: Record<string, number> = {};
   return (

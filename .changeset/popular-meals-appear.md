@@ -2,4 +2,4 @@
 "applesauce-react": minor
 ---
 
-Add useRenderNast hook
+Add `useRenderNast` hook

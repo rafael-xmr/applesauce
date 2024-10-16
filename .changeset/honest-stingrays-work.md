@@ -2,4 +2,4 @@
 "applesauce-core": minor
 ---
 
-Add getValue observable helper
+Add `getValue` observable helper
