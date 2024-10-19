@@ -3,7 +3,7 @@ import { Filter, NostrEvent } from "nostr-tools";
 
 import { EventStore } from "../event-store/event-store.js";
 import { stateful, StatefulObservable } from "../observable/stateful.js";
-import { LRU } from "../utils/lru.js";
+import { LRU } from "../helpers/lru.js";
 
 import * as Queries from "../queries/index.js";
 import { AddressPointer, EventPointer } from "nostr-tools/nip19";

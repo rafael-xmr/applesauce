@@ -5,7 +5,7 @@ import PushStream from "zen-push";
 import { getEventUID, getIndexableTags, getReplaceableUID } from "../helpers/event.js";
 import { INDEXABLE_TAGS } from "./common.js";
 import { logger } from "../logger.js";
-import { LRU } from "../utils/lru.js";
+import { LRU } from "../helpers/lru.js";
 
 /**
  * An in-memory database for nostr events
