@@ -6,13 +6,14 @@ import { parseTextContent } from "./parser.js";
 import { nostrMentions } from "./mentions.js";
 import { cashuTokens } from "./cashu.js";
 import { Root } from "../nast/types.js";
+import { emojis } from "./emoji.js";
 
 export * from "./mentions.js";
 
 export const ParsedTextContentSymbol = Symbol.for("parsed-text-content");
 
 function process(event: NostrEvent | EventTemplate, content?: string) {
-  return unified().use(nostrMentions).use(cashuTokens).runSync(parseTextContent(event, content));
+  return unified().use(nostrMentions).use(cashuTokens).use(emojis).runSync(parseTextContent(event, content));
 }
 
 export type ParseTextContentOptions = {

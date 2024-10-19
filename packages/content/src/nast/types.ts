@@ -50,6 +50,7 @@ export interface Emoji extends Node {
   type: "emoji";
   code: string;
   raw: string;
+  url: string;
   tag: ["emoji", ...string[]];
 }
 
@@ -60,6 +61,7 @@ export interface ContentMap {
   cashu: CashuToken;
   lightning: LightningInvoice;
   hashtag: Hashtag;
+  emoji: Emoji;
 }
 
 export type Content = ContentMap[keyof ContentMap];

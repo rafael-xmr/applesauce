@@ -8,3 +8,4 @@ export * from "./pointers.js";
 export * from "./string.js";
 export * from "./time.js";
 export * from "./tags.js";
+export * from "./emoji.js";
