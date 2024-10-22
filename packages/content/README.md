@@ -1,9 +1,32 @@
-# applesauce-channel
+# applesauce-content
 
-Helper methods an queries for [NIP-28](https://github.com/nostr-protocol/nips/blob/master/28.md) Public Channels
+applesauce package for parsing text note content
 
-## Install
+## Example
 
-```bash
-npm install applesauce-core applesauce-channel
+```ts
+import { getParsedTextContent } from "applesauce-content/text";
+
+const stringContent = `
+hello nostr!
+nostr:npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6
+`;
+const ats = getParsedTextContent(stringContent);
+
+console.log(ats);
+/*
+{
+  type: 'root',
+  event: undefined,
+  children: [
+    { type: 'text', value: 'hello nostr!' },
+    { type: 'text', value: '\n' },
+    {
+      type: 'mention',
+      decoded: [Object],
+      encoded: 'npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6'
+    }
+  ]
+}
+*/
 ```
