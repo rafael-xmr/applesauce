@@ -23,6 +23,11 @@ export interface Link extends Node {
   href: string;
 }
 
+export interface Gallery extends Node {
+  type: "gallery";
+  links: string[];
+}
+
 export interface Mention extends Node {
   type: "mention";
   decoded: DecodeResult;
@@ -42,7 +47,10 @@ export interface LightningInvoice extends Node {
 
 export interface Hashtag extends Node {
   type: "hashtag";
-  value: string;
+  /** The name as it was written in the event */
+  name: string;
+  /** The lowercase canonical name */
+  hashtag: string;
   tag: ["t", ...string[]];
 }
 
@@ -62,6 +70,7 @@ export interface ContentMap {
   lightning: LightningInvoice;
   hashtag: Hashtag;
   emoji: Emoji;
+  gallery: Gallery;
 }
 
 export type Content = ContentMap[keyof ContentMap];
@@ -69,5 +78,6 @@ export type Content = ContentMap[keyof ContentMap];
 export interface Root extends Parent {
   type: "root";
   children: Content[];
-  event: NostrEvent | EventTemplate;
+  event?: NostrEvent | EventTemplate;
+  truncated?: boolean;
 }

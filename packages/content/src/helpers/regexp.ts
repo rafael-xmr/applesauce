@@ -1,4 +1,4 @@
-const Expressions = {
+export const Expressions = {
   get cashu() {
     return /(cashu(?:A|B)[A-Za-z0-9_-]{100,10000}={0,3})/gi;
   },
@@ -7,6 +7,9 @@ const Expressions = {
   },
   get emoji() {
     return /:([a-zA-Z0-9_-]+):/gi;
+  },
+  get hashtag() {
+    return /(?:^|[^\p{L}])#([\p{L}\p{N}\p{M}]+)/gu;
   },
 };
 

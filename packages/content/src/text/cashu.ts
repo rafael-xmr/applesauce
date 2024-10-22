@@ -5,6 +5,7 @@ import { Root } from "../nast/types.js";
 import Expressions from "../helpers/regexp.js";
 import { findAndReplace } from "../nast/find-and-replace.js";
 
+/** Parse cashu tokens from an ATS tree */
 export function cashuTokens(): Transformer<Root> {
   return (tree) => {
     findAndReplace(tree, [
