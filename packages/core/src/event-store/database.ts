@@ -1,8 +1,8 @@
 import { Filter, NostrEvent } from "nostr-tools";
 import { binarySearch, insertEventIntoDescendingList } from "nostr-tools/utils";
-import PushStream from "zen-push";
+import { Subject } from "rxjs";
 
-import { getEventUID, getIndexableTags, getReplaceableUID } from "../helpers/event.js";
+import { FromCacheSymbol, getEventUID, getIndexableTags, getReplaceableUID } from "../helpers/event.js";
 import { INDEXABLE_TAGS } from "./common.js";
 import { logger } from "../logger.js";
 import { LRU } from "../helpers/lru.js";
@@ -22,18 +22,14 @@ export class Database {
   /** LRU cache of last events touched */
   events = new LRU<NostrEvent>();
 
-  private insertedSignal = new PushStream<NostrEvent>();
-  private updatedSignal = new PushStream<NostrEvent>();
-  private deletedSignal = new PushStream<NostrEvent>();
-
   /** A stream of events inserted into the database */
-  inserted = this.insertedSignal.observable;
+  inserted = new Subject<NostrEvent>();
 
   /** A stream of events that have been updated */
-  updated = this.updatedSignal.observable;
+  updated = new Subject<NostrEvent>();
 
   /** A stream of events removed of the database */
-  deleted = this.deletedSignal.observable;
+  deleted = new Subject<NostrEvent>();
 
   get size() {
     return this.events.size;
@@ -95,7 +91,13 @@ export class Database {
     const uid = getEventUID(event);
 
     const current = this.events.get(uid);
-    if (current && event.created_at <= current.created_at) return current;
+    if (current && event.created_at <= current.created_at) {
+      // if this is a duplicate event, transfer some import symbols
+      if (current.id === event.id) {
+        if (event[FromCacheSymbol]) current[FromCacheSymbol] = event[FromCacheSymbol];
+      }
+      return current;
+    }
 
     this.events.set(uid, event);
     this.getKindIndex(event.kind).add(event);
@@ -109,7 +111,7 @@ export class Database {
 
     insertEventIntoDescendingList(this.created_at, event);
 
-    this.insertedSignal.next(event);
+    this.inserted.next(event);
 
     return event;
   }
@@ -117,7 +119,7 @@ export class Database {
   /** Inserts and event into the database and notifies all subscriptions that the event has updated */
   updateEvent(event: NostrEvent) {
     const inserted = this.addEvent(event);
-    this.updatedSignal.next(inserted);
+    this.updated.next(inserted);
     return inserted;
   }
 
@@ -146,7 +148,7 @@ export class Database {
 
     this.events.delete(uid);
 
-    this.deletedSignal.next(event);
+    this.deleted.next(event);
 
     return true;
   }

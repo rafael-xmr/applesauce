@@ -1,12 +1,15 @@
-import { kinds, NostrEvent } from "nostr-tools";
+import { kinds, NostrEvent, VerifiedEvent, verifiedSymbol } from "nostr-tools";
 import { INDEXABLE_TAGS } from "../event-store/common.js";
 
 export const EventUIDSymbol = Symbol.for("event-uid");
 export const EventIndexableTagsSymbol = Symbol.for("indexable-tags");
+export const FromCacheSymbol = Symbol.for("from-cache");
+
 declare module "nostr-tools" {
   export interface Event {
     [EventUIDSymbol]?: string;
     [EventIndexableTagsSymbol]?: Set<string>;
+    [FromCacheSymbol]?: boolean;
   }
 }
 
@@ -64,4 +67,19 @@ export function getIndexableTags(event: NostrEvent) {
 /** Returns the second index ( tag[1] ) of the first tag that matches the name */
 export function getTagValue(event: NostrEvent, name: string) {
   return event.tags.find((t) => t[0] === name)?.[1];
+}
+
+/** Sets events verified flag without checking anything */
+export function fakeVerifyEvent(event: NostrEvent): event is VerifiedEvent {
+  return (event[verifiedSymbol] = true);
+}
+
+/** Marks an event as being from a cache */
+export function markFromCache(event: NostrEvent) {
+  event[FromCacheSymbol] = true;
+}
+
+/** Returns if an event was from a cache */
+export function isFromCache(event: NostrEvent) {
+  return !!event[FromCacheSymbol];
 }

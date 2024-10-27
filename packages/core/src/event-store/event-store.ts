@@ -1,6 +1,6 @@
 import { Filter, NostrEvent } from "nostr-tools";
 import { insertEventIntoDescendingList } from "nostr-tools/utils";
-import Observable from "zen-observable";
+import { Observable } from "rxjs";
 
 import { Database } from "./database.js";
 import { getEventUID, getReplaceableUID } from "../helpers/event.js";
@@ -9,10 +9,6 @@ import { addSeenRelay } from "../helpers/relays.js";
 
 export class EventStore {
   database: Database;
-
-  private singles = new Map<ZenObservable.SubscriptionObserver<NostrEvent>, string>();
-  private streams = new Map<ZenObservable.SubscriptionObserver<NostrEvent>, Filter[]>();
-  private timelines = new Map<ZenObservable.SubscriptionObserver<NostrEvent[]>, Filter[]>();
 
   constructor() {
     this.database = new Database();
@@ -89,14 +85,11 @@ export class EventStore {
         }
       });
 
-      this.singles.set(observer, uid);
-
       return () => {
         inserted.unsubscribe();
         deleted.unsubscribe();
         updated.unsubscribe();
 
-        this.singles.delete(observer);
         if (current) this.database.removeClaim(current, observer);
       };
     });
@@ -197,11 +190,8 @@ export class EventStore {
         }
       });
 
-      this.streams.set(observer, filters);
-
       return () => {
         sub.unsubscribe();
-        this.streams.delete(observer);
 
         // remove all claims
         for (const event of claimed) this.database.removeClaim(event, observer);
@@ -277,10 +267,7 @@ export class EventStore {
         }
       });
 
-      this.timelines.set(observer, filters);
-
       return () => {
-        this.timelines.delete(observer);
         inserted.unsubscribe();
         deleted.unsubscribe();
         updated.unsubscribe();

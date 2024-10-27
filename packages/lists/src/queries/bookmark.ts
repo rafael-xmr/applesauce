@@ -1,5 +1,6 @@
 import { kinds } from "nostr-tools";
 import { Query } from "applesauce-core";
+import { map } from "rxjs/operators";
 
 import { isHiddenTagsLocked } from "../helpers/hidden.js";
 import { Bookmarks, getBookmarks, getHiddenBookmarks } from "../helpers/bookmark.js";
@@ -7,7 +8,7 @@ import { Bookmarks, getBookmarks, getHiddenBookmarks } from "../helpers/bookmark
 export function UserBookmarkQuery(pubkey: string): Query<Bookmarks | undefined> {
   return {
     key: pubkey,
-    run: (store) => store.replaceable(kinds.Mutelist, pubkey).map((event) => event && getBookmarks(event)),
+    run: (store) => store.replaceable(kinds.Mutelist, pubkey).pipe(map((event) => event && getBookmarks(event))),
   };
 }
 
@@ -17,12 +18,14 @@ export function UserHiddenBookmarkQuery(
   return {
     key: pubkey,
     run: (store) =>
-      store.replaceable(kinds.Mutelist, pubkey).map((event) => {
-        if (!event) return undefined;
+      store.replaceable(kinds.Mutelist, pubkey).pipe(
+        map((event) => {
+          if (!event) return undefined;
 
-        const bookmarks = getHiddenBookmarks(event);
-        if (isHiddenTagsLocked(event) || !bookmarks) return { locked: true };
-        return { locked: false, ...bookmarks };
-      }),
+          const bookmarks = getHiddenBookmarks(event);
+          if (isHiddenTagsLocked(event) || !bookmarks) return { locked: true };
+          return { locked: false, ...bookmarks };
+        }),
+      ),
   };
 }

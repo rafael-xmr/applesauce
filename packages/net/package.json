@@ -1,14 +1,14 @@
 {
-  "name": "applesauce-lists",
+  "name": "applesauce-net",
   "version": "0.7.0",
-  "description": "A collection of tools for working with NIP-51 lists",
+  "description": "",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "watch:build": "tsc --watch > /dev/null",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --passWithNoTests",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "watch:test": "(trap 'kill 0' SIGINT; pnpm run build -w > /dev/null & pnpm run test --watch)"
   },
   "keywords": [
@@ -24,37 +24,34 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./helpers": {
-      "import": "./dist/helpers/index.js",
-      "types": "./dist/helpers/index.d.ts"
+    "./connection": {
+      "import": "./dist/connection/index.js",
+      "types": "./dist/connection/index.d.ts"
     },
-    "./helpers/*": {
-      "import": "./dist/helpers/*.js",
-      "types": "./dist/helpers/*.d.ts"
+    "./connection/*": {
+      "import": "./dist/connection/*.js",
+      "types": "./dist/connection/*.d.ts"
     },
-    "./queries": {
-      "import": "./dist/queries/index.js",
-      "types": "./dist/queries/index.d.ts"
+    "./subscription": {
+      "import": "./dist/subscription/index.js",
+      "types": "./dist/subscription/index.d.ts"
     },
-    "./queries/*": {
-      "import": "./dist/queries/*.js",
-      "types": "./dist/queries/*.d.ts"
+    "./subscription/*": {
+      "import": "./dist/subscription/*.js",
+      "types": "./dist/subscription/*.d.ts"
     }
   },
   "dependencies": {
-    "@noble/hashes": "^1.5.0",
-    "@noble/secp256k1": "^1.7.1",
-    "@scure/base": "^1.1.9",
-    "@types/dom-serial": "^1.0.6",
     "applesauce-core": "^0.7.0",
-    "debug": "^4.3.7",
+    "nanoid": "^5.0.7",
     "nostr-tools": "^2.7.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "zen-push": "^0.3.1"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
-    "@types/debug": "^4.1.12",
     "@types/jest": "^29.5.13",
+    "@types/zen-push": "^0.1.4",
     "jest": "^29.7.0",
     "jest-extended": "^4.0.2"
   },

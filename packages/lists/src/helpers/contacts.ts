@@ -1,8 +1,15 @@
 import { NostrEvent } from "nostr-tools";
-import { safeRelayUrl } from "applesauce-core/helpers";
+import { getProfilePointerFromTag, isPTag, safeRelayUrl } from "applesauce-core/helpers";
 import { getOrComputeCachedValue } from "applesauce-core/helpers/cache";
 
 export const ContactsRelaysSymbol = Symbol.for("contacts-relays");
+export const ContactsPeopleSymbol = Symbol.for("contacts-people");
+
+export function getContactsPeople(contacts: NostrEvent) {
+  return getOrComputeCachedValue(contacts, ContactsPeopleSymbol, () =>
+    contacts.tags.filter(isPTag).map(getProfilePointerFromTag),
+  );
+}
 
 type RelayJson = Record<string, { read: boolean; write: boolean }>;
 export function relaysFromContactsEvent(event: NostrEvent) {

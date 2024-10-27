@@ -1,5 +1,6 @@
 import { kinds } from "nostr-tools";
 import { Query } from "applesauce-core";
+import { map } from "rxjs/operators";
 
 import { getHiddenMutedThings, getMutedThings, Mutes } from "../helpers/mute.js";
 import { isHiddenTagsLocked } from "../helpers/hidden.js";
@@ -7,7 +8,7 @@ import { isHiddenTagsLocked } from "../helpers/hidden.js";
 export function UserMuteQuery(pubkey: string): Query<Mutes | undefined> {
   return {
     key: pubkey,
-    run: (store) => store.replaceable(kinds.Mutelist, pubkey).map((event) => event && getMutedThings(event)),
+    run: (store) => store.replaceable(kinds.Mutelist, pubkey).pipe(map((event) => event && getMutedThings(event))),
   };
 }
 
@@ -15,12 +16,14 @@ export function UserHiddenMuteQuery(pubkey: string): Query<(Mutes & { locked: fa
   return {
     key: pubkey,
     run: (store) =>
-      store.replaceable(kinds.Mutelist, pubkey).map((event) => {
-        if (!event) return undefined;
+      store.replaceable(kinds.Mutelist, pubkey).pipe(
+        map((event) => {
+          if (!event) return undefined;
 
-        const muted = getHiddenMutedThings(event);
-        if (isHiddenTagsLocked(event) || !muted) return { locked: true };
-        return { locked: false, ...muted };
-      }),
+          const muted = getHiddenMutedThings(event);
+          if (isHiddenTagsLocked(event) || !muted) return { locked: true };
+          return { locked: false, ...muted };
+        }),
+      ),
   };
 }

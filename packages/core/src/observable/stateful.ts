@@ -1,4 +1,4 @@
-import Observable from "zen-observable";
+import { Observable, Subscription } from "rxjs";
 
 export type StatefulObservable<T> = Observable<T> & {
   _stateful?: true;
@@ -9,8 +9,8 @@ export type StatefulObservable<T> = Observable<T> & {
 
 /** Wraps an {@link Observable} and makes it stateful */
 export function stateful<T extends unknown>(observable: Observable<T>, cleanup = false) {
-  let subscription: ZenObservable.Subscription | undefined = undefined;
-  let observers: ZenObservable.SubscriptionObserver<T>[] = [];
+  let subscription: Subscription | undefined = undefined;
+  let observers: any[] = [];
 
   const self: StatefulObservable<T> = new Observable<T>((observer) => {
     // add observer to list

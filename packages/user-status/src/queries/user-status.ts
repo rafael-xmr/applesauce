@@ -1,6 +1,7 @@
 import { kinds, NostrEvent } from "nostr-tools";
 import { Query } from "applesauce-core/query-store";
 import { getTagValue } from "applesauce-core/helpers";
+import { map } from "rxjs";
 
 import { getUserStatusPointer, UserStatusPointer } from "../helpers/user-status.js";
 
@@ -14,18 +15,20 @@ export function UserStatusQuery(pubkey: string, type: string = "general"): Query
   return {
     key: pubkey,
     run: (events) =>
-      events.replaceable(kinds.UserStatuses, pubkey, type).map((event) => {
-        if (!event) return undefined;
+      events.replaceable(kinds.UserStatuses, pubkey, type).pipe(
+        map((event) => {
+          if (!event) return undefined;
 
-        const pointer = getUserStatusPointer(event);
-        if (!pointer) return null;
+          const pointer = getUserStatusPointer(event);
+          if (!pointer) return null;
 
-        return {
-          ...pointer,
-          event,
-          content: event.content,
-        };
-      }),
+          return {
+            ...pointer,
+            event,
+            content: event.content,
+          };
+        }),
+      ),
   };
 }
 
@@ -34,13 +37,15 @@ export function UserStatusesQuery(pubkey: string): Query<Record<string, UserStat
   return {
     key: pubkey,
     run: (events) =>
-      events.timeline([{ kinds: [kinds.UserStatuses], authors: [pubkey] }]).map((events) => {
-        return events.reduce((dir, event) => {
-          const d = getTagValue(event, "d");
-          if (!d) return dir;
+      events.timeline([{ kinds: [kinds.UserStatuses], authors: [pubkey] }]).pipe(
+        map((events) => {
+          return events.reduce((dir, event) => {
+            const d = getTagValue(event, "d");
+            if (!d) return dir;
 
-          return { ...dir, [d]: { event, ...getUserStatusPointer(event), content: event.content } };
-        }, {});
-      }),
+            return { ...dir, [d]: { event, ...getUserStatusPointer(event), content: event.content } };
+          }, {});
+        }),
+      ),
   };
 }

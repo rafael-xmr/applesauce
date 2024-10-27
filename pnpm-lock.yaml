@@ -33,6 +33,9 @@ importers:
       nostr-tools:
         specifier: ^2.7.2
         version: 2.7.2(typescript@5.6.2)
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
     devDependencies:
       '@jest/globals':
         specifier: ^29.7.0
@@ -113,12 +116,9 @@ importers:
       nostr-tools:
         specifier: ^2.7.2
         version: 2.7.2(typescript@5.6.2)
-      zen-observable:
-        specifier: ^0.10.0
-        version: 0.10.0
-      zen-push:
-        specifier: ^0.3.1
-        version: 0.3.1
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
     devDependencies:
       '@jest/globals':
         specifier: ^29.7.0
@@ -129,12 +129,6 @@ importers:
       '@types/jest':
         specifier: ^29.5.13
         version: 29.5.13
-      '@types/zen-observable':
-        specifier: ^0.8.7
-        version: 0.8.7
-      '@types/zen-push':
-        specifier: ^0.1.4
-        version: 0.1.4
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@12.20.55)
@@ -165,6 +159,9 @@ importers:
       nostr-tools:
         specifier: ^2.7.2
         version: 2.7.2(typescript@5.6.2)
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
     devDependencies:
       '@jest/globals':
         specifier: ^29.7.0
@@ -175,6 +172,40 @@ importers:
       '@types/jest':
         specifier: ^29.5.13
         version: 29.5.13
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@12.20.55)
+      jest-extended:
+        specifier: ^4.0.2
+        version: 4.0.2(jest@29.7.0(@types/node@12.20.55))
+
+  packages/net:
+    dependencies:
+      applesauce-core:
+        specifier: ^0.7.0
+        version: link:../core
+      nanoid:
+        specifier: ^5.0.7
+        version: 5.0.7
+      nostr-tools:
+        specifier: ^2.7.2
+        version: 2.7.2(typescript@5.6.2)
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      zen-push:
+        specifier: ^0.3.1
+        version: 0.3.1
+    devDependencies:
+      '@jest/globals':
+        specifier: ^29.7.0
+        version: 29.7.0
+      '@types/jest':
+        specifier: ^29.5.13
+        version: 29.5.13
+      '@types/zen-push':
+        specifier: ^0.1.4
+        version: 0.1.4
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@12.20.55)
@@ -196,9 +227,9 @@ importers:
       react:
         specifier: ^18.3.1
         version: 18.3.1
-      zen-observable:
-        specifier: ^0.10.0
-        version: 0.10.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
     devDependencies:
       '@jest/globals':
         specifier: ^29.7.0
@@ -209,9 +240,6 @@ importers:
       '@types/react':
         specifier: ^18.3.11
         version: 18.3.11
-      '@types/zen-observable':
-        specifier: ^0.8.7
-        version: 0.8.7
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@12.20.55)
@@ -236,9 +264,15 @@ importers:
       applesauce-core:
         specifier: ^0.7.0
         version: link:../core
+      applesauce-net:
+        specifier: ^0.7.0
+        version: link:../net
       debug:
         specifier: ^4.3.7
         version: 4.3.7
+      nanoid:
+        specifier: ^5.0.7
+        version: 5.0.7
       nostr-tools:
         specifier: ^2.7.2
         version: 2.7.2(typescript@5.6.2)
@@ -267,6 +301,9 @@ importers:
       nostr-tools:
         specifier: ^2.7.2
         version: 2.7.2(typescript@5.6.2)
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
     devDependencies:
       '@jest/globals':
         specifier: ^29.7.0
@@ -1826,6 +1863,9 @@ packages:
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
 
+  rxjs@7.8.1:
+    resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
+
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
@@ -1962,6 +2002,9 @@ packages:
 
   trough@2.2.0:
     resolution: {integrity: sha512-tmMpK00BjZiUyVyvrBK7knerNgmgvcV/KLVyuma/SC+TQN167GrMRciANTz09+k3zW8L8t60jWO1GpfkZdjTaw==}
+
+  tslib@2.8.0:
+    resolution: {integrity: sha512-jWVzBLplnCmoaTr13V9dYbiQ99wvZRd0vNWaDRg+aVYRcjDF3nDksxFDE/+fkXnKhpnUUkmx5pK/v8mCtLVqZA==}
 
   turbo-darwin-64@2.1.2:
     resolution: {integrity: sha512-3TEBxHWh99h2yIzkuIigMEOXt/ItYQp0aPiJjPd1xN4oDcsKK5AxiFKPH9pdtfIBzYsY59kQhZiFj0ELnSP7Bw==}
@@ -2115,9 +2158,6 @@ packages:
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
-
-  zen-observable@0.10.0:
-    resolution: {integrity: sha512-iI3lT0iojZhKwT5DaFy2Ce42n3yFcLdFyOh01G7H0flMY60P8MJuVFEoJoNwXlmAyQ45GrjL6AcZmmlv8A5rbw==}
 
   zen-observable@0.9.0:
     resolution: {integrity: sha512-xBrvSw1htnb2VEYpgjG7etqztHSZ4KyKzJgFh/rucI7QzkbxD0rVNmIni6lia6KhWs7RBbBBLZksGKrCSaDAMQ==}
@@ -4189,6 +4229,10 @@ snapshots:
     dependencies:
       queue-microtask: 1.2.3
 
+  rxjs@7.8.1:
+    dependencies:
+      tslib: 2.8.0
+
   safer-buffer@2.1.2: {}
 
   semver@6.3.1: {}
@@ -4309,6 +4353,8 @@ snapshots:
   trim-lines@3.0.1: {}
 
   trough@2.2.0: {}
+
+  tslib@2.8.0: {}
 
   turbo-darwin-64@2.1.2:
     optional: true
@@ -4462,8 +4508,6 @@ snapshots:
       yargs-parser: 21.1.1
 
   yocto-queue@0.1.0: {}
-
-  zen-observable@0.10.0: {}
 
   zen-observable@0.9.0: {}
 
