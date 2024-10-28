@@ -1,5 +1,19 @@
 # applesauce-signer
 
+## 0.8.0
+
+### Minor Changes
+
+- 0dae7f5: Add nostr-connect signer
+
+### Patch Changes
+
+- Updated dependencies [08d2abe]
+- Updated dependencies [08d2abe]
+- Updated dependencies [0dae7f5]
+  - applesauce-core@0.8.0
+  - applesauce-net@0.8.0
+
 ## 0.7.0
 
 ### Patch Changes
