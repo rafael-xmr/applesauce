@@ -3,10 +3,12 @@ import { AbstractRelay } from "nostr-tools/abstract-relay";
 import { normalizeURL } from "nostr-tools/utils";
 import { fakeVerifyEvent } from "applesauce-core/helpers/event";
 
+/** @experimental */
 export interface IConnectionPool {
   getConnection(url: string | URL): AbstractRelay;
 }
 
+/** @experimental */
 export class SimpleConnectionPool extends SimplePool implements IConnectionPool {
   getConnection(url: string | URL): AbstractRelay {
     url = normalizeURL(url.toString());
