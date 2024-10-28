@@ -1,5 +1,16 @@
 # applesauce-core
 
+## 0.8.0
+
+### Minor Changes
+
+- 08d2abe: Add `shareLatestValue` observable operator for caching queries
+- 0dae7f5: Replace zen-observable with rxjs
+
+### Patch Changes
+
+- 08d2abe: Fix hashtag regexp capturing whitespace before
+
 ## 0.7.0
 
 ### Minor Changes
