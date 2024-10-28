@@ -1,12 +1,12 @@
-import { Observable, shareReplay } from "rxjs";
+import { BehaviorSubject, Observable } from "rxjs";
 import { Filter, NostrEvent } from "nostr-tools";
 
 import { EventStore } from "../event-store/event-store.js";
-import { StatefulObservable } from "../observable/stateful.js";
 import { LRU } from "../helpers/lru.js";
 
 import * as Queries from "../queries/index.js";
 import { AddressPointer, EventPointer } from "nostr-tools/nip19";
+import { shareLatestValue } from "../observable/share-latest-value.js";
 
 export type Query<T extends unknown> = { key: string; run: (events: EventStore, store: QueryStore) => Observable<T> };
 export type QueryConstructor<T extends unknown, Args extends Array<any>> = (...args: Args) => Query<T>;
@@ -19,9 +19,7 @@ export class QueryStore {
     this.store = store;
   }
 
-  /** Time to keep queries when there are are subscribers (default 5min) */
-  defaultCacheTime = 5 * 60_000;
-  queries = new LRU<StatefulObservable<any>>();
+  queries = new LRU<BehaviorSubject<any> | Observable<any>>();
 
   /** Creates a cached query */
   runQuery<T extends unknown, Args extends Array<any>>(
@@ -32,9 +30,7 @@ export class QueryStore {
       const key = `${queryConstructor.name}|${query.key}`;
 
       if (!this.queries.has(key)) {
-        const observable = query
-          .run(this.store, this)
-          .pipe(shareReplay({ bufferSize: 1, windowTime: this.defaultCacheTime, refCount: true }));
+        const observable = query.run(this.store, this).pipe(shareLatestValue()) as Observable<T>;
 
         this.queries.set(key, observable);
         return observable;

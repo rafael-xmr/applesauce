@@ -8,7 +8,7 @@ export function galleries(types = IMAGE_EXT): Transformer<Root> {
   return (tree) => {
     let links: Link[] = [];
 
-    const commit = (i: number) => {
+    const commit = (index: number) => {
       // only create a gallery if there are more than a single image
       if (links.length > 1) {
         const start = tree.children.indexOf(links[0]);
@@ -22,7 +22,7 @@ export function galleries(types = IMAGE_EXT): Transformer<Root> {
         return end - 1;
       } else {
         links = [];
-        return i;
+        return index;
       }
     };
 
@@ -48,5 +48,8 @@ export function galleries(types = IMAGE_EXT): Transformer<Root> {
         i = commit(i);
       }
     }
+
+    // Do one finally commit, just in case a link is the last element in the list
+    commit(tree.children.length);
   };
 }

@@ -9,7 +9,7 @@ export const Expressions = {
     return /:([a-zA-Z0-9_-]+):/gi;
   },
   get hashtag() {
-    return /(?:^|[^\p{L}])#([\p{L}\p{N}\p{M}]+)/gu;
+    return /(?<=^|[^\p{L}#])#([\p{L}\p{N}\p{M}]+)/gu;
   },
 };
 
