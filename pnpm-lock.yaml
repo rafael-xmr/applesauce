@@ -110,6 +110,9 @@ importers:
       json-stringify-deterministic:
         specifier: ^1.0.12
         version: 1.0.12
+      light-bolt11-decoder:
+        specifier: ^3.2.0
+        version: 3.2.0
       nanoid:
         specifier: ^5.0.7
         version: 5.0.7
@@ -1496,6 +1499,9 @@ packages:
   leven@3.1.0:
     resolution: {integrity: sha512-qsda+H8jTaUaN/x5vzW2rzc+8Rw4TAQ/4KjB46IwK5VH+IlVeeeje/EoZRpiXvIqjFgK84QffqPztGI3VBLG1A==}
     engines: {node: '>=6'}
+
+  light-bolt11-decoder@3.2.0:
+    resolution: {integrity: sha512-3QEofgiBOP4Ehs9BI+RkZdXZNtSys0nsJ6fyGeSiAGCBsMwHGUDS/JQlY/sTnWs91A2Nh0S9XXfA8Sy9g6QpuQ==}
 
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
@@ -3778,6 +3784,10 @@ snapshots:
   kleur@3.0.3: {}
 
   leven@3.1.0: {}
+
+  light-bolt11-decoder@3.2.0:
+    dependencies:
+      '@scure/base': 1.1.1
 
   lines-and-columns@1.2.4: {}
 

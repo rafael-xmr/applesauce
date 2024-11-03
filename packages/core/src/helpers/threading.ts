@@ -1,6 +1,7 @@
-import { NostrEvent } from "nostr-tools";
+import { EventTemplate, NostrEvent } from "nostr-tools";
 import { AddressPointer, EventPointer } from "nostr-tools/nip19";
 import { getAddressPointerFromTag, getEventPointerFromTag } from "./pointers.js";
+import { getOrComputeCachedValue } from "./cache.js";
 
 export type ThreadReferences = {
   root?:
@@ -21,7 +22,7 @@ declare module "nostr-tools" {
 }
 
 /** Parses NIP-10 tags and handles legacy behavior */
-export function interpretThreadTags(event: NostrEvent) {
+export function interpretThreadTags(event: NostrEvent | EventTemplate) {
   const eTags = event.tags.filter((t) => t[0] === "e" && t[1]);
   const aTags = event.tags.filter((t) => t[0] === "a" && t[1]);
 
@@ -71,24 +72,33 @@ export function interpretThreadTags(event: NostrEvent) {
 }
 
 /** Returns the parsed NIP-10 tags for an event */
-export function getNip10References(event: NostrEvent): ThreadReferences {
-  let refs = event[Nip10ThreadRefsSymbol];
+export function getNip10References(event: NostrEvent | EventTemplate): ThreadReferences {
+  return getOrComputeCachedValue(event, Nip10ThreadRefsSymbol, () => {
+    const tags = interpretThreadTags(event);
 
-  if (!refs) {
-    const e = event;
-    const tags = interpretThreadTags(e);
+    let root: ThreadReferences["root"];
+    if (tags.root) {
+      try {
+        root = {
+          e: tags.root.e && getEventPointerFromTag(tags.root.e),
+          a: tags.root.a && getAddressPointerFromTag(tags.root.a),
+        } as ThreadReferences["root"];
+      } catch (error) {}
+    }
 
-    refs = event[Nip10ThreadRefsSymbol] = {
-      root: tags.root && {
-        e: tags.root.e && getEventPointerFromTag(tags.root.e),
-        a: tags.root.a && getAddressPointerFromTag(tags.root.a),
-      },
-      reply: tags.reply && {
-        e: tags.reply.e && getEventPointerFromTag(tags.reply.e),
-        a: tags.reply.a && getAddressPointerFromTag(tags.reply.a),
-      },
+    let reply: ThreadReferences["reply"];
+    if (tags.reply) {
+      try {
+        reply = {
+          e: tags.reply.e && getEventPointerFromTag(tags.reply.e),
+          a: tags.reply.a && getAddressPointerFromTag(tags.reply.a),
+        } as ThreadReferences["reply"];
+      } catch (error) {}
+    }
+
+    return {
+      root,
+      reply,
     } as ThreadReferences;
-  }
-
-  return refs;
+  });
 }

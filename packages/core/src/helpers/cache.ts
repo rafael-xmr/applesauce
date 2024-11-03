@@ -1,13 +1,11 @@
 import { EventTemplate, NostrEvent } from "nostr-tools";
 
 export function getCachedValue<T extends unknown>(event: NostrEvent | EventTemplate, symbol: symbol): T | undefined {
-  // @ts-expect-error
-  return event[symbol];
+  return Reflect.get(event, symbol);
 }
 
 export function setCachedValue<T extends unknown>(event: NostrEvent | EventTemplate, symbol: symbol, value: T) {
-  // @ts-expect-error
-  event[symbol] = value;
+  Reflect.set(event, symbol, value);
 }
 
 /** Internal method used to cache computed values on events */
@@ -16,12 +14,11 @@ export function getOrComputeCachedValue<T extends unknown>(
   symbol: symbol,
   compute: (event: NostrEvent | EventTemplate) => T,
 ): T {
-  let cached = getCachedValue<T>(event, symbol);
-
-  if (!cached) {
-    // @ts-expect-error
-    cached = event[symbol] = compute(event);
+  if (Reflect.has(event, symbol)) {
+    return Reflect.get(event, symbol);
+  } else {
+    const value = compute(event);
+    Reflect.set(event, symbol, value);
+    return value;
   }
-
-  return cached;
 }
