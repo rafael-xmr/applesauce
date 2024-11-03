@@ -10,12 +10,18 @@ export type ParsedInvoice = {
 
 export function parseBolt11(paymentRequest: string): ParsedInvoice {
   const decoded = decode(paymentRequest);
-  const timestamp = decoded.sections.find((s) => s.name === "timestamp")?.value ?? 0;
+  const timestamp = (decoded.sections.find((s) => s.name === "timestamp") as { value: number } | undefined)?.value ?? 0;
+
+  const description =
+    (decoded.sections.find((s) => s.name === "description") as { value: string } | undefined)?.value ?? "";
+  const amount = parseInt(
+    (decoded.sections.find((s) => s.name === "amount") as { value: string } | undefined)?.value ?? "0",
+  );
 
   return {
     paymentRequest: decoded.paymentRequest,
-    description: decoded.sections.find((s) => s.name === "description")?.value ?? "",
-    amount: parseInt(decoded.sections.find((s) => s.name === "amount")?.value ?? "0"),
+    description: description,
+    amount: amount,
     timestamp: timestamp,
     expiry: timestamp + decoded.expiry,
   };
