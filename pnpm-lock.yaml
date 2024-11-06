@@ -53,8 +53,8 @@ importers:
   packages/content:
     dependencies:
       '@cashu/cashu-ts':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: 2.0.0-rc1
+        version: 2.0.0-rc1
       '@types/hast':
         specifier: ^3.0.4
         version: 3.0.4
@@ -500,8 +500,8 @@ packages:
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
 
-  '@cashu/cashu-ts@1.1.0':
-    resolution: {integrity: sha512-zdMKOHx3l+gzCRbK2R+dPaui78Kq3f4C1pz+ya7polbpzqPGU+NlT3Y3V9uKjwLJUp1G0lumKKU0lj4/Ywczpg==}
+  '@cashu/cashu-ts@2.0.0-rc1':
+    resolution: {integrity: sha512-39459l7x/fUMEgOsCdGLLl6rMekO4nbv+wEuavmyElh8hgN8t66wcb29AJvdFTb6K3lPACKF2rs/jAlPYrN7Ng==}
 
   '@cashu/crypto@0.2.7':
     resolution: {integrity: sha512-1aaDfUjiHNXoJqg8nW+341TLWV9W28DsVNXJUKcHL0yAmwLs5+56SSnb8LLDJzPamLVoYL0U0bda91klAzptig==}
@@ -2386,13 +2386,12 @@ snapshots:
 
   '@bcoe/v8-coverage@0.2.3': {}
 
-  '@cashu/cashu-ts@1.1.0':
+  '@cashu/cashu-ts@2.0.0-rc1':
     dependencies:
       '@cashu/crypto': 0.2.7
       '@noble/curves': 1.6.0
       '@noble/hashes': 1.5.0
       '@scure/bip32': 1.5.0
-      '@scure/bip39': 1.4.0
       buffer: 6.0.3
 
   '@cashu/crypto@0.2.7':
