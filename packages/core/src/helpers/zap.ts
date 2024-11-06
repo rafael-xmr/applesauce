@@ -9,6 +9,7 @@ export const ZapRequestSymbol = Symbol.for("zap-request");
 export const ZapFromSymbol = Symbol.for("zap-from");
 export const ZapInvoiceSymbol = Symbol.for("zap-bolt11");
 export const ZapEventPointerSymbol = Symbol.for("zap-event-pointer");
+export const ZapAddressPointerSymbol = Symbol.for("zap-address-pointer");
 
 export function getZapSender(zap: NostrEvent) {
   return getTagValue(zap, "P") || getZapRequest(zap).pubkey;
@@ -28,7 +29,7 @@ export function getZapPayment(zap: NostrEvent) {
 }
 
 export function getZapAddressPointer(zap: NostrEvent) {
-  return getOrComputeCachedValue(zap, ZapEventPointerSymbol, () => {
+  return getOrComputeCachedValue(zap, ZapAddressPointerSymbol, () => {
     const a = zap.tags.find(isATag);
     return a ? getAddressPointerFromTag(a) : null;
   });

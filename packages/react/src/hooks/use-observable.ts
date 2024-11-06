@@ -5,19 +5,14 @@ import { type BehaviorSubject, type Observable } from "rxjs";
 export function useObservable<T extends unknown>(observable?: BehaviorSubject<T>): T;
 export function useObservable<T extends unknown>(observable?: Observable<T>): T | undefined;
 export function useObservable<T extends unknown>(observable?: Observable<T>): T | undefined {
-  const [_count, update] = useState(0);
-  const [value, setValue] = useState(
-    observable && Reflect.has(observable, "value") ? (Reflect.get(observable, "value") as T | undefined) : undefined,
-  );
+  const observableValue =
+    observable && Reflect.has(observable, "value") ? (Reflect.get(observable, "value") as T | undefined) : undefined;
+  const [value, setValue] = useState(observableValue);
 
   useEffect(() => {
-    const sub = observable?.subscribe((v) => {
-      setValue(v);
-      update((c) => c + 1);
-    });
-
+    const sub = observable?.subscribe((v) => setValue(v));
     return () => sub?.unsubscribe();
   }, [observable]);
 
-  return value;
+  return observableValue || value;
 }
