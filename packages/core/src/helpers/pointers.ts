@@ -7,7 +7,6 @@ import {
   noteEncode,
   nprofileEncode,
   npubEncode,
-  nrelayEncode,
   nsecEncode,
   ProfilePointer,
 } from "nostr-tools/nip19";
@@ -75,8 +74,6 @@ export function encodeDecodeResult(result: DecodeResult) {
       return nprofileEncode(result.data);
     case "nevent":
       return neventEncode(result.data);
-    case "nrelay":
-      return nrelayEncode(result.data);
     case "nsec":
       return nsecEncode(result.data);
     case "npub":
