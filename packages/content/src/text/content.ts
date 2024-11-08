@@ -9,11 +9,12 @@ import { createTextNoteATS } from "./parser.js";
 import { Root } from "../nast/types.js";
 import { hashtags } from "./hashtag.js";
 import { galleries } from "./gallery.js";
+import { lightningInvoices } from "./lightning.js";
 
 export const ParsedTextContentSymbol = Symbol.for("parsed-text-content");
 
 // default kind 1 transformers
-export const defaultTransformers = [nostrMentions, galleries, emojis, hashtags, cashuTokens];
+export const defaultTransformers = [nostrMentions, galleries, emojis, hashtags, lightningInvoices, cashuTokens];
 
 /** Parsed and process a note with custom transformers */
 export function getParsedTextContent(

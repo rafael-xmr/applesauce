@@ -11,6 +11,9 @@ export const Expressions = {
   get hashtag() {
     return /(?<=^|[^\p{L}#])#([\p{L}\p{N}\p{M}]+)/gu;
   },
+  get lightning() {
+    return /(?:lightning:)?(LNBC[A-Za-z0-9]+)/gim;
+  },
 };
 
 export default Expressions;

@@ -3,6 +3,7 @@ import { DecodeResult } from "nostr-tools/nip19";
 import { Node as UnistNode, Parent } from "unist";
 
 import { type Token } from "@cashu/cashu-ts";
+import { type ParsedInvoice } from "applesauce-core/helpers/bolt11";
 
 export interface CommonData {
   eol?: boolean;
@@ -43,6 +44,7 @@ export interface CashuToken extends Node {
 export interface LightningInvoice extends Node {
   type: "lightning";
   invoice: string;
+  parsed: ParsedInvoice;
 }
 
 export interface Hashtag extends Node {
