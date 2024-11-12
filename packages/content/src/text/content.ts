@@ -11,11 +11,13 @@ import { hashtags } from "./hashtag.js";
 import { galleries } from "./gallery.js";
 import { lightningInvoices } from "./lightning.js";
 import { eolMetadata } from "../nast/eol-metadata.js";
+import { links } from "./links.js";
 
 export const ParsedTextContentSymbol = Symbol.for("parsed-text-content");
 
 // default kind 1 transformers
 export const defaultTransformers = [
+  links,
   nostrMentions,
   galleries,
   emojis,

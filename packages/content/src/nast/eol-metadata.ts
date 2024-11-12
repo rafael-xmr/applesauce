@@ -8,7 +8,11 @@ export function eolMetadata(): Transformer<Root> {
       const node = tree.children[i];
       const next = tree.children[i + 1];
 
-      if (!next || (next.type === "text" && next.value.startsWith("\n"))) {
+      if (
+        (node.type === "text" && node.value.endsWith("\n")) ||
+        !next ||
+        (next.type === "text" && next.value.startsWith("\n"))
+      ) {
         node.data = node.data || {};
         node.data.eol = true;
       }
