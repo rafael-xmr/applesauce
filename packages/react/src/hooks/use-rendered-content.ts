@@ -1,17 +1,19 @@
 import { useMemo } from "react";
-import { getParsedTextContent } from "applesauce-content/text";
+import { truncateContent } from "applesauce-content/nast";
+import { getParsedContent } from "applesauce-content/text";
 import { EventTemplate, NostrEvent } from "nostr-tools";
 
 import { useRenderNast } from "./use-render-nast.js";
 import { ComponentMap } from "../helpers/nast.js";
 import { buildLinkRenderer, LinkRenderer } from "../helpers/build-link-renderer.js";
-import { truncateContent } from "applesauce-content/nast";
 
 export { ComponentMap };
 
 type Options = {
+  /** The key to cache the results under, passing null will disable */
+  cacheKey: symbol | null;
   /** Override transformers */
-  transformers?: Parameters<typeof getParsedTextContent>[2];
+  transformers?: Parameters<typeof getParsedContent>[2];
   /** If set will use {@link buildLinkRenderer} to render links */
   linkRenderers?: LinkRenderer[];
   /** Override event content */
@@ -34,8 +36,8 @@ export function useRenderedContent(
 
   // add additional transformers
   const nast = useMemo(
-    () => (event ? getParsedTextContent(event, opts?.content, opts?.transformers) : undefined),
-    [event, opts?.content, opts?.transformers],
+    () => (event ? getParsedContent(event, opts?.content, opts?.transformers, opts?.cacheKey) : undefined),
+    [event, opts?.content, opts?.transformers, opts?.cacheKey],
   );
 
   let truncated = nast;

@@ -13,10 +13,10 @@ import { lightningInvoices } from "./lightning.js";
 import { eolMetadata } from "../nast/eol-metadata.js";
 import { links } from "./links.js";
 
-export const ParsedTextContentSymbol = Symbol.for("parsed-text-content");
+export const TextNoteContentSymbol = Symbol.for("text-note-content");
 
 // default kind 1 transformers
-export const defaultTransformers = [
+export const textNoteTransformers = [
   links,
   nostrMentions,
   galleries,
@@ -28,10 +28,11 @@ export const defaultTransformers = [
 ];
 
 /** Parsed and process a note with custom transformers */
-export function getParsedTextContent(
+export function getParsedContent(
   event: NostrEvent | EventTemplate | string,
   content?: string,
-  transformers: (() => Transformer<Root>)[] = defaultTransformers,
+  transformers: (() => Transformer<Root>)[] = textNoteTransformers,
+  cacheKey: symbol | null | undefined = TextNoteContentSymbol,
 ) {
   // process strings
   if (typeof event === "string") {
@@ -42,7 +43,16 @@ export function getParsedTextContent(
     return processor.runSync(createTextNoteATS(event, content)) as Root;
   }
 
-  return getOrComputeCachedValue(event, ParsedTextContentSymbol, () => {
+  // no caching
+  if (!cacheKey) {
+    const processor = unified();
+    for (const transformer of transformers) {
+      processor.use(transformer);
+    }
+    return processor.runSync(createTextNoteATS(event, content)) as Root;
+  }
+
+  return getOrComputeCachedValue(event, cacheKey, () => {
     const processor = unified();
     for (const transformer of transformers) {
       processor.use(transformer);
@@ -53,5 +63,5 @@ export function getParsedTextContent(
 
 export function removeParsedTextContent(event: NostrEvent | EventTemplate) {
   // @ts-expect-error
-  delete event[ParsedTextContentSymbol];
+  delete event[TextNoteContentSymbol];
 }
