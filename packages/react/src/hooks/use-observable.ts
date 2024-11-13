@@ -1,18 +1,27 @@
 import { useState, useEffect } from "react";
 import { type BehaviorSubject, type Observable } from "rxjs";
 
+export function getCurrentValue<T extends unknown>(observable: BehaviorSubject<T>): T;
+export function getCurrentValue<T extends unknown>(observable: Observable<T>): T | undefined;
+export function getCurrentValue<T extends unknown>(observable: Observable<T>): T | undefined {
+  if (Reflect.has(observable, "value")) return Reflect.get(observable, "value") as T | undefined;
+  return undefined;
+}
+
 /** Subscribe to the value of an observable */
 export function useObservable<T extends unknown>(observable?: BehaviorSubject<T>): T;
 export function useObservable<T extends unknown>(observable?: Observable<T>): T | undefined;
 export function useObservable<T extends unknown>(observable?: Observable<T>): T | undefined {
-  const observableValue =
-    observable && Reflect.has(observable, "value") ? (Reflect.get(observable, "value") as T | undefined) : undefined;
-  const [value, setValue] = useState(observableValue);
+  const current = observable && getCurrentValue(observable);
+  const [value, setValue] = useState(current);
 
   useEffect(() => {
-    const sub = observable?.subscribe((v) => setValue(v));
-    return () => sub?.unsubscribe();
-  }, [observable]);
+    // Reset the state, the method passed to subscribe will NOT always be called
+    setValue(observable && getCurrentValue(observable));
 
-  return observableValue || value;
+    const sub = observable?.subscribe(setValue);
+    return () => sub?.unsubscribe();
+  }, [observable, setValue]);
+
+  return current || value;
 }
