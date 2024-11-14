@@ -3,7 +3,7 @@ import { nanoid } from "nanoid";
 import { Nip07Interface, SimpleSigner } from "applesauce-signer";
 import { IConnectionPool } from "applesauce-net/connection";
 import { Deferred, createDefer } from "applesauce-core/promise";
-import { unixNow } from "applesauce-core/helpers";
+import { isHexKey, unixNow } from "applesauce-core/helpers";
 import { MultiSubscription } from "applesauce-net/subscription";
 import { logger } from "applesauce-core";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
@@ -213,8 +213,8 @@ export class NostrConnectSigner implements Nip07Interface {
     } catch (e) {}
   }
 
-  protected async createEvent(content: string, target = this.remote, kind = kinds.NostrConnect) {
-    if (!target) throw new Error("invalid target pubkey");
+  protected async createRequestEvent(content: string, target = this.remote, kind = kinds.NostrConnect) {
+    if (!target) throw new Error("Missing target pubkey");
 
     return await this.signer.signEvent({
       kind,
@@ -236,7 +236,7 @@ export class NostrConnectSigner implements Nip07Interface {
     const id = nanoid(8);
     const request: NostrConnectRequest<T> = { id, method, params };
     const encrypted = await this.signer.nip04.encrypt(remote, JSON.stringify(request));
-    const event = await this.createEvent(encrypted, this.remote, kind);
+    const event = await this.createRequestEvent(encrypted, remote, kind);
     this.log(`Sending request ${id} (${method}) ${JSON.stringify(params)}`, event);
     this.sub.publish(event);
 
@@ -246,7 +246,7 @@ export class NostrConnectSigner implements Nip07Interface {
   }
 
   /** Connect to remote signer */
-  async connect(token?: string, permissions?: string[]) {
+  async connect(token?: string | undefined, permissions?: string[]) {
     if (!this.pubkey) throw new Error("Missing user pubkey");
 
     await this.open();
@@ -352,6 +352,24 @@ export class NostrConnectSigner implements Nip07Interface {
 
   static buildSigningPermissions(kinds: number[]) {
     return [Permission.GetPublicKey, ...kinds.map((k) => `${Permission.SignEvent}:${k}`)];
+  }
+
+  static async fromBunkerURI(uri: string, pool: IConnectionPool, permissions?: string[]) {
+    const url = new URL(uri);
+
+    // firefox puts pubkey part in host, chrome puts pubkey in pathname
+    const pubkey = url.host || url.pathname.replace("//", "");
+    if (!isHexKey(pubkey)) throw new Error("Invalid connection URI");
+
+    const relays = url.searchParams.getAll("relay");
+    if (relays.length === 0) throw new Error("Missing relays");
+
+    const client = new NostrConnectSigner({ pool, relays, pubkey });
+
+    const token = url.searchParams.get("secret");
+    await client.connect(token ?? undefined, permissions);
+
+    return client;
   }
 
   toJSON() {
