@@ -68,5 +68,9 @@
     "setupFilesAfterEnv": [
       "jest-extended/all"
     ]
+  },
+  "funding": {
+    "type": "lightning",
+    "url": "lightning:nostrudel@geyser.fund"
   }
 }
