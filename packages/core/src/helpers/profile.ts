@@ -1,11 +1,7 @@
 import { NostrEvent } from "nostr-tools";
+import { getOrComputeCachedValue } from "./cache.js";
 
 export const ProfileContentSymbol = Symbol.for("profile-content");
-declare module "nostr-tools" {
-  export interface Event {
-    [ProfileContentSymbol]?: ProfileContent | Error;
-  }
-}
 
 export type ProfileContent = {
   name?: string;
@@ -23,29 +19,18 @@ export type ProfileContent = {
 };
 
 /** Returns the parsed profile content for a kind 0 event */
-export function getProfileContent(event: NostrEvent): ProfileContent;
-export function getProfileContent(event: NostrEvent, quite: false): ProfileContent;
-export function getProfileContent(event: NostrEvent, quite: true): ProfileContent | Error;
-export function getProfileContent(event: NostrEvent, quite = false) {
-  let cached = event[ProfileContentSymbol];
+export function getProfileContent(event: NostrEvent) {
+  return getOrComputeCachedValue(event, ProfileContentSymbol, () => {
+    const profile = JSON.parse(event.content) as ProfileContent;
 
-  if (!cached) {
-    try {
-      const profile = JSON.parse(event.content) as ProfileContent;
+    // ensure nip05 is a string
+    if (profile.nip05 && typeof profile.nip05 !== "string") profile.nip05 = String(profile.nip05);
 
-      // ensure nip05 is a string
-      if (profile.nip05 && typeof profile.nip05 !== "string") profile.nip05 = String(profile.nip05);
-
-      cached = event[ProfileContentSymbol] = profile;
-    } catch (e) {
-      if (e instanceof Error) cached = event[ProfileContentSymbol] = e;
+    // add missing protocol to website
+    if (profile.website?.startsWith("http") === false) {
+      profile.website = "https://" + profile.website;
     }
-  }
 
-  if (cached === undefined) {
-    throw new Error("Failed to parse profile");
-  } else if (cached instanceof Error) {
-    if (!quite) throw cached;
-    else return cached;
-  } else return cached;
+    return profile;
+  });
 }
