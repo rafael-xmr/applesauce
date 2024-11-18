@@ -1,5 +1,19 @@
 # applesauce-core
 
+## 0.9.0
+
+### Minor Changes
+
+- a14dbd9: Add `isValidZap` method
+- 493aee0: Bump nostr-tools to 2.10
+- a14dbd9: Add `isValidProfile` method
+- 892cd33: Remove nrelay encoding
+- 149625d: Add zap helpers and queries
+
+### Patch Changes
+
+- 81015c4: Fix getZapAddressPointer returning EventPointer
+
 ## 0.8.0
 
 ### Minor Changes
