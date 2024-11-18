@@ -8,6 +8,7 @@ export type ParsedInvoice = {
   expiry: number;
 };
 
+/** Parses a lightning invoice */
 export function parseBolt11(paymentRequest: string): ParsedInvoice {
   const decoded = decode(paymentRequest);
   const timestamp = (decoded.sections.find((s) => s.name === "timestamp") as { value: number } | undefined)?.value ?? 0;
