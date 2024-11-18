@@ -1,6 +1,6 @@
 export const Expressions = {
   get link() {
-    return /https?:\/\/([a-zA-Z0-9\.\-]+\.[a-zA-Z]+)([\/\?#][\p{L}\p{N}\p{M}&\.-\/\?=#\-@%\+_,:!~*]*)?/gu;
+    return /https?:\/\/([a-zA-Z0-9\.\-]+\.[a-zA-Z]+(?::\d+)?)([\/\?#][\p{L}\p{N}\p{M}&\.-\/\?=#\-@%\+_,:!~*]*)?/gu;
   },
   get cashu() {
     return /(cashu(?:A|B)[A-Za-z0-9_-]{100,10000}={0,3})/gi;

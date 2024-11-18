@@ -8,12 +8,7 @@
 
 ### Patch Changes
 
-- Updated dependencies [a14dbd9]
-- Updated dependencies [493aee0]
-- Updated dependencies [a14dbd9]
-- Updated dependencies [892cd33]
-- Updated dependencies [149625d]
-- Updated dependencies [81015c4]
+- Updated dependencies
   - applesauce-core@0.9.0
 
 ## 0.8.0
@@ -24,9 +19,7 @@
 
 ### Patch Changes
 
-- Updated dependencies [08d2abe]
-- Updated dependencies [08d2abe]
-- Updated dependencies [0dae7f5]
+- Updated dependencies
   - applesauce-core@0.8.0
 
 ## 0.7.0
@@ -37,9 +30,7 @@
 
 ### Patch Changes
 
-- Updated dependencies [7673403]
-- Updated dependencies [d11fbe8]
-- Updated dependencies [b96717c]
+- Updated dependencies
   - applesauce-core@0.7.0
 
 ## 0.6.0
@@ -51,8 +42,5 @@
 
 ### Patch Changes
 
-- Updated dependencies [df7756c]
-- Updated dependencies [64c99e7]
-- Updated dependencies [df7756c]
-- Updated dependencies [df7756c]
+- Updated dependencies
   - applesauce-core@0.6.0
