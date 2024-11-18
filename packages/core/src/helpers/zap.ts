@@ -1,4 +1,4 @@
-import { nip57, NostrEvent } from "nostr-tools";
+import { kinds, nip57, NostrEvent } from "nostr-tools";
 import { getOrComputeCachedValue } from "./cache.js";
 import { getTagValue } from "./event.js";
 import { isATag, isETag } from "./tags.js";
@@ -54,4 +54,16 @@ export function getZapRequest(zap: NostrEvent) {
     if (error) throw new Error(error);
     return JSON.parse(description) as NostrEvent;
   });
+}
+
+export function isValidZap(zap?: NostrEvent) {
+  if (!zap) return false;
+  if (zap.kind !== kinds.Zap) return false;
+  try {
+    getZapRequest(zap);
+    getZapRecipient(zap);
+    return true;
+  } catch (error) {
+    return false;
+  }
 }

@@ -1,4 +1,4 @@
-import { NostrEvent } from "nostr-tools";
+import { kinds, NostrEvent } from "nostr-tools";
 import { getOrComputeCachedValue } from "./cache.js";
 
 export const ProfileContentSymbol = Symbol.for("profile-content");
@@ -33,4 +33,17 @@ export function getProfileContent(event: NostrEvent) {
 
     return profile;
   });
+}
+
+/** Checks if the content of the kind 0 event is valid JSON */
+export function isValidProfile(profile?: NostrEvent) {
+  if (!profile) return false;
+  if (profile.kind !== kinds.Metadata) return false;
+  try {
+    getProfileContent(profile);
+
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
