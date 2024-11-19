@@ -12,7 +12,7 @@ export function getContactsPeople(contacts: NostrEvent) {
 }
 
 type RelayJson = Record<string, { read: boolean; write: boolean }>;
-export function relaysFromContactsEvent(event: NostrEvent) {
+export function getRelaysFromContactsEvent(event: NostrEvent) {
   return getOrComputeCachedValue(event, ContactsRelaysSymbol, () => {
     try {
       const relayJson = JSON.parse(event.content) as RelayJson;

@@ -3,9 +3,8 @@ import {
   getATagFromAddressPointer,
   getCoordinateFromAddressPointer,
   getETagFromEventPointer,
+  TagOperation,
 } from "applesauce-core/helpers";
-
-import { TagOperation } from "../list.js";
 
 export function addPubkeyTag(pubkey: string | ProfilePointer): TagOperation {
   pubkey = typeof pubkey !== "string" ? pubkey.pubkey : pubkey;
