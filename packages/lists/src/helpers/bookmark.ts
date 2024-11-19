@@ -1,7 +1,6 @@
-import { getAddressPointerFromTag, getEventPointerFromTag } from "applesauce-core/helpers";
+import { getAddressPointerFromTag, getEventPointerFromTag, getHiddenTags } from "applesauce-core/helpers";
 import { kinds, NostrEvent } from "nostr-tools";
 
-import { getHiddenTags } from "./hidden.js";
 import { getOrComputeCachedValue } from "applesauce-core/helpers/cache";
 import { AddressPointer, EventPointer } from "nostr-tools/nip19";
 

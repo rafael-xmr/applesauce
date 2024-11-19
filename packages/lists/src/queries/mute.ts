@@ -1,9 +1,9 @@
 import { kinds } from "nostr-tools";
 import { Query } from "applesauce-core";
 import { map } from "rxjs/operators";
+import { isHiddenTagsLocked } from "applesauce-core/helpers";
 
 import { getHiddenMutedThings, getMutedThings, Mutes } from "../helpers/mute.js";
-import { isHiddenTagsLocked } from "../helpers/hidden.js";
 
 export function UserMuteQuery(pubkey: string): Query<Mutes | undefined> {
   return {

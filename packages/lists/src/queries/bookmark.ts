@@ -1,8 +1,8 @@
 import { kinds } from "nostr-tools";
 import { Query } from "applesauce-core";
 import { map } from "rxjs/operators";
+import { isHiddenTagsLocked } from "applesauce-core/helpers";
 
-import { isHiddenTagsLocked } from "../helpers/hidden.js";
 import { Bookmarks, getBookmarks, getHiddenBookmarks } from "../helpers/bookmark.js";
 
 export function UserBookmarkQuery(pubkey: string): Query<Bookmarks | undefined> {

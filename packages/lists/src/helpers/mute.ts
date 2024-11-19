@@ -1,8 +1,6 @@
 import { NostrEvent } from "nostr-tools";
-import { isETag, isPTag, isTTag } from "applesauce-core/helpers";
+import { getHiddenTags, isETag, isPTag, isTTag } from "applesauce-core/helpers";
 import { getOrComputeCachedValue } from "applesauce-core/helpers/cache";
-
-import { getHiddenTags } from "./hidden.js";
 
 export const MutePublicSymbol = Symbol.for("mute-public");
 export const MuteHiddenSymbol = Symbol.for("mute-hidden");
