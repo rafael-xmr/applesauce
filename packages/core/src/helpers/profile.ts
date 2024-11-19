@@ -27,7 +27,7 @@ export function getProfileContent(event: NostrEvent) {
     if (profile.nip05 && typeof profile.nip05 !== "string") profile.nip05 = String(profile.nip05);
 
     // add missing protocol to website
-    if (profile.website?.startsWith("http") === false) {
+    if (profile.website && profile.website?.length > 0 && profile.website?.startsWith("http") === false) {
       profile.website = "https://" + profile.website;
     }
 
