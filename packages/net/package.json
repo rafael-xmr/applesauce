@@ -44,7 +44,7 @@
   "dependencies": {
     "applesauce-core": "^0.9.0",
     "nanoid": "^5.0.7",
-    "nostr-tools": "^2.10.1",
+    "nostr-tools": "^2.10.3",
     "rxjs": "^7.8.1",
     "zen-push": "^0.3.1"
   },

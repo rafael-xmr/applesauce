@@ -31,8 +31,8 @@ importers:
         specifier: ^0.9.0
         version: link:../core
       nostr-tools:
-        specifier: ^2.10.1
-        version: 2.10.1(typescript@5.6.3)
+        specifier: ^2.10.3
+        version: 2.10.3(typescript@5.6.3)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -74,8 +74,8 @@ importers:
         specifier: ^3.0.1
         version: 3.0.1
       nostr-tools:
-        specifier: ^2.10.1
-        version: 2.10.1(typescript@5.6.3)
+        specifier: ^2.10.3
+        version: 2.10.3(typescript@5.6.3)
       remark:
         specifier: ^15.0.1
         version: 15.0.1
@@ -107,6 +107,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@scure/base':
+        specifier: ^1.1.9
+        version: 1.1.9
       debug:
         specifier: ^4.3.7
         version: 4.3.7
@@ -120,8 +123,8 @@ importers:
         specifier: ^5.0.7
         version: 5.0.7
       nostr-tools:
-        specifier: ^2.10.1
-        version: 2.10.1(typescript@5.6.3)
+        specifier: ^2.10.3
+        version: 2.10.3(typescript@5.6.3)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -166,8 +169,8 @@ importers:
         specifier: ^4.3.7
         version: 4.3.7
       nostr-tools:
-        specifier: ^2.10.1
-        version: 2.10.1(typescript@5.6.3)
+        specifier: ^2.10.3
+        version: 2.10.3(typescript@5.6.3)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -200,8 +203,8 @@ importers:
         specifier: ^5.0.7
         version: 5.0.7
       nostr-tools:
-        specifier: ^2.10.1
-        version: 2.10.1(typescript@5.6.3)
+        specifier: ^2.10.3
+        version: 2.10.3(typescript@5.6.3)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -237,8 +240,8 @@ importers:
         specifier: ^0.9.0
         version: link:../core
       nostr-tools:
-        specifier: ^2.10.1
-        version: 2.10.1(typescript@5.6.3)
+        specifier: ^2.10.3
+        version: 2.10.3(typescript@5.6.3)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -292,8 +295,8 @@ importers:
         specifier: ^5.0.7
         version: 5.0.7
       nostr-tools:
-        specifier: ^2.10.1
-        version: 2.10.1(typescript@5.6.3)
+        specifier: ^2.10.3
+        version: 2.10.3(typescript@5.6.3)
     devDependencies:
       '@jest/globals':
         specifier: ^29.7.0
@@ -320,8 +323,8 @@ importers:
         specifier: ^0.9.0
         version: link:../core
       nostr-tools:
-        specifier: ^2.10.1
-        version: 2.10.1(typescript@5.6.3)
+        specifier: ^2.10.3
+        version: 2.10.3(typescript@5.6.3)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1708,8 +1711,8 @@ packages:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
     engines: {node: '>=0.10.0'}
 
-  nostr-tools@2.10.1:
-    resolution: {integrity: sha512-fnAxLi92UgyMAEw4fMEhDKzH53uBJ0WkkVPTNfX0b3bspeWWn0n5tDZtKRJbvW0wAGOPmU6LYWi/IKPOsq3p2Q==}
+  nostr-tools@2.10.3:
+    resolution: {integrity: sha512-XL+eX/kyXNoCdtgEFFT26YlGaMq/eUMaxlGWVyR8lqdDvSa9m8rrHRUiR8IYZWwq5B0534E8VXbiSuoUgGGIDw==}
     peerDependencies:
       typescript: '>=5.0.0'
     peerDependenciesMeta:
@@ -4098,7 +4101,7 @@ snapshots:
 
   normalize-path@3.0.0: {}
 
-  nostr-tools@2.10.1(typescript@5.6.3):
+  nostr-tools@2.10.3(typescript@5.6.3):
     dependencies:
       '@noble/ciphers': 0.5.3
       '@noble/curves': 1.2.0
