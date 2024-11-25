@@ -1,4 +1,4 @@
-import { Filter, NostrEvent } from "nostr-tools";
+import { Filter, kinds, NostrEvent } from "nostr-tools";
 import { insertEventIntoDescendingList } from "nostr-tools/utils";
 import { Observable } from "rxjs";
 
@@ -6,6 +6,8 @@ import { Database } from "./database.js";
 import { getEventUID, getReplaceableUID } from "../helpers/event.js";
 import { matchFilters } from "../helpers/filter.js";
 import { addSeenRelay } from "../helpers/relays.js";
+import { getDeleteIds } from "../helpers/delete.js";
+import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
 
 export class EventStore {
   database: Database;
@@ -16,11 +18,46 @@ export class EventStore {
 
   /** Adds an event to the database */
   add(event: NostrEvent, fromRelay?: string) {
+    if (event.kind === kinds.EventDeletion) this.handleDeleteEvent(event);
+    if (this.checkDeleted(event)) return event;
+
     const inserted = this.database.addEvent(event);
 
     if (fromRelay) addSeenRelay(inserted, fromRelay);
 
     return inserted;
+  }
+
+  protected deletedIds = new Set<string>();
+  protected deletedCoords = new Map<string, number>();
+  protected handleDeleteEvent(deleteEvent: NostrEvent) {
+    const ids = getDeleteIds(deleteEvent);
+    for (const id of ids) {
+      this.deletedIds.add(id);
+
+      // remove deleted events in the database
+      const event = this.database.getEvent(id);
+      if (event) this.database.deleteEvent(event);
+    }
+
+    const coords = getDeleteIds(deleteEvent);
+    for (const coord of coords) {
+      this.deletedCoords.set(coord, Math.max(this.deletedCoords.get(coord) ?? 0, deleteEvent.created_at));
+
+      // remove deleted events in the database
+      const event = this.database.getEvent(coord);
+      if (event && event.created_at < deleteEvent.created_at) this.database.deleteEvent(event);
+    }
+  }
+  protected checkDeleted(event: NostrEvent) {
+    if (this.deletedIds.has(event.id)) return true;
+
+    if (isParameterizedReplaceableKind(event.kind)) {
+      const deleted = this.deletedCoords.get(getEventUID(event));
+      if (deleted) return deleted > event.created_at;
+    }
+
+    return false;
   }
 
   /** Add an event to the store and notifies all subscribes it has updated */

@@ -16,3 +16,4 @@ export * from "./zap.js";
 export * from "./hidden-tags.js";
 export * from "./bolt11.js";
 export * from "./lnurl.js";
+export * from "./delete.js";
