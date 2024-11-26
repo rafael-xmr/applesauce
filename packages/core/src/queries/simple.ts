@@ -40,10 +40,8 @@ export function TimelineQuery(filters: Filter | Filter[], keepOldVersions?: bool
 export function ReplaceableSetQuery(
   pointers: { kind: number; pubkey: string; identifier?: string }[],
 ): Query<Map<string, NostrEvent>> {
-  const cords = pointers.map((pointer) => getReplaceableUID(pointer.kind, pointer.pubkey, pointer.identifier));
-
   return {
     key: hash_sum(pointers),
-    run: (events) => events.events(cords),
+    run: (events) => events.replaceableSet(pointers),
   };
 }
