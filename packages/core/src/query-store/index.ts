@@ -61,8 +61,8 @@ export class QueryStore {
   }
 
   /** Returns an array of events that match the filter */
-  timeline(filters: Filter | Filter[]) {
-    return this.runQuery(Queries.TimelineQuery)(filters);
+  timeline(filters: Filter | Filter[], keepOldVersions?: boolean) {
+    return this.runQuery(Queries.TimelineQuery)(filters, keepOldVersions);
   }
 
   /** Returns the parsed profile (0) for a pubkey */

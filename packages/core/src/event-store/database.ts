@@ -2,13 +2,14 @@ import { Filter, NostrEvent } from "nostr-tools";
 import { binarySearch, insertEventIntoDescendingList } from "nostr-tools/utils";
 import { Subject } from "rxjs";
 
-import { FromCacheSymbol, getEventUID, getIndexableTags, getReplaceableUID } from "../helpers/event.js";
+import { FromCacheSymbol, getEventUID, getIndexableTags, getReplaceableUID, isReplaceable } from "../helpers/event.js";
 import { INDEXABLE_TAGS } from "./common.js";
 import { logger } from "../logger.js";
 import { LRU } from "../helpers/lru.js";
 
 /**
  * An in-memory database for nostr events
+ * NOTE: does not handle replaceable events
  */
 export class Database {
   protected log = logger.extend("Database");
@@ -21,6 +22,7 @@ export class Database {
 
   /** LRU cache of last events touched */
   events = new LRU<NostrEvent>();
+  protected replaceable = new Map<string, NostrEvent[]>();
 
   /** A stream of events inserted into the database */
   inserted = new Subject<NostrEvent>();
@@ -66,40 +68,42 @@ export class Database {
   }
 
   /** Moves an event to the top of the LRU cache */
-  touch(event: NostrEvent) {
-    this.events.set(getEventUID(event), event);
+  touch(event: NostrEvent): void {
+    this.events.set(event.id, event);
   }
 
-  hasEvent(uid: string) {
-    return this.events.get(uid);
+  /** Checks if the database contains an event without touching it */
+  hasEvent(id: string): boolean {
+    return this.events.has(id);
   }
-  getEvent(uid: string) {
-    return this.events.get(uid);
+  /** Gets a single event based on id */
+  getEvent(id: string): NostrEvent|undefined {
+    return this.events.get(id);
   }
 
   /** Checks if the database contains a replaceable event without touching it */
-  hasReplaceable(kind: number, pubkey: string, d?: string) {
-    return this.events.has(getReplaceableUID(kind, pubkey, d));
+  hasReplaceable(kind: number, pubkey: string, d?: string): boolean {
+    const events = this.replaceable.get(getReplaceableUID(kind, pubkey, d));
+    return !!events && events.length > 0;
   }
-  /** Gets a replaceable event and touches it */
-  getReplaceable(kind: number, pubkey: string, d?: string) {
-    return this.events.get(getReplaceableUID(kind, pubkey, d));
+  /** Gets an array of replaceable events */
+  getReplaceable(kind: number, pubkey: string, d?: string): NostrEvent[] | undefined {
+    return this.replaceable.get(getReplaceableUID(kind, pubkey, d));
   }
 
   /** Inserts an event into the database and notifies all subscriptions */
-  addEvent(event: NostrEvent) {
-    const uid = getEventUID(event);
+  addEvent(event: NostrEvent): NostrEvent {
+    const id = event.id;
 
-    const current = this.events.get(uid);
-    if (current && event.created_at <= current.created_at) {
+    const current = this.events.get(id);
+    if (current) {
       // if this is a duplicate event, transfer some import symbols
-      if (current.id === event.id) {
-        if (event[FromCacheSymbol]) current[FromCacheSymbol] = event[FromCacheSymbol];
-      }
+      if (event[FromCacheSymbol]) current[FromCacheSymbol] = event[FromCacheSymbol];
+
       return current;
     }
 
-    this.events.set(uid, event);
+    this.events.set(id, event);
     this.getKindIndex(event.kind).add(event);
     this.getAuthorsIndex(event.pubkey).add(event);
 
@@ -109,7 +113,21 @@ export class Database {
       }
     }
 
+    // insert into time index
     insertEventIntoDescendingList(this.created_at, event);
+
+    // insert into replaceable index
+    if (isReplaceable(event.kind)) {
+      const uid = getEventUID(event);
+
+      let array = this.replaceable.get(uid)!;
+      if (!this.replaceable.has(uid)) {
+        array = [];
+        this.replaceable.set(uid, array);
+      }
+
+      insertEventIntoDescendingList(array, event);
+    }
 
     this.inserted.next(event);
 
@@ -117,21 +135,21 @@ export class Database {
   }
 
   /** Inserts and event into the database and notifies all subscriptions that the event has updated */
-  updateEvent(event: NostrEvent) {
+  updateEvent(event: NostrEvent): NostrEvent {
     const inserted = this.addEvent(event);
     this.updated.next(inserted);
     return inserted;
   }
 
   /** Deletes an event from the database and notifies all subscriptions */
-  deleteEvent(eventOrUID: string | NostrEvent) {
-    let event = typeof eventOrUID === "string" ? this.events.get(eventOrUID) : eventOrUID;
+  deleteEvent(eventOrId: string | NostrEvent): boolean {
+    let event = typeof eventOrId === "string" ? this.events.get(eventOrId) : eventOrId;
     if (!event) throw new Error("Missing event");
 
-    const uid = getEventUID(event);
+    const id = event.id;
 
     // only remove events that are known
-    if (!this.events.has(uid)) return false;
+    if (!this.events.has(id)) return false;
 
     this.getAuthorsIndex(event.pubkey).delete(event);
     this.getKindIndex(event.kind).delete(event);
@@ -146,7 +164,17 @@ export class Database {
     const i = this.created_at.indexOf(event);
     this.created_at.splice(i, 1);
 
-    this.events.delete(uid);
+    this.events.delete(id);
+
+    // remove from replaceable index
+    if (isReplaceable(event.kind)) {
+      const uid = getEventUID(event);
+      const array = this.replaceable.get(uid);
+      if (array && array.includes(event)) {
+        const idx = array.indexOf(event);
+        array.splice(idx, 1);
+      }
+    }
 
     this.deleted.next(event);
 
@@ -154,7 +182,7 @@ export class Database {
   }
 
   /** Sets the claim on the event and touches it */
-  claimEvent(event: NostrEvent, claim: any) {
+  claimEvent(event: NostrEvent, claim: any): void {
     if (!this.claims.has(event)) {
       this.claims.set(event, claim);
     }
@@ -163,20 +191,20 @@ export class Database {
     this.touch(event);
   }
   /** Checks if an event is claimed by anything */
-  isClaimed(event: NostrEvent) {
+  isClaimed(event: NostrEvent): boolean {
     return this.claims.has(event);
   }
   /** Removes a claim from an event */
-  removeClaim(event: NostrEvent, claim: any) {
+  removeClaim(event: NostrEvent, claim: any): void {
     const current = this.claims.get(event);
     if (current === claim) this.claims.delete(event);
   }
   /** Removes all claims on an event */
-  clearClaim(event: NostrEvent) {
+  clearClaim(event: NostrEvent): void {
     this.claims.delete(event);
   }
 
-  *iterateAuthors(authors: Iterable<string>) {
+  *iterateAuthors(authors: Iterable<string>): Generator<NostrEvent> {
     for (const author of authors) {
       const events = this.authors.get(author);
 
@@ -186,7 +214,7 @@ export class Database {
     }
   }
 
-  *iterateTag(tag: string, values: Iterable<string>) {
+  *iterateTag(tag: string, values: Iterable<string>): Generator<NostrEvent> {
     for (const value of values) {
       const events = this.getTagIndex(tag + ":" + value);
 
@@ -196,7 +224,7 @@ export class Database {
     }
   }
 
-  *iterateKinds(kinds: Iterable<number>) {
+  *iterateKinds(kinds: Iterable<number>): Generator<NostrEvent> {
     for (const kind of kinds) {
       const events = this.kinds.get(kind);
 
@@ -206,7 +234,7 @@ export class Database {
     }
   }
 
-  *iterateTime(since: number | undefined, until: number | undefined) {
+  *iterateTime(since: number | undefined, until: number | undefined): Generator<NostrEvent> {
     let untilIndex = 0;
     let sinceIndex = this.created_at.length - 1;
 
@@ -237,7 +265,7 @@ export class Database {
     return events;
   }
 
-  *iterateIds(ids: Iterable<string>) {
+  *iterateIds(ids: Iterable<string>): Generator<NostrEvent> {
     for (const id of ids) {
       if (this.events.has(id)) yield this.events.get(id)!;
     }
@@ -301,7 +329,7 @@ export class Database {
     return events;
   }
 
-  getForFilters(filters: Filter[]) {
+  getForFilters(filters: Filter[]): Set<NostrEvent> {
     if (filters.length === 0) throw new Error("No Filters");
 
     let events = new Set<NostrEvent>();
@@ -315,7 +343,7 @@ export class Database {
   }
 
   /** Remove the oldest events that are not claimed */
-  prune(limit = 1000) {
+  prune(limit = 1000): number {
     let removed = 0;
 
     let cursor = this.events.first;

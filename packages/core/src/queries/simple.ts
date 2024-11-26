@@ -1,22 +1,22 @@
 import { Filter, NostrEvent } from "nostr-tools";
-import stringify from "json-stringify-deterministic";
 
 import { getReplaceableUID } from "../helpers/event.js";
 import { Query } from "../query-store/index.js";
+import hash_sum from "hash-sum";
 
 /** Creates a Query that returns a single event or undefined */
-export function SingleEventQuery(uid: string): Query<NostrEvent | undefined> {
+export function SingleEventQuery(id: string): Query<NostrEvent | undefined> {
   return {
-    key: uid,
-    run: (events) => events.event(uid),
+    key: id,
+    run: (events) => events.event(id),
   };
 }
 
 /** Creates a Query that returns a multiple events in a map */
-export function MultipleEventsQuery(uids: string[]): Query<Map<string, NostrEvent>> {
+export function MultipleEventsQuery(ids: string[]): Query<Map<string, NostrEvent>> {
   return {
-    key: uids.join(","),
-    run: (events) => events.events(uids),
+    key: ids.join(","),
+    run: (events) => events.events(ids),
   };
 }
 
@@ -29,10 +29,10 @@ export function ReplaceableQuery(kind: number, pubkey: string, d?: string): Quer
 }
 
 /** Creates a Query that returns an array of sorted events matching the filters */
-export function TimelineQuery(filters: Filter | Filter[]): Query<NostrEvent[]> {
+export function TimelineQuery(filters: Filter | Filter[], keepOldVersions?: boolean): Query<NostrEvent[]> {
   return {
-    key: stringify(filters),
-    run: (events) => events.timeline(Array.isArray(filters) ? filters : [filters]),
+    key: hash_sum(filters) + (keepOldVersions ? "-history" : ""),
+    run: (events) => events.timeline(Array.isArray(filters) ? filters : [filters], keepOldVersions),
   };
 }
 
@@ -43,7 +43,7 @@ export function ReplaceableSetQuery(
   const cords = pointers.map((pointer) => getReplaceableUID(pointer.kind, pointer.pubkey, pointer.identifier));
 
   return {
-    key: stringify(pointers),
+    key: hash_sum(pointers),
     run: (events) => events.events(cords),
   };
 }

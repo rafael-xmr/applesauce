@@ -1,6 +1,6 @@
 import { Filter, NostrEvent } from "nostr-tools";
 import { getIndexableTags } from "./event.js";
-import stringify from "json-stringify-deterministic";
+import equal from "fast-deep-equal";
 
 /**
  * Copied from nostr-tools and modified to use getIndexableTags
@@ -44,12 +44,7 @@ export function matchFilters(filters: Filter[], event: NostrEvent): boolean {
   return false;
 }
 
-/** Stringify filters in a predictable way */
-export function stringifyFilter(filter: Filter | Filter[]) {
-  return stringify(filter);
-}
-
 /** Check if two filters are equal */
 export function isFilterEqual(a: Filter | Filter[], b: Filter | Filter[]) {
-  return stringifyFilter(a) === stringifyFilter(b);
+  return equal(a, b);
 }

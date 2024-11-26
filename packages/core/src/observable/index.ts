@@ -1,2 +1,2 @@
-export * from "./getValue.js";
+export * from "./get-value.js";
 export * from "./share-latest-value.js";

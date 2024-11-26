@@ -1,28 +1,48 @@
 import { Filter, kinds, NostrEvent } from "nostr-tools";
 import { insertEventIntoDescendingList } from "nostr-tools/utils";
+import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
 import { Observable } from "rxjs";
 
 import { Database } from "./database.js";
-import { getEventUID, getReplaceableUID } from "../helpers/event.js";
+import { getEventUID, getReplaceableUID, getTagValue, isReplaceable } from "../helpers/event.js";
 import { matchFilters } from "../helpers/filter.js";
 import { addSeenRelay } from "../helpers/relays.js";
 import { getDeleteIds } from "../helpers/delete.js";
-import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
 
 export class EventStore {
   database: Database;
+
+  /** Whether to keep old versions of replaceable events */
+  keepOldVersions = false;
 
   constructor() {
     this.database = new Database();
   }
 
   /** Adds an event to the database */
-  add(event: NostrEvent, fromRelay?: string) {
+  add(event: NostrEvent, fromRelay?: string): NostrEvent {
     if (event.kind === kinds.EventDeletion) this.handleDeleteEvent(event);
+
+    // ignore if the event was deleted
     if (this.checkDeleted(event)) return event;
 
+    // insert event into database
     const inserted = this.database.addEvent(event);
 
+    // remove all old version of the replaceable event
+    if (!this.keepOldVersions && isReplaceable(event.kind)) {
+      const current = this.database.getReplaceable(event.kind, event.pubkey, getTagValue(event, "d"));
+
+      if (current) {
+        const older = Array.from(current).filter((e) => e.created_at < event.created_at);
+        for (const old of older) this.database.deleteEvent(old);
+
+        // skip inserting this event because its not the newest
+        if (current.length !== older.length) return current[0];
+      }
+    }
+
+    // attach relay this event was from
     if (fromRelay) addSeenRelay(inserted, fromRelay);
 
     return inserted;
@@ -61,32 +81,145 @@ export class EventStore {
   }
 
   /** Add an event to the store and notifies all subscribes it has updated */
-  update(event: NostrEvent) {
+  update(event: NostrEvent): NostrEvent {
     return this.database.updateEvent(event);
   }
 
-  getAll(filters: Filter[]) {
+  getAll(filters: Filter[]): Set<NostrEvent> {
     return this.database.getForFilters(filters);
   }
 
-  hasEvent(uid: string) {
+  hasEvent(uid: string): boolean {
     return this.database.hasEvent(uid);
   }
-  getEvent(uid: string) {
+  getEvent(uid: string): NostrEvent | undefined {
     return this.database.getEvent(uid);
   }
 
-  hasReplaceable(kind: number, pubkey: string, d?: string) {
+  hasReplaceable(kind: number, pubkey: string, d?: string): boolean {
     return this.database.hasReplaceable(kind, pubkey, d);
   }
-  getReplaceable(kind: number, pubkey: string, d?: string) {
+
+  /** Gets the latest version of a replaceable event */
+  getReplaceable(kind: number, pubkey: string, d?: string): NostrEvent | undefined {
+    return this.database.getReplaceable(kind, pubkey, d)?.[0];
+  }
+
+  /** Returns all versions of a replaceable event */
+  getAllReplaceable(kind: number, pubkey: string, d?: string): NostrEvent[] | undefined {
     return this.database.getReplaceable(kind, pubkey, d);
   }
 
   /** Creates an observable that updates a single event */
-  event(uid: string) {
+  event(id: string): Observable<NostrEvent | undefined> {
     return new Observable<NostrEvent | undefined>((observer) => {
-      let current = this.database.getEvent(uid);
+      let current = this.database.getEvent(id);
+
+      if (current) {
+        observer.next(current);
+        this.database.claimEvent(current, observer);
+      }
+
+      // subscribe to future events
+      const inserted = this.database.inserted.subscribe((event) => {
+        if (event.id === id) {
+          current = event;
+          observer.next(event);
+          this.database.claimEvent(event, observer);
+        }
+      });
+
+      // subscribe to updated events
+      const updated = this.database.updated.subscribe((event) => {
+        if (event.id === id) observer.next(current);
+      });
+
+      // subscribe to deleted events
+      const deleted = this.database.deleted.subscribe((event) => {
+        if (current?.id === event.id) {
+          this.database.removeClaim(current, observer);
+
+          current = undefined;
+          observer.next(undefined);
+        }
+      });
+
+      return () => {
+        deleted.unsubscribe();
+        updated.unsubscribe();
+        inserted.unsubscribe();
+
+        if (current) this.database.removeClaim(current, observer);
+      };
+    });
+  }
+
+  /** Creates an observable that subscribes to multiple events */
+  events(ids: string[]): Observable<Map<string, NostrEvent>> {
+    return new Observable<Map<string, NostrEvent>>((observer) => {
+      const events = new Map<string, NostrEvent>();
+
+      for (const id of ids) {
+        const event = this.getEvent(id);
+        if (event) {
+          events.set(id, event);
+          this.database.claimEvent(event, observer);
+        }
+      }
+
+      observer.next(events);
+
+      // subscribe to future events
+      const inserted = this.database.inserted.subscribe((event) => {
+        const id = event.id;
+        if (ids.includes(id) && !events.has(id)) {
+          events.set(id, event);
+          observer.next(events);
+
+          // claim new event
+          this.database.claimEvent(event, observer);
+        }
+      });
+
+      // subscribe to updated events
+      const updated = this.database.updated.subscribe((event) => {
+        if (ids.includes(event.id)) observer.next(events);
+      });
+
+      // subscribe to deleted events
+      const deleted = this.database.deleted.subscribe((event) => {
+        const id = event.id;
+        if (ids.includes(id)) {
+          const current = events.get(id);
+
+          if (current) {
+            this.database.removeClaim(current, observer);
+
+            events.delete(id);
+            observer.next(events);
+          }
+        }
+      });
+
+      return () => {
+        inserted.unsubscribe();
+        deleted.unsubscribe();
+        updated.unsubscribe();
+
+        for (const [_uid, event] of events) {
+          this.database.removeClaim(event, observer);
+        }
+      };
+    });
+  }
+
+  /** Creates an observable with the latest version of a replaceable event */
+  replaceable(kind: number, pubkey: string, d?: string): Observable<NostrEvent | undefined> {
+    return new Observable<NostrEvent | undefined>((observer) => {
+      const uid = getReplaceableUID(kind, pubkey, d);
+
+      // get latest version
+      let current = this.database.getReplaceable(kind, pubkey, d)?.[0];
 
       if (current) {
         observer.next(current);
@@ -107,14 +240,14 @@ export class EventStore {
         }
       });
 
-      // subscribe to updates
+      // subscribe to updated events
       const updated = this.database.updated.subscribe((event) => {
         if (event === current) observer.next(event);
       });
 
       // subscribe to deleted events
       const deleted = this.database.deleted.subscribe((event) => {
-        if (getEventUID(event) === uid && current) {
+        if (getEventUID(event) === uid && event === current) {
           this.database.removeClaim(current, observer);
 
           current = undefined;
@@ -132,80 +265,8 @@ export class EventStore {
     });
   }
 
-  /** Creates an observable that subscribes to multiple events */
-  events(uids: string[]) {
-    return new Observable<Map<string, NostrEvent>>((observer) => {
-      const events = new Map<string, NostrEvent>();
-
-      for (const uid of uids) {
-        const e = this.getEvent(uid);
-        if (e) {
-          events.set(uid, e);
-          this.database.claimEvent(e, observer);
-        }
-      }
-
-      observer.next(events);
-
-      // subscribe to future events
-      const inserted = this.database.inserted.subscribe((event) => {
-        const uid = getEventUID(event);
-        if (uids.includes(uid)) {
-          const current = events.get(uid);
-
-          // remove old claim
-          if (!current || event.created_at > current.created_at) {
-            if (current) this.database.removeClaim(current, observer);
-
-            events.set(uid, event);
-            observer.next(events);
-
-            // claim new event
-            this.database.claimEvent(event, observer);
-          }
-        }
-      });
-
-      // subscribe to updates
-      const updated = this.database.updated.subscribe((event) => {
-        const uid = getEventUID(event);
-        if (uids.includes(uid)) observer.next(events);
-      });
-
-      // subscribe to deleted events
-      const deleted = this.database.deleted.subscribe((event) => {
-        const uid = getEventUID(event);
-        if (uids.includes(uid)) {
-          const current = events.get(uid);
-
-          if (current) {
-            this.database.removeClaim(current, observer);
-
-            events.delete(uid);
-            observer.next(events);
-          }
-        }
-      });
-
-      return () => {
-        inserted.unsubscribe();
-        deleted.unsubscribe();
-        updated.unsubscribe();
-
-        for (const [_uid, event] of events) {
-          this.database.removeClaim(event, observer);
-        }
-      };
-    });
-  }
-
-  /** Creates an observable that updates a single replaceable event */
-  replaceable(kind: number, pubkey: string, d?: string) {
-    return this.event(getReplaceableUID(kind, pubkey, d));
-  }
-
   /** Creates an observable that streams all events that match the filter */
-  stream(filters: Filter[]) {
+  stream(filters: Filter[]): Observable<NostrEvent> {
     return new Observable<NostrEvent>((observer) => {
       let claimed = new Set<NostrEvent>();
       let events = this.database.getForFilters(filters);
@@ -238,69 +299,64 @@ export class EventStore {
   }
 
   /** Creates an observable that updates with an array of sorted events */
-  timeline(filters: Filter[]) {
+  timeline(filters: Filter[], keepOldVersions = this.keepOldVersions): Observable<NostrEvent[]> {
     return new Observable<NostrEvent[]>((observer) => {
       const seen = new Map<string, NostrEvent>();
       const timeline: NostrEvent[] = [];
 
-      // build initial timeline
-      const events = this.database.getForFilters(filters);
-      for (const event of events) {
+      // NOTE: only call this if we know the event is in timeline
+      const removeFromTimeline = (event: NostrEvent) => {
+        timeline.splice(timeline.indexOf(event), 1);
+        if (!keepOldVersions && isReplaceable(event.kind)) seen.delete(getEventUID(event));
+        this.database.removeClaim(event, observer);
+      };
+
+      // inserts an event into the timeline and handles replaceable events
+      const insertIntoTimeline = (event: NostrEvent) => {
+        // remove old versions
+        if (!keepOldVersions && isReplaceable(event.kind)) {
+          const uid = getEventUID(event);
+          const old = seen.get(uid);
+          if (old) {
+            if (event.created_at > old.created_at) removeFromTimeline(old);
+            else return;
+          }
+          seen.set(uid, event);
+        }
+
+        // insert into timeline
         insertEventIntoDescendingList(timeline, event);
 
         this.database.claimEvent(event, observer);
-        seen.set(getEventUID(event), event);
-      }
+      };
+
+      // build initial timeline
+      const events = this.database.getForFilters(filters);
+      for (const event of events) insertIntoTimeline(event);
       observer.next([...timeline]);
 
       // subscribe to future events
       const inserted = this.database.inserted.subscribe((event) => {
         if (matchFilters(filters, event)) {
-          const uid = getEventUID(event);
+          insertIntoTimeline(event);
 
-          let current = seen.get(uid);
-          if (current) {
-            if (event.created_at > current.created_at) {
-              // replace event
-              timeline.splice(timeline.indexOf(current), 1, event);
-              observer.next([...timeline]);
-
-              // update the claim
-              seen.set(uid, event);
-              this.database.removeClaim(current, observer);
-              this.database.claimEvent(event, observer);
-            }
-          } else {
-            insertEventIntoDescendingList(timeline, event);
-            observer.next([...timeline]);
-
-            // claim new event
-            this.database.claimEvent(event, observer);
-            seen.set(getEventUID(event), event);
-          }
+          observer.next([...timeline]);
         }
       });
 
-      // subscribe to updates
+      // subscribe to updated events
       const updated = this.database.updated.subscribe((event) => {
-        if (seen.has(getEventUID(event))) {
+        if (timeline.includes(event)) {
           observer.next([...timeline]);
         }
       });
 
-      // subscribe to removed events
+      // subscribe to deleted events
       const deleted = this.database.deleted.subscribe((event) => {
-        const uid = getEventUID(event);
+        if (timeline.includes(event)) {
+          removeFromTimeline(event);
 
-        let current = seen.get(uid);
-        if (current) {
-          // remove the event
-          timeline.splice(timeline.indexOf(current), 1);
           observer.next([...timeline]);
-
-          // remove the claim
-          seen.delete(uid);
-          this.database.removeClaim(current, observer);
         }
       });
 
@@ -310,10 +366,11 @@ export class EventStore {
         updated.unsubscribe();
 
         // remove all claims
-        for (const [_, event] of seen) {
+        for (const event of timeline) {
           this.database.removeClaim(event, observer);
         }
 
+        // forget seen replaceable events
         seen.clear();
       };
     });
