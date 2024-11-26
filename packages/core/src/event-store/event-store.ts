@@ -7,7 +7,7 @@ import { Database } from "./database.js";
 import { getEventUID, getReplaceableUID, getTagValue, isReplaceable } from "../helpers/event.js";
 import { matchFilters } from "../helpers/filter.js";
 import { addSeenRelay } from "../helpers/relays.js";
-import { getDeleteIds } from "../helpers/delete.js";
+import { getDeleteCoordinates, getDeleteIds } from "../helpers/delete.js";
 
 export class EventStore {
   database: Database;
@@ -60,7 +60,7 @@ export class EventStore {
       if (event) this.database.deleteEvent(event);
     }
 
-    const coords = getDeleteIds(deleteEvent);
+    const coords = getDeleteCoordinates(deleteEvent);
     for (const coord of coords) {
       this.deletedCoords.set(coord, Math.max(this.deletedCoords.get(coord) ?? 0, deleteEvent.created_at));
 
