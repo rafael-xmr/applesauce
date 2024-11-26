@@ -290,8 +290,10 @@ export class EventStore {
       // get latest version
       for (const pointer of pointers) {
         const events = this.database.getReplaceable(pointer.kind, pointer.pubkey, pointer.identifier);
-        if (events) for (const event of events) handleEvent(event);
+        if (events) handleEvent(events[0]);
       }
+
+      observer.next(events);
 
       // subscribe to future events
       const inserted = this.database.inserted.subscribe((event) => {
