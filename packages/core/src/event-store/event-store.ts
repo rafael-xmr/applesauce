@@ -106,7 +106,7 @@ export class EventStore {
   }
 
   /** Returns all versions of a replaceable event */
-  getAllReplaceable(kind: number, pubkey: string, d?: string): NostrEvent[] | undefined {
+  getReplaceableHistory(kind: number, pubkey: string, d?: string): NostrEvent[] | undefined {
     return this.database.getReplaceable(kind, pubkey, d);
   }
 

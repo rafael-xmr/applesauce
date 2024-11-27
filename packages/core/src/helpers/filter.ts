@@ -23,7 +23,7 @@ export function matchFilter(filter: Filter, event: NostrEvent): boolean {
       let values = filter[`#${tagName}`];
       if (values) {
         const tags = getIndexableTags(event);
-        if (values.some((v) => !tags.has(tagName + ":" + v))) return false;
+        if (values.some((v) => tags.has(tagName + ":" + v)) === false) return false;
       }
     }
   }

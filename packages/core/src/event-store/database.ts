@@ -77,7 +77,7 @@ export class Database {
     return this.events.has(id);
   }
   /** Gets a single event based on id */
-  getEvent(id: string): NostrEvent|undefined {
+  getEvent(id: string): NostrEvent | undefined {
     return this.events.get(id);
   }
 
@@ -240,29 +240,23 @@ export class Database {
 
     let start = until
       ? binarySearch(this.created_at, (mid) => {
-          if (mid.created_at === until) return -1;
           return mid.created_at - until;
         })
       : undefined;
 
-    if (start && start[1]) untilIndex = start[0];
+    if (start) untilIndex = start[0];
 
     const end = since
       ? binarySearch(this.created_at, (mid) => {
-          if (mid.created_at === since) return 1;
-          return since - mid.created_at;
+          return mid.created_at - since;
         })
       : undefined;
 
-    if (end && end[1]) sinceIndex = end[0];
+    if (end) sinceIndex = end[0];
 
-    const events = new Set<NostrEvent>();
-
-    for (let i = untilIndex; i <= sinceIndex; i++) {
-      events.add(this.created_at[i]);
+    for (let i = untilIndex; i < sinceIndex; i++) {
+      yield this.created_at[i];
     }
-
-    return events;
   }
 
   *iterateIds(ids: Iterable<string>): Generator<NostrEvent> {

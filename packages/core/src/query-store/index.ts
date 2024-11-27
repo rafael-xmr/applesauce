@@ -8,7 +8,11 @@ import * as Queries from "../queries/index.js";
 import { AddressPointer, EventPointer } from "nostr-tools/nip19";
 import { shareLatestValue } from "../observable/share-latest-value.js";
 
-export type Query<T extends unknown> = { key: string; run: (events: EventStore, store: QueryStore) => Observable<T> };
+export type Query<T extends unknown> = {
+  key: string;
+  args?: Array<any>;
+  run: (events: EventStore, store: QueryStore) => Observable<T>;
+};
 export type QueryConstructor<T extends unknown, Args extends Array<any>> = (...args: Args) => Query<T>;
 
 export class QueryStore {
@@ -19,24 +23,31 @@ export class QueryStore {
     this.store = store;
   }
 
-  queries = new LRU<BehaviorSubject<any> | Observable<any>>();
+  queries = new LRU<Query<any>>();
+  observables = new WeakMap<Query<any>, BehaviorSubject<any> | Observable<any>>();
 
   /** Creates a cached query */
   runQuery<T extends unknown, Args extends Array<any>>(
     queryConstructor: (...args: Args) => { key: string; run: (events: EventStore, store: QueryStore) => Observable<T> },
-  ) {
+  ): (...args: Args) => Observable<T> {
     return (...args: Args) => {
-      const query = queryConstructor(...args);
-      const key = `${queryConstructor.name}|${query.key}`;
+      const tempQuery = queryConstructor(...args);
+      const key = `${queryConstructor.name}|${tempQuery.key}`;
 
-      if (!this.queries.has(key)) {
+      let query = this.queries.get(key);
+      if (!query) {
+        query = tempQuery;
+        this.queries.set(key, tempQuery);
+      }
+
+      if (!this.observables.has(query)) {
+        query.args = args;
         const observable = query.run(this.store, this).pipe(shareLatestValue()) as Observable<T>;
-
-        this.queries.set(key, observable);
+        this.observables.set(query, observable);
         return observable;
       }
 
-      return this.queries.get(key)! as Observable<T>;
+      return this.observables.get(query)! as Observable<T>;
     };
   }
 

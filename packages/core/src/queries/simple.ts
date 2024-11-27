@@ -1,8 +1,8 @@
 import { Filter, NostrEvent } from "nostr-tools";
+import hash_sum from "hash-sum";
 
 import { getReplaceableUID } from "../helpers/event.js";
 import { Query } from "../query-store/index.js";
-import hash_sum from "hash-sum";
 
 /** Creates a Query that returns a single event or undefined */
 export function SingleEventQuery(id: string): Query<NostrEvent | undefined> {
@@ -30,9 +30,11 @@ export function ReplaceableQuery(kind: number, pubkey: string, d?: string): Quer
 
 /** Creates a Query that returns an array of sorted events matching the filters */
 export function TimelineQuery(filters: Filter | Filter[], keepOldVersions?: boolean): Query<NostrEvent[]> {
+  filters = Array.isArray(filters) ? filters : [filters];
+
   return {
     key: hash_sum(filters) + (keepOldVersions ? "-history" : ""),
-    run: (events) => events.timeline(Array.isArray(filters) ? filters : [filters], keepOldVersions),
+    run: (events) => events.timeline(filters, keepOldVersions),
   };
 }
 
@@ -45,3 +47,6 @@ export function ReplaceableSetQuery(
     run: (events) => events.replaceableSet(pointers),
   };
 }
+
+// @ts-expect-error
+window.hash_sum = hash_sum;
