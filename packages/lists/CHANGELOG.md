@@ -1,5 +1,25 @@
 # applesauce-lists
 
+## 0.10.0
+
+### Minor Changes
+
+- f5be45d: Move hidden tag helpers to core
+- 7d1b3ff: Add general list helpers
+
+### Patch Changes
+
+- 26264fc: Bump nostr-tools package
+- Updated dependencies [304c912]
+- Updated dependencies [26264fc]
+- Updated dependencies [f5be45d]
+- Updated dependencies [304c912]
+- Updated dependencies [8a9beea]
+- Updated dependencies [375d3da]
+- Updated dependencies [e99383c]
+- Updated dependencies [32a94cd]
+  - applesauce-core@0.10.0
+
 ## 0.9.0
 
 ### Minor Changes

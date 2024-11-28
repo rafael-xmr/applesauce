@@ -1,5 +1,22 @@
 # applesauce-react
 
+## 0.10.0
+
+### Patch Changes
+
+- 26264fc: Bump nostr-tools package
+- Updated dependencies [304c912]
+- Updated dependencies [69d08da]
+- Updated dependencies [26264fc]
+- Updated dependencies [f5be45d]
+- Updated dependencies [304c912]
+- Updated dependencies [8a9beea]
+- Updated dependencies [375d3da]
+- Updated dependencies [e99383c]
+- Updated dependencies [32a94cd]
+  - applesauce-core@0.10.0
+  - applesauce-content@0.9.1
+
 ## 0.9.0
 
 ### Minor Changes
