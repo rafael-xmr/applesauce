@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "applesauce-core": "^0.10.0",
-    "nostr-tools": "^2.10.3",
+    "nostr-tools": "^2.10.4",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
@@ -43,7 +43,7 @@
     "@types/jest": "^29.5.13",
     "jest": "^29.7.0",
     "jest-extended": "^4.0.2",
-    "typescript": "^5.6.3"
+		"typescript": "^5.7.2"
   },
   "jest": {
     "roots": [

@@ -1,25 +1,25 @@
 {
-  "name": "applesauce",
-  "private": true,
-  "scripts": {
-    "build": "turbo build",
-    "test": "turbo test",
-    "format": "prettier --write .",
-    "docs": "typedoc",
-    "version-packages": "changeset version && pnpm install --no-frozen-lockfile && pnpm format",
-    "release": "pnpm run -r build && changeset publish"
-  },
-  "dependencies": {
-    "@changesets/cli": "^2.27.9",
-    "typedoc": "^0.26.11"
-  },
-  "devDependencies": {
-    "prettier": "^3.3.3",
-    "turbo": "^2.2.3",
-    "typescript": "^5.6.3"
-  },
-  "packageManager": "pnpm@9.9.0",
-  "engines": {
-    "node": ">=20"
-  }
+	"name": "applesauce",
+	"private": true,
+	"scripts": {
+		"build": "turbo build",
+		"test": "turbo test",
+		"format": "prettier --write .",
+		"docs": "typedoc",
+		"version-packages": "changeset version && pnpm install --no-frozen-lockfile && pnpm format",
+		"release": "pnpm run -r build && changeset publish"
+	},
+	"dependencies": {
+		"@changesets/cli": "^2.27.9",
+		"typedoc": "^0.26.11"
+	},
+	"devDependencies": {
+		"prettier": "^3.3.3",
+		"turbo": "^2.2.3",
+		"typescript": "^5.7.2"
+	},
+	"packageManager": "pnpm@9.9.0",
+	"engines": {
+		"node": ">=20"
+	}
 }
