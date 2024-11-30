@@ -10,14 +10,16 @@ import {
   nsecEncode,
   ProfilePointer,
 } from "nostr-tools/nip19";
-import { getPublicKey } from "nostr-tools";
+import { getPublicKey, kinds, NostrEvent } from "nostr-tools";
 
 import { safeRelayUrls } from "./relays.js";
+import { getTagValue } from "./index.js";
 
 export type AddressPointerWithoutD = Omit<AddressPointer, "identifier"> & {
   identifier?: string;
 };
 
+/** Parse the value of an "a" tag into an AddressPointer */
 export function parseCoordinate(a: string): AddressPointerWithoutD | null;
 export function parseCoordinate(a: string, requireD: false): AddressPointerWithoutD | null;
 export function parseCoordinate(a: string, requireD: true): AddressPointer | null;
@@ -51,7 +53,8 @@ export function parseCoordinate(a: string, requireD = false, silent = true): Add
   };
 }
 
-export function getPubkeyFromDecodeResult(result?: DecodeResult) {
+/** Extra a pubkey from the result of nip19.decode */
+export function getPubkeyFromDecodeResult(result?: DecodeResult): string | undefined {
   if (!result) return;
   switch (result.type) {
     case "naddr":
@@ -66,6 +69,7 @@ export function getPubkeyFromDecodeResult(result?: DecodeResult) {
   }
 }
 
+/** Encodes the result of nip19.decode */
 export function encodeDecodeResult(result: DecodeResult) {
   switch (result.type) {
     case "naddr":
@@ -89,6 +93,10 @@ export function getEventPointerFromTag(tag: string[]): EventPointer {
   if (!tag[1]) throw new Error("Missing event id in tag");
   let pointer: EventPointer = { id: tag[1] };
   if (tag[2]) pointer.relays = safeRelayUrls([tag[2]]);
+
+  // get author from NIP-18 quote tags
+  if (tag[0] === "q" && tag[3] && tag[3].length === 64) pointer.author = tag[3];
+
   return pointer;
 }
 export function getAddressPointerFromTag(tag: string[]): AddressPointer {
@@ -104,6 +112,7 @@ export function getProfilePointerFromTag(tag: string[]): ProfilePointer {
   return pointer;
 }
 
+/** Parses a tag into a pointer */
 export function getPointerFromTag(tag: string[]): DecodeResult | null {
   try {
     switch (tag[0]) {
@@ -118,6 +127,10 @@ export function getPointerFromTag(tag: string[]): DecodeResult | null {
 
       case "p":
         return { type: "nprofile", data: getProfilePointerFromTag(tag) };
+
+      // NIP-18 quote tags
+      case "q":
+        return { type: "nevent", data: getEventPointerFromTag(tag) };
     }
   } catch (error) {}
 
@@ -140,11 +153,42 @@ export function getCoordinateFromAddressPointer(pointer: AddressPointer) {
   return `${pointer.kind}:${pointer.pubkey}:${pointer.identifier}`;
 }
 
+/** Returns a tag for an address pointer */
 export function getATagFromAddressPointer(pointer: AddressPointer): ["a", ...string[]] {
   const relay = pointer.relays?.[0];
   const coordinate = getCoordinateFromAddressPointer(pointer);
   return relay ? ["a", coordinate, relay] : ["a", coordinate];
 }
+
+/** Returns a tag for an event pointer */
 export function getETagFromEventPointer(pointer: EventPointer): ["e", ...string[]] {
   return pointer.relays?.length ? ["e", pointer.id, pointer.relays[0]] : ["e", pointer.id];
+}
+
+/** Returns a pointer for a given event */
+export function getPointerForEvent(event: NostrEvent, relays?: string[]): DecodeResult {
+  if (kinds.isParameterizedReplaceableKind(event.kind)) {
+    const d = getTagValue(event, "d");
+    if (!d) throw new Error("Event missing identifier");
+
+    return {
+      type: "naddr",
+      data: {
+        identifier: d,
+        kind: event.kind,
+        pubkey: event.pubkey,
+        relays,
+      },
+    };
+  } else {
+    return {
+      type: "nevent",
+      data: {
+        id: event.id,
+        kind: event.kind,
+        author: event.pubkey,
+        relays,
+      },
+    };
+  }
 }
