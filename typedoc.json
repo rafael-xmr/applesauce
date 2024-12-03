@@ -6,5 +6,6 @@
   "entryPointStrategy": "packages",
   "packageOptions": {
     "entryPoints": ["src/index.ts"]
-  }
+  },
+  "out": "./docs/typedoc"
 }

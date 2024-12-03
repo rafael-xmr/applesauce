@@ -8,7 +8,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: "Home", link: "/" },
-      { text: "Reference", link: "https://hzrd149.github.io/applesauce/modules/applesauce_core.html" },
+      { text: "Reference", link: "/typedoc/modules/applesauce_core.html" },
     ],
 
     sidebar: [

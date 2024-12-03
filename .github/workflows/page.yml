@@ -48,8 +48,11 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Build Docs
+      - name: Build typedoc
         run: pnpm typedoc
+
+      - name: Copy vitepress
+        run: cp -r packages/docs/.vitepress/dist/* docs
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

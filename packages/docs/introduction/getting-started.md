@@ -1,12 +1,12 @@
 # Getting Started
 
-There are three main components that makeup the applesauce libraries: [Helpers](https://hzrd149.github.io/applesauce/modules/applesauce_core.Helpers.html), the [EventStore](https://hzrd149.github.io/applesauce/classes/applesauce_core.EventStore.html), and [Queries](https://hzrd149.github.io/applesauce/modules/applesauce_core.Queries.html)
+There are three main components that makeup the applesauce libraries: [Helpers](/typedoc/modules/applesauce_core.Helpers.html), the [EventStore](/typedoc/classes/applesauce_core.EventStore.html), and [Queries](/typedoc/modules/applesauce_core.Queries.html)
 
 ## Helpers
 
 Helper methods are the core of the library and serve to extract and parse nostr events
 
-A few good example methods are [getProfileContent](https://hzrd149.github.io/applesauce/functions/applesauce_core.Helpers.getProfileContent.html) which returns the parsed content of a kind:0 event and [getOutboxes](https://hzrd149.github.io/applesauce/functions/applesauce_core.Helpers.getOutboxes.html) which returns an array of outbox _(write)_ relays from a kind:10002 relay list event
+A few good example methods are [getProfileContent](/typedoc/functions/applesauce_core.Helpers.getProfileContent.html) which returns the parsed content of a kind:0 event and [getOutboxes](/typedoc/functions/applesauce_core.Helpers.getOutboxes.html) which returns an array of outbox _(write)_ relays from a kind:10002 relay list event
 
 ## EventStore
 
