@@ -140,13 +140,13 @@ export function getPointerFromTag(tag: string[]): DecodeResult | null {
 export function isAddressPointer(pointer: DecodeResult["data"]): pointer is AddressPointer {
   return (
     typeof pointer !== "string" &&
-    Object.hasOwn(pointer, "identifier") &&
-    Object.hasOwn(pointer, "pubkey") &&
-    Object.hasOwn(pointer, "kind")
+    Reflect.has(pointer, "identifier") &&
+    Reflect.has(pointer, "pubkey") &&
+    Reflect.has(pointer, "kind")
   );
 }
 export function isEventPointer(pointer: DecodeResult["data"]): pointer is EventPointer {
-  return typeof pointer !== "string" && Object.hasOwn(pointer, "id");
+  return typeof pointer !== "string" && Reflect.has(pointer, "id");
 }
 
 export function getCoordinateFromAddressPointer(pointer: AddressPointer) {
