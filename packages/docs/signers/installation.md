@@ -1,6 +1,6 @@
 # Signers
 
-`applesauce-signers` is a packages is pre-built NIP-07 signer classes
+`applesauce-signer` is a packages is pre-built NIP-07 signer classes
 
 ## Installation
 

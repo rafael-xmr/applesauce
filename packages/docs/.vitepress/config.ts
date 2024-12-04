@@ -21,15 +21,39 @@ export default defineConfig({
         ],
       },
       {
+        text: "Core",
+        items: [
+          { text: "EventStore", link: "/core/event-store" },
+          { text: "QueryStore", link: "/core/query-store" },
+        ],
+      },
+      {
         text: "Signers",
         items: [
           { text: "Installation", link: "/signers/installation" },
-          { text: "Password Signer", link: "/signers/password-signer" },
+          { text: "Signers", link: "/signers/signers" },
+          { text: "Nostr Connect", link: "/signers/nostr-connect" },
+        ],
+      },
+      {
+        text: "React",
+        items: [
+          { text: "Installation", link: "/react/installation" },
+          { text: "Providers", link: "/react/providers" },
+          { text: "Hooks", link: "/react/hooks" },
+          { text: "Content", link: "/react/content" },
         ],
       },
       {
         text: "Lists",
         items: [{ text: "Installation", link: "/lists/installation" }],
+      },
+      {
+        text: "Channels",
+        items: [
+          { text: "Installation", link: "/channels/installation" },
+          { text: "Queries", link: "/channels/queries" },
+        ],
       },
     ],
 
