@@ -1,5 +1,7 @@
 # Queries
 
+TODO
+
 ## SingleEventQuery
 
 A query that wraps the [`eventStore.event`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_core.EventStore.html#event) method and subscribes to a single event
