@@ -47,6 +47,3 @@ export function ReplaceableSetQuery(
     run: (events) => events.replaceableSet(pointers),
   };
 }
-
-// @ts-expect-error
-window.hash_sum = hash_sum;

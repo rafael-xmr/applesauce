@@ -137,6 +137,20 @@ export function getPointerFromTag(tag: string[]): DecodeResult | null {
   return null;
 }
 
+export function isEvent(event: any): event is NostrEvent {
+  if (event === undefined || event === null) return false;
+
+  return (
+    event.id?.length === 64 &&
+    typeof event.sig === "string" &&
+    typeof event.pubkey === "string" &&
+    event.pubkey.length === 64 &&
+    typeof event.content === "string" &&
+    Array.isArray(event.tags) &&
+    typeof event.created_at === "number" &&
+    event.created_at > 0
+  );
+}
 export function isAddressPointer(pointer: DecodeResult["data"]): pointer is AddressPointer {
   return (
     typeof pointer !== "string" &&

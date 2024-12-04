@@ -9,8 +9,15 @@ import { AddressPointer, EventPointer } from "nostr-tools/nip19";
 import { shareLatestValue } from "../observable/share-latest-value.js";
 
 export type Query<T extends unknown> = {
+  /**
+   * A unique key for this query. this is used to detect duplicate queries
+   */
   key: string;
+  /** The args array this query was created with. This is mostly for debugging */
   args?: Array<any>;
+  /**
+   * The meat of the query, this should return an Observables that subscribes to the eventStore in some way
+   */
   run: (events: EventStore, store: QueryStore) => Observable<T>;
 };
 export type QueryConstructor<T extends unknown, Args extends Array<any>> = (...args: Args) => Query<T>;

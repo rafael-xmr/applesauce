@@ -1,6 +1,6 @@
-# Providers
+# Provider
 
-The [QueryStoreProvider](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.QueryStoreProvider.html) can be used to provide a `QueryStore` to the app
+The [`QueryStoreProvider`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.QueryStoreProvider.html) can be used to provide a [`QueryStore`](../core/query-store.md) to the app
 
 ```tsx{5,7}
 const eventStore = new EventStore();

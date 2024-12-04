@@ -14,32 +14,6 @@ The [EventStore](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce
 
 The event store does not make any relay connections or fetch any data, nor does it persist the events. its sole purpose is to store events and notify the UI when there are new events
 
-```ts
-// create an event store
-const eventStore = new EventStore();
-
-// create a new subscription for a filter
-const timeline = eventStore.timeline({ kinds: [1] }).subscribe((events) => {
-  console.log(events);
-});
-
-// subscribe to a stream of events
-const stream = eventStore.stream({ kinds: [0] }).subscribe((event) => {
-  console.log("new profile event", event);
-});
-
-// fetch some events using another library
-fetchEvents({ kinds: [1, 0] }, (event) => {
-  // add the event to the event store
-  eventStore.add(event);
-});
-
-// cleanup
-setTimeout(() => {
-  timeline.unsubscribe();
-}, 10_000);
-```
-
 > [!NOTE]
 > Its recommended that you only create a single instance of the `EventStore` for your app
 
@@ -48,7 +22,7 @@ setTimeout(() => {
 The `QueryStore` is built on top of the `EventStore` and handles managing and running the queries. its primary role is to ensure that only a single query for each filter is created and that it is wrapped in the rxjs [share](https://rxjs.dev/api/index/function/share) operator for performance reasons
 
 > [!IMPORTANT]
-> For performance reasons UI components should subscribe to the `QueryStore` and NOT the `EventStore`
+> For performance reasons UI components should only subscribe to the `QueryStore` and NOT the `EventStore`
 
 ## Queries
 

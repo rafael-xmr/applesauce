@@ -23,8 +23,11 @@ export default defineConfig({
       {
         text: "Core",
         items: [
+          { text: "Helpers", link: "/core/helpers" },
           { text: "EventStore", link: "/core/event-store" },
           { text: "QueryStore", link: "/core/query-store" },
+          { text: "Queries", link: "/core/queries" },
+          { text: "Custom Queries", link: "/core/custom-queries" },
         ],
       },
       {
@@ -39,9 +42,17 @@ export default defineConfig({
         text: "React",
         items: [
           { text: "Installation", link: "/react/installation" },
-          { text: "Providers", link: "/react/providers" },
+          { text: "Provider", link: "/react/provider" },
           { text: "Hooks", link: "/react/hooks" },
           { text: "Content", link: "/react/content" },
+        ],
+      },
+      {
+        text: "Content",
+        items: [
+          { text: "Installation", link: "/content/installation" },
+          { text: "Text Notes", link: "/content/text" },
+          { text: "Markdown", link: "/content/markdown" },
         ],
       },
       {

@@ -3,9 +3,10 @@ import { AddressPointer, EventPointer } from "nostr-tools/nip19";
 import { map } from "rxjs/operators";
 
 import { Query } from "../query-store/index.js";
-import { getNip10References, ThreadReferences } from "../helpers/threading.js";
-import { getCoordinateFromAddressPointer, isAddressPointer } from "../helpers/pointers.js";
-import { getEventUID } from "../helpers/event.js";
+import { getNip10References, interpretThreadTags, ThreadReferences } from "../helpers/threading.js";
+import { getCoordinateFromAddressPointer, isAddressPointer, isEvent, isEventPointer } from "../helpers/pointers.js";
+import { getEventUID, getReplaceableUID, getTagValue } from "../helpers/event.js";
+import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
 
 export type Thread = {
   root?: ThreadItem;
@@ -99,5 +100,34 @@ export function ThreadQuery(root: string | AddressPointer | EventPointer, opts?:
           return { root: items.get(rootUID), all: items };
         }),
       ),
+  };
+}
+
+/** Returns all legacy and NIP-10 replies */
+export function RepliesQuery(event: NostrEvent, overrideKinds?: number[]): Query<NostrEvent[]> {
+  return {
+    key: getEventUID(event),
+    run: (events) => {
+      const kinds = overrideKinds || event.kind === 1 ? [1, 1111] : [1111];
+      const filter: Filter = { kinds };
+
+      if (isEvent(parent) || isEventPointer(event)) filter["#e"] = [event.id];
+
+      const address = isParameterizedReplaceableKind(event.kind)
+        ? getReplaceableUID(event.kind, event.pubkey, getTagValue(event, "d"))
+        : undefined;
+      if (address) {
+        filter["#a"] = [address];
+      }
+
+      return events.timeline(filter).pipe(
+        map((events) => {
+          return events.filter((e) => {
+            const refs = interpretThreadTags(e);
+            return refs.reply?.e?.[1] === event.id || refs.reply?.a?.[1] === address;
+          });
+        }),
+      );
+    },
   };
 }

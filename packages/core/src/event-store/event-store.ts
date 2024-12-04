@@ -12,14 +12,14 @@ import { getDeleteCoordinates, getDeleteIds } from "../helpers/delete.js";
 export class EventStore {
   database: Database;
 
-  /** Whether to keep old versions of replaceable events */
+  /** Enable this to keep old versions of replaceable events */
   keepOldVersions = false;
 
   constructor() {
     this.database = new Database();
   }
 
-  /** Adds an event to the database */
+  /** Adds an event to the database and update subscriptions */
   add(event: NostrEvent, fromRelay?: string): NostrEvent {
     if (event.kind === kinds.EventDeletion) this.handleDeleteEvent(event);
 
@@ -46,6 +46,14 @@ export class EventStore {
     if (fromRelay) addSeenRelay(inserted, fromRelay);
 
     return inserted;
+  }
+
+  /** Removes an event from the database and updates subscriptions */
+  remove(event: string | NostrEvent): boolean {
+    if (typeof event === "string") return this.database.deleteEvent(event);
+    else if (this.database.hasEvent(event.id)) {
+      return this.database.deleteEvent(event.id);
+    } else return false;
   }
 
   protected deletedIds = new Set<string>();
@@ -78,6 +86,11 @@ export class EventStore {
     }
 
     return false;
+  }
+
+  /** Removes any event that is not being used by a subscription */
+  prune(max?: number): number {
+    return this.database.prune(max);
   }
 
   /** Add an event to the store and notifies all subscribes it has updated */
@@ -332,41 +345,33 @@ export class EventStore {
     });
   }
 
-  /** Creates an observable that streams all events that match the filter */
-  stream(filters: Filter[]): Observable<NostrEvent> {
+  /**
+   * Creates an observable that streams all events that match the filter
+   * @param filters
+   * @param [onlyNew=false] Only subscribe to new events
+   */
+  stream(filters: Filter | Filter[], onlyNew = false): Observable<NostrEvent> {
+    filters = Array.isArray(filters) ? filters : [filters];
+
     return new Observable<NostrEvent>((observer) => {
-      let claimed = new Set<NostrEvent>();
-      let events = this.database.getForFilters(filters);
-
-      for (const event of events) {
-        observer.next(event);
-
-        this.database.claimEvent(event, observer);
-        claimed.add(event);
+      if (!onlyNew) {
+        let events = this.database.getForFilters(filters);
+        for (const event of events) observer.next(event);
       }
 
       // subscribe to future events
       const sub = this.database.inserted.subscribe((event) => {
-        if (matchFilters(filters, event)) {
-          observer.next(event);
-
-          this.database.claimEvent(event, observer);
-          claimed.add(event);
-        }
+        if (matchFilters(filters, event)) observer.next(event);
       });
 
-      return () => {
-        sub.unsubscribe();
-
-        // remove all claims
-        for (const event of claimed) this.database.removeClaim(event, observer);
-        claimed.clear();
-      };
+      return () => sub.unsubscribe();
     });
   }
 
   /** Creates an observable that updates with an array of sorted events */
-  timeline(filters: Filter[], keepOldVersions = this.keepOldVersions): Observable<NostrEvent[]> {
+  timeline(filters: Filter | Filter[], keepOldVersions = false): Observable<NostrEvent[]> {
+    filters = Array.isArray(filters) ? filters : [filters];
+
     return new Observable<NostrEvent[]>((observer) => {
       const seen = new Map<string, NostrEvent>();
       const timeline: NostrEvent[] = [];
