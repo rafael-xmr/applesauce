@@ -1,6 +1,6 @@
 # Getting Started
 
-There are three main components that makeup the applesauce libraries: [Helpers](../core/helpers.md), the [EventStore](../core/event-store.md), the [QueryStore](../core/query-store.md), and [Queries](../core/queries.md)
+There are four main components that makeup the applesauce libraries: [Helpers](../core/helpers.md), the [EventStore](../core/event-store.md), the [QueryStore](../core/query-store.md), and [Queries](../core/queries.md)
 
 ## Helpers
 
