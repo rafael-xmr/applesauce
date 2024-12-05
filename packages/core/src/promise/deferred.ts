@@ -3,6 +3,7 @@ export type Deferred<T> = Promise<T> & {
   reject: (reason?: any) => void;
 };
 
+/** Creates a controlled promise */
 export function createDefer<T>() {
   let _resolve: (value?: T | PromiseLike<T>) => void;
   let _reject: (reason?: any) => void;

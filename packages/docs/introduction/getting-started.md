@@ -32,7 +32,7 @@ For example the [ProfileQuery](https://hzrd149.github.io/applesauce/typedoc/func
 
 ```ts
 const sub = queryStore
-  .runQuery(ProfileQuery)("3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d")
+  .createQuery(ProfileQuery, "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d")
   .subscribe((profile) => {
     if (profile) console.log(profile);
   });
@@ -42,7 +42,7 @@ Or the [MailboxesQuery](https://hzrd149.github.io/applesauce/typedoc/functions/a
 
 ```ts
 const sub = queryStore
-  .runQuery(MailboxesQuery)("3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d")
+  .createQuery(MailboxesQuery, "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d")
   .subscribe((mailboxes) => {
     if (mailboxes) {
       console.log(mailboxes.inboxes, mailboxes.outboxes);

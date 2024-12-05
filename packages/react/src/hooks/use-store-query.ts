@@ -15,7 +15,7 @@ export function useStoreQuery<T extends unknown, Args extends Array<any>>(
 ) {
   const store = useQueryStore();
   const observable = useMemo(() => {
-    if (args) return store.runQuery(queryConstructor)(...args);
+    if (args) return store.createQuery(queryConstructor, ...args);
     else return undefined;
   }, [args, store]);
 

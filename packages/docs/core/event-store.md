@@ -163,7 +163,7 @@ const sub = eventStore.stream({ kinds: [1] }, true).subscribe((event) => {
 
 ### Timelines
 
-TODO
+A timeline subscription takes a filter(s) and returns a sorted array of events that match the filter(s)
 
 ```ts
 const timeline = eventStore.timeline({ kinds: [1] }).subscribe((events) => {
@@ -172,7 +172,7 @@ const timeline = eventStore.timeline({ kinds: [1] }).subscribe((events) => {
 
 // fetch some events using another library
 fetchEvents({ kinds: [1, 0] }, (event) => {
-  // add the event to the event store
+  // timeline will update for each new event
   eventStore.add(event);
 });
 ```

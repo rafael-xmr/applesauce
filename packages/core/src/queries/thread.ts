@@ -103,7 +103,7 @@ export function ThreadQuery(root: string | AddressPointer | EventPointer, opts?:
   };
 }
 
-/** Returns all legacy and NIP-10 replies */
+/** A query that gets all legacy and NIP-10 replies for an event */
 export function RepliesQuery(event: NostrEvent, overrideKinds?: number[]): Query<NostrEvent[]> {
   return {
     key: getEventUID(event),

@@ -6,19 +6,21 @@ The [`getParsedContent`](https://hzrd149.github.io/applesauce/typedoc/functions/
 
 ## Cashing
 
-TODO
+Because parsing and transforming content is an expensive operation `getParsedContent` will cache the results on the event under a [Symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol), by default this is the [`TextNoteContentSymbol`](https://hzrd149.github.io/applesauce/typedoc/variables/applesauce_content.Text.TextNoteContentSymbol.html)
+
+If your parsing or transforming different event kinds than kind 1, its recommended to create a new `Symbol` to and pass to `getParsedContent` to avoid cache collisions with the default kind 1 processor
 
 ## Links
 
 TODO
 
-## Nostr Mentions
+## Mentions
 
-TODO
+The [`nostrMentions`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_content.Text.nostrMentions.html) transformer can be used to add [`Mention`](https://hzrd149.github.io/applesauce/typedoc/interfaces/applesauce_content.Nast.Mention.html) nodes to the tree
 
 ## Hashtags
 
-TODO
+The [`hashtags`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_content.Text.hashtags.html) transformer can be used to add [`Hashtag`](https://hzrd149.github.io/applesauce/typedoc/interfaces/applesauce_content.Nast.Hashtag.html) nodes to the tree
 
 ## Emojis
 
@@ -27,8 +29,6 @@ The [`emojis`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce
 ## Galleries
 
 The [`galleries`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_content.Text.galleries.html) transformer will group image URLs into a [`Gallery`](https://hzrd149.github.io/applesauce/typedoc/interfaces/applesauce_content.Nast.Gallery.html) node
-
-TODO: add example
 
 ## Lightning invoices
 

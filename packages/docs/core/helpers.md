@@ -78,6 +78,18 @@
 - [`isRTag`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.isRTag.html) Checks if tag is an "r" tag and has at least one value
 - [`isTTag`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.isTTag.html) Checks if tag is an "t" tag and has at least one value
 
+## Hidden Tags
+
+Hidden tags are used in [NIP-51](https://github.com/nostr-protocol/nips/blob/master/51.md) lists and [NIP-60](https://github.com/nostr-protocol/nips/blob/master/60.md) wallets
+
+- [`canHaveHiddenTags`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.canHaveHiddenTags.html) Checks if a given event kind can have hidden tags
+- [`hasHiddenTags`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.hasHiddenTags.html) Checks if an event has hidden tags
+- [`getHiddenTags`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getHiddenTags.html) Returns the hidden tags for an event if they are unlocked
+- [`isHiddenTagsLocked`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.isHiddenTagsLocked.html) Checks if the hidden tags are locked
+- [`unlockHiddenTags`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.unlockHiddenTags.html) Unlocks the hidden tags using a `signer`
+- [`overrideHiddenTags`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.overrideHiddenTags.html) Replaces an events hidden tags
+- [`modifyEventTags`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.modifyEventTags.html) Modifies an events public or hidden tags
+
 ## Filters
 
 - [`isFilterEqual`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.isFilterEqual.html) Check if two filters are equal

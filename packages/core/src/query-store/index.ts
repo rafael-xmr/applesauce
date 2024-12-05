@@ -34,72 +34,72 @@ export class QueryStore {
   observables = new WeakMap<Query<any>, BehaviorSubject<any> | Observable<any>>();
 
   /** Creates a cached query */
-  runQuery<T extends unknown, Args extends Array<any>>(
+  createQuery<T extends unknown, Args extends Array<any>>(
     queryConstructor: (...args: Args) => { key: string; run: (events: EventStore, store: QueryStore) => Observable<T> },
-  ): (...args: Args) => Observable<T> {
-    return (...args: Args) => {
-      const tempQuery = queryConstructor(...args);
-      const key = `${queryConstructor.name}|${tempQuery.key}`;
+    ...args: Args
+  ): Observable<T> {
+    const tempQuery = queryConstructor(...args);
+    const key = `${queryConstructor.name}|${tempQuery.key}`;
 
-      let query = this.queries.get(key);
-      if (!query) {
-        query = tempQuery;
-        this.queries.set(key, tempQuery);
-      }
+    let query = this.queries.get(key);
+    if (!query) {
+      query = tempQuery;
+      this.queries.set(key, tempQuery);
+    }
 
-      if (!this.observables.has(query)) {
-        query.args = args;
-        const observable = query.run(this.store, this).pipe(shareLatestValue()) as Observable<T>;
-        this.observables.set(query, observable);
-        return observable;
-      }
+    if (!this.observables.has(query)) {
+      query.args = args;
+      const observable = query.run(this.store, this).pipe(shareLatestValue()) as Observable<T>;
+      this.observables.set(query, observable);
+      return observable;
+    }
 
-      return this.observables.get(query)! as Observable<T>;
-    };
+    return this.observables.get(query)! as Observable<T>;
   }
 
-  /** Returns a single event */
+  /** Creates a SingleEventQuery */
   event(id: string) {
-    return this.runQuery(Queries.SingleEventQuery)(id);
+    return this.createQuery(Queries.SingleEventQuery, id);
   }
 
-  /** Returns a single event */
+  /** Creates a MultipleEventsQuery */
   events(ids: string[]) {
-    return this.runQuery(Queries.MultipleEventsQuery)(ids);
+    return this.createQuery(Queries.MultipleEventsQuery, ids);
   }
 
-  /** Returns the latest version of a replaceable event */
+  /** Creates a ReplaceableQuery */
   replaceable(kind: number, pubkey: string, d?: string) {
-    return this.runQuery(Queries.ReplaceableQuery)(kind, pubkey, d);
+    return this.createQuery(Queries.ReplaceableQuery, kind, pubkey, d);
   }
 
-  /** Returns a directory of events by their UID */
+  /** Creates a ReplaceableSetQuery */
   replaceableSet(pointers: { kind: number; pubkey: string; identifier?: string }[]) {
-    return this.runQuery(Queries.ReplaceableSetQuery)(pointers);
+    return this.createQuery(Queries.ReplaceableSetQuery, pointers);
   }
 
-  /** Returns an array of events that match the filter */
+  /** Creates a TimelineQuery */
   timeline(filters: Filter | Filter[], keepOldVersions?: boolean) {
-    return this.runQuery(Queries.TimelineQuery)(filters, keepOldVersions);
+    return this.createQuery(Queries.TimelineQuery, filters, keepOldVersions);
   }
 
-  /** Returns the parsed profile (0) for a pubkey */
+  /** Creates a ProfileQuery */
   profile(pubkey: string) {
-    return this.runQuery(Queries.ProfileQuery)(pubkey);
+    return this.createQuery(Queries.ProfileQuery, pubkey);
   }
 
-  /** Returns all reactions for an event (supports replaceable events) */
+  /** Creates a ReactionsQuery */
   reactions(event: NostrEvent) {
-    return this.runQuery(Queries.ReactionsQuery)(event);
+    return this.createQuery(Queries.ReactionsQuery, event);
   }
 
-  /** Returns the parsed relay list (10002) for the pubkey */
+  /** Creates a MailboxesQuery */
   mailboxes(pubkey: string) {
-    return this.runQuery(Queries.MailboxesQuery)(pubkey);
+    return this.createQuery(Queries.MailboxesQuery, pubkey);
   }
 
+  /** Creates a ThreadQuery */
   thread(root: string | EventPointer | AddressPointer) {
-    return this.runQuery(Queries.ThreadQuery)(root);
+    return this.createQuery(Queries.ThreadQuery, root);
   }
 }
 
