@@ -17,7 +17,6 @@ export function emojis(): Transformer<Root> {
         (full: string, $1: string) => {
           try {
             const tag = getEmojiTag(event, $1);
-
             if (!tag) return false;
 
             return {

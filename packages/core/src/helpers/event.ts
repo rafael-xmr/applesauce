@@ -15,6 +15,25 @@ declare module "nostr-tools" {
 }
 
 /**
+ * Checks if an object is a nostr event
+ * NOTE: does not validation the signature on the event
+ */
+export function isEvent(event: any): event is NostrEvent {
+  if (event === undefined || event === null) return false;
+
+  return (
+    event.id?.length === 64 &&
+    typeof event.sig === "string" &&
+    typeof event.pubkey === "string" &&
+    event.pubkey.length === 64 &&
+    typeof event.content === "string" &&
+    Array.isArray(event.tags) &&
+    typeof event.created_at === "number" &&
+    event.created_at > 0
+  );
+}
+
+/**
  * Returns if a kind is replaceable ( 10000 <= n < 20000 || n == 0 || n == 3 )
  * or parameterized replaceable ( 30000 <= n < 40000 )
  */

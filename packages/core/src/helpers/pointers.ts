@@ -89,6 +89,7 @@ export function encodeDecodeResult(result: DecodeResult) {
   return "";
 }
 
+/** @throws */
 export function getEventPointerFromTag(tag: string[]): EventPointer {
   if (!tag[1]) throw new Error("Missing event id in tag");
   let pointer: EventPointer = { id: tag[1] };
@@ -99,12 +100,16 @@ export function getEventPointerFromTag(tag: string[]): EventPointer {
 
   return pointer;
 }
+
+/** @throws */
 export function getAddressPointerFromTag(tag: string[]): AddressPointer {
   if (!tag[1]) throw new Error("Missing coordinate in tag");
   const pointer = parseCoordinate(tag[1], true, false);
   if (tag[2]) pointer.relays = safeRelayUrls([tag[2]]);
   return pointer;
 }
+
+/** @throws */
 export function getProfilePointerFromTag(tag: string[]): ProfilePointer {
   if (!tag[1]) throw new Error("Missing pubkey in tag");
   const pointer: ProfilePointer = { pubkey: tag[1] };
@@ -112,7 +117,7 @@ export function getProfilePointerFromTag(tag: string[]): ProfilePointer {
   return pointer;
 }
 
-/** Parses a tag into a pointer */
+/** Parses "e", "a", "p", and "q" tags into a pointer */
 export function getPointerFromTag(tag: string[]): DecodeResult | null {
   try {
     switch (tag[0]) {
@@ -137,20 +142,6 @@ export function getPointerFromTag(tag: string[]): DecodeResult | null {
   return null;
 }
 
-export function isEvent(event: any): event is NostrEvent {
-  if (event === undefined || event === null) return false;
-
-  return (
-    event.id?.length === 64 &&
-    typeof event.sig === "string" &&
-    typeof event.pubkey === "string" &&
-    event.pubkey.length === 64 &&
-    typeof event.content === "string" &&
-    Array.isArray(event.tags) &&
-    typeof event.created_at === "number" &&
-    event.created_at > 0
-  );
-}
 export function isAddressPointer(pointer: DecodeResult["data"]): pointer is AddressPointer {
   return (
     typeof pointer !== "string" &&
@@ -163,6 +154,7 @@ export function isEventPointer(pointer: DecodeResult["data"]): pointer is EventP
   return typeof pointer !== "string" && Reflect.has(pointer, "id");
 }
 
+/** Returns the coordinate string for an AddressPointer */
 export function getCoordinateFromAddressPointer(pointer: AddressPointer) {
   return `${pointer.kind}:${pointer.pubkey}:${pointer.identifier}`;
 }
