@@ -1,6 +1,7 @@
 import { bufferTime, filter, from, map, mergeMap, OperatorFunction, share } from "rxjs";
 import { getReplaceableUID } from "applesauce-core/helpers";
 import { EventPacket, RxNostr } from "rx-nostr";
+import { nanoid } from "nanoid";
 
 import { Loader } from "./loader.js";
 import { LoadableAddressPointer } from "./replaceable-loader.js";
@@ -60,7 +61,7 @@ export class SingleRelayReplaceableLoader extends Loader<LoadableAddressPointer,
         // batch and filter
         singleRelayBatcher(opts),
         // breakout the batches so they can complete
-        mergeMap((pointers) => from([pointers]).pipe(replaceableRequest(rxNostr, [relay]))),
+        mergeMap((pointers) => from([pointers]).pipe(replaceableRequest(rxNostr, nanoid(8), [relay]))),
         // share the response with all subscribers
         share(),
       ),

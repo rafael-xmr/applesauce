@@ -4,8 +4,8 @@ import { map, mergeAll, OperatorFunction } from "rxjs";
 /** Makes a request to relays for every set of filters */
 export function relaysRequest(
   rxNostr: RxNostr,
-  relays: string[],
-  id?: string,
+  id: string,
+  relays?: string[],
 ): OperatorFunction<LazyFilter | LazyFilter[], EventPacket> {
   return (source) =>
     source.pipe(

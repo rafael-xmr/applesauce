@@ -62,7 +62,7 @@ function* cacheFirstSequence(
   if (opts?.cacheRelays && opts?.cacheRelays.length > 0) {
     log(`Checking cache`, opts.cacheRelays, remaining);
     const results = yield from([remaining]).pipe(
-      replaceableRequest(rxNostr, opts.cacheRelays, id),
+      replaceableRequest(rxNostr, id, opts.cacheRelays),
       // mark the event as from the cache
       tap((p) => markFromCache(p.event)),
     );
@@ -70,10 +70,14 @@ function* cacheFirstSequence(
     if (handleResults(results)) return;
   }
 
-  // finished loading from the cache, load from pointer relays
-  if (pointerRelays.length > 0) {
-    log(`Requesting`, pointerRelays, remaining);
-    const results = yield from([remaining]).pipe(replaceableRequest(rxNostr, pointerRelays, id));
+  // load from pointer relays and default relays
+  const defaultRelays = Object.entries(rxNostr.getDefaultRelays())
+    .filter(([_relay, config]) => config.read)
+    .map(([relay]) => relay);
+  const remoteRelays = [...pointerRelays, ...defaultRelays];
+  if (remoteRelays.length > 0) {
+    log(`Requesting`, remoteRelays, remaining);
+    const results = yield from([remaining]).pipe(replaceableRequest(rxNostr, id, remoteRelays));
 
     if (handleResults(results)) return;
   }
@@ -84,7 +88,7 @@ function* cacheFirstSequence(
     const relays = opts.lookupRelays.filter((r) => !pointerRelays.includes(r));
     if (relays.length > 0) {
       log(`Request from lookup`, relays, remaining);
-      const results = yield from([remaining]).pipe(replaceableRequest(rxNostr, relays, id));
+      const results = yield from([remaining]).pipe(replaceableRequest(rxNostr, id, relays));
 
       if (handleResults(results)) return;
     }
