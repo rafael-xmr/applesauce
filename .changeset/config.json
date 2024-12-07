@@ -4,7 +4,18 @@
   "commit": false,
   "fixed": [],
   "linked": [
-    ["applesauce-core", "applesauce-user-status", "applesauce-channel", "applesauce-signer", "applesauce-react"]
+    [
+      "applesauce-channel",
+      "applesauce-content",
+      "applesauce-core",
+      "applesauce-docs",
+      "applesauce-lists",
+      "applesauce-loaders",
+      "applesauce-net",
+      "applesauce-react",
+      "applesauce-signer",
+      "applesauce-user-status"
+    ]
   ],
   "access": "public",
   "baseBranch": "master",
