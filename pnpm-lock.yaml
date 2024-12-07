@@ -206,6 +206,40 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
 
+  packages/loaders:
+    dependencies:
+      applesauce-core:
+        specifier: ^0.9.0
+        version: link:../core
+      nanoid:
+        specifier: ^5.0.9
+        version: 5.0.9
+      nostr-tools:
+        specifier: ^2.10.3
+        version: 2.10.3(typescript@5.6.3)
+      rx-nostr:
+        specifier: ^3.4.1
+        version: 3.4.1
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+    devDependencies:
+      '@jest/globals':
+        specifier: ^29.7.0
+        version: 29.7.0
+      '@types/jest':
+        specifier: ^29.5.13
+        version: 29.5.13
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@12.20.55)
+      jest-extended:
+        specifier: ^4.0.2
+        version: 4.0.2(jest@29.7.0(@types/node@12.20.55))
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+
   packages/net:
     dependencies:
       applesauce-core:
@@ -220,9 +254,6 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
-      zen-push:
-        specifier: ^0.3.1
-        version: 0.3.1
     devDependencies:
       '@jest/globals':
         specifier: ^29.7.0
@@ -230,9 +261,6 @@ importers:
       '@types/jest':
         specifier: ^29.5.13
         version: 29.5.13
-      '@types/zen-push':
-        specifier: ^0.1.4
-        version: 0.1.4
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@12.20.55)
@@ -1201,12 +1229,6 @@ packages:
 
   '@types/yargs@17.0.33':
     resolution: {integrity: sha512-WpxBCKWPLr4xSsHgz511rFJAM+wS28w2zEO1QDNY5zM/S8ok70NNfztH0xwhqKyaK0OHCbN98LDAZuy1ctxDkA==}
-
-  '@types/zen-observable@0.8.7':
-    resolution: {integrity: sha512-LKzNTjj+2j09wAo/vvVjzgw5qckJJzhdGgWHW7j69QIGdq/KnZrMAMIHQiWGl3Ccflh5/CudBAntTPYdprPltA==}
-
-  '@types/zen-push@0.1.4':
-    resolution: {integrity: sha512-FB0u2p9qwYRItXTio+Jwn+usx4zWIgdDXwMcSiZtjEFru/mIfJb9SedruzbBvEGHvq77sGt2e5cursvheyYcRQ==}
 
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
@@ -2218,6 +2240,11 @@ packages:
     engines: {node: ^18 || >=20}
     hasBin: true
 
+  nanoid@5.0.9:
+    resolution: {integrity: sha512-Aooyr6MXU6HpvvWXKoVoXwKMs/KyVakWwg7xQfv5/S/RIgJMy0Ifa45H9qqYy7pTCszrHzP21Uk4PZq2HpEM8Q==}
+    engines: {node: ^18 || >=20}
+    hasBin: true
+
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
@@ -2238,6 +2265,9 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  nostr-typedef@0.9.0:
+    resolution: {integrity: sha512-nLTzhlYcRnLQGUJ5YfvGAUDyGFHjGH6Qozltl/wV3UXelmiUwjrwI8IIxQNkbgVMv+zmbFi/m1xKHxIvVfG09w==}
 
   nostr-wasm@0.1.0:
     resolution: {integrity: sha512-78BTryCLcLYv96ONU8Ws3Q1JzjlAt+43pWQhIl86xZmWeegYCNLPml7yQ+gG3vR6V5h4XGj+TxO+SS5dsThQIA==}
@@ -2448,6 +2478,9 @@ packages:
 
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
+
+  rx-nostr@3.4.1:
+    resolution: {integrity: sha512-u/FkKUERrrJWVrDxMvhYCntRldyHS14CmHE9bRJefl8StU48x27MxsMDHIjZ1zDKtaOtBvvrpv+vCEaleIB/Mw==}
 
   rxjs@7.8.1:
     resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
@@ -2827,12 +2860,6 @@ packages:
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
-
-  zen-observable@0.9.0:
-    resolution: {integrity: sha512-xBrvSw1htnb2VEYpgjG7etqztHSZ4KyKzJgFh/rucI7QzkbxD0rVNmIni6lia6KhWs7RBbBBLZksGKrCSaDAMQ==}
-
-  zen-push@0.3.1:
-    resolution: {integrity: sha512-6XNTSVz8Z/5+8BzOQFQr+HOr/j7K+ZJfc4tdCCmuiq8y2Ph+aODqagZnXKbKIFZrQ3nSIcdek9gAuEe+p3zJUg==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -3887,12 +3914,6 @@ snapshots:
   '@types/yargs@17.0.33':
     dependencies:
       '@types/yargs-parser': 21.0.3
-
-  '@types/zen-observable@0.8.7': {}
-
-  '@types/zen-push@0.1.4':
-    dependencies:
-      '@types/zen-observable': 0.8.7
 
   '@ungap/structured-clone@1.2.0': {}
 
@@ -5211,6 +5232,8 @@ snapshots:
 
   nanoid@5.0.7: {}
 
+  nanoid@5.0.9: {}
+
   natural-compare@1.4.0: {}
 
   node-int64@0.4.0: {}
@@ -5230,6 +5253,8 @@ snapshots:
     optionalDependencies:
       nostr-wasm: 0.1.0
       typescript: 5.6.3
+
+  nostr-typedef@0.9.0: {}
 
   nostr-wasm@0.1.0:
     optional: true
@@ -5444,6 +5469,11 @@ snapshots:
   run-parallel@1.2.0:
     dependencies:
       queue-microtask: 1.2.3
+
+  rx-nostr@3.4.1:
+    dependencies:
+      nostr-typedef: 0.9.0
+      rxjs: 7.8.1
 
   rxjs@7.8.1:
     dependencies:
@@ -5816,11 +5846,5 @@ snapshots:
       yargs-parser: 21.1.1
 
   yocto-queue@0.1.0: {}
-
-  zen-observable@0.9.0: {}
-
-  zen-push@0.3.1:
-    dependencies:
-      zen-observable: 0.9.0
 
   zwitch@2.0.4: {}
