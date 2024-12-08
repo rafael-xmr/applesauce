@@ -95,8 +95,10 @@ export function getEventPointerFromTag(tag: string[]): EventPointer {
   let pointer: EventPointer = { id: tag[1] };
   if (tag[2]) pointer.relays = safeRelayUrls([tag[2]]);
 
-  // get author from NIP-18 quote tags
-  if (tag[0] === "q" && tag[3] && tag[3].length === 64) pointer.author = tag[3];
+  // get author from NIP-18 quote tags and nip-22 comments
+  if ((tag[0] === "q" || tag[0] === "e" || tag[0] === "E") && tag[3] && tag[3].length === 64) {
+    pointer.author = tag[3];
+  }
 
   return pointer;
 }

@@ -14,7 +14,8 @@
       "applesauce-net",
       "applesauce-react",
       "applesauce-signer",
-      "applesauce-user-status"
+      "applesauce-user-status",
+      "applesauce-factory"
     ]
   ],
   "access": "public",
