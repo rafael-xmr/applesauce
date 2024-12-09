@@ -97,6 +97,9 @@ function* cacheFirstSequence(
 
 /** Batches address pointers and consolidates them */
 function multiRelayBatcher(buffer: number): OperatorFunction<LoadableAddressPointer, LoadableAddressPointer[]> {
+  const requestedFrom = new Map<string, Set<string>>();
+  const requestedDefault = new Set<string>();
+
   return (source) =>
     source.pipe(
       // buffer on time
@@ -133,14 +136,21 @@ function multiRelayBatcher(buffer: number): OperatorFunction<LoadableAddressPoin
       filter((buffer) => buffer.length > 0),
       // ensure pointers are only requested from each relay once
       map((pointers) => {
-        const requestedFrom = new Map<string, Set<string>>();
-
         return pointers.filter((pointer) => {
-          // if this pointer does not have any relays or is forced, skip
-          if (!pointer.relays) return true;
+          const id = getAddressPointerId(pointer);
+
+          // skip if forced
           if (pointer.force) return true;
 
-          const id = getAddressPointerId(pointer);
+          // skip if already requested from default relays
+          if (!pointer.relays) {
+            if (requestedDefault.has(id)) return false;
+            else {
+              requestedDefault.add(id);
+              return true;
+            }
+          }
+
           let set = requestedFrom.get(id);
           if (!set) {
             set = new Set<string>();
@@ -182,8 +192,6 @@ export class ReplaceableLoader extends Loader<LoadableAddressPointer, EventPacke
       return source.pipe(
         // filter out invalid pointers
         filter(isLoadableAddressPointer),
-        // TODO: needs a new batching method that takes the multiple relays (and force) into account
-
         // batch and filter
         multiRelayBatcher(opts?.bufferTime ?? 1000),
         // check cache, relays, lookup relays in that order
