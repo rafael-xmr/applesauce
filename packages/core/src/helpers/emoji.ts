@@ -15,8 +15,13 @@ export function getPackName(pack: NostrEvent): string | undefined {
   return getTagValue(pack, "title") || getTagValue(pack, "d");
 }
 
+export type Emoji = {
+  name: string;
+  url: string;
+};
+
 /** Returns an array of emojis from a NIP-30 emoji pack */
-export function getEmojis(pack: NostrEvent): { name: string; url: string }[] {
+export function getEmojis(pack: NostrEvent): Emoji[] {
   return pack.tags
     .filter((t) => t[0] === "emoji" && t[1] && t[2])
     .map((t) => ({ name: t[1] as string, url: t[2] as string }));

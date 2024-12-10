@@ -4,10 +4,8 @@ import { AddressPointer } from "nostr-tools/nip19";
 import { EventTemplate, kinds, NostrEvent, VerifiedEvent } from "nostr-tools";
 
 import { includeCommentTags } from "./operations/comment.js";
-import { setContent } from "./operations/content.js";
-import { includeQuoteTags } from "./operations/quote.js";
+import { createTextContentOperations, TextContentOptions } from "./operations/content.js";
 import { includeClientTag } from "./operations/client.js";
-import { includeContentHashtags } from "./operations/hashtags.js";
 
 export type EventFactoryTemplate = { kind: number; content?: string; pubkey?: string };
 
@@ -63,23 +61,16 @@ export class EventFactory {
   }
 
   /** Create a NIP-22 comment */
-  comment(parent: NostrEvent, content: string) {
+  comment(parent: NostrEvent, content: string, options?: TextContentOptions) {
     return this.create(
       { kind: COMMENT_KIND },
       includeCommentTags(parent),
-      setContent(content),
-      includeQuoteTags(),
-      includeContentHashtags(),
+      ...createTextContentOperations(content, options),
     );
   }
 
   /** Creates a short text note */
-  note(content: string) {
-    return this.create(
-      { kind: kinds.ShortTextNote },
-      setContent(content),
-      includeQuoteTags(),
-      includeContentHashtags(),
-    );
+  note(content: string, options?: TextContentOptions) {
+    return this.create({ kind: kinds.ShortTextNote }, ...createTextContentOperations(content, options));
   }
 }
