@@ -2,16 +2,17 @@ import { NostrEvent } from "nostr-tools";
 
 import { EventFactoryOperation } from "../event-factory.js";
 import { createCommentTagsForReply } from "../helpers/comment.js";
-import { fillAndTrimTag } from "../helpers/tag.js";
+import { ensureProfilePointerTag } from "../helpers/common-tags.js";
 
 /** Includes NIP-22 comment tags */
 export function includeCommentTags(parent: NostrEvent): EventFactoryOperation {
   return async (draft, ctx) => {
     const relayHint = ctx.getRelayHint ? await ctx.getRelayHint(parent) : undefined;
-    const tags = [...draft.tags, ...createCommentTagsForReply(parent, relayHint)];
+    let tags = [...draft.tags, ...createCommentTagsForReply(parent, relayHint)];
 
     // include notification tag for pubkey
-    tags.push(fillAndTrimTag(["p", parent.pubkey, await ctx.getPubkeyRelayHint?.(parent.pubkey)]));
+    const relay = await ctx.getPubkeyRelayHint?.(parent.pubkey);
+    tags = ensureProfilePointerTag(tags, { pubkey: parent.pubkey, relays: relay ? [relay] : undefined });
 
     return { ...draft, tags };
   };

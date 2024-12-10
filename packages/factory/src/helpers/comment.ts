@@ -11,6 +11,7 @@ import {
 
 import { fillAndTrimTag } from "./tag.js";
 
+/** Create a set fo tags for a single CommentPointer */
 export function createCommentTagsFromCommentPointer(pointer: CommentPointer, root = false): string[][] {
   if (isCommentEventPointer(pointer)) {
     return [
@@ -24,9 +25,9 @@ export function createCommentTagsFromCommentPointer(pointer: CommentPointer, roo
         getReplaceableUID(pointer.kind, pointer.pubkey, pointer.identifier),
         pointer.relay,
       ]),
-      fillAndTrimTag([root ? "E" : "e", pointer.id, pointer.relay, pointer.pubkey]),
+      pointer.id ? fillAndTrimTag([root ? "E" : "e", pointer.id, pointer.relay, pointer.pubkey]) : undefined,
       [root ? "K" : "k", String(pointer.kind)],
-    ];
+    ].filter((t) => !!t);
   } else {
     return [
       [root ? "I" : "i", pointer.identifier],

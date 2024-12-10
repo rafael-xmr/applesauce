@@ -2,7 +2,7 @@ import { Expressions } from "applesauce-content/helpers";
 import { nip19 } from "nostr-tools";
 
 import { EventFactoryOperation } from "../event-factory.js";
-import { createQuoteTagFromEventPointer } from "../helpers/quote.js";
+import { createQTagFromEventPointer } from "../helpers/quote.js";
 
 /** Include "q" quote tags for any nostr event mentioned in the content */
 export function includeQuoteTags(): EventFactoryOperation {
@@ -18,7 +18,7 @@ export function includeQuoteTags(): EventFactoryOperation {
             tags.push(["q", decode.data]);
             break;
           case "nevent":
-            tags.push(createQuoteTagFromEventPointer(decode.data));
+            tags.push(createQTagFromEventPointer(decode.data));
             break;
         }
       } catch (error) {}
