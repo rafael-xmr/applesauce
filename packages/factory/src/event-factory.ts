@@ -30,6 +30,7 @@ export type EventFactoryClient = {
 export type EventFactoryContext = {
   client?: EventFactoryClient;
   getRelayHint?: (event: NostrEvent) => string | undefined | Promise<string> | Promise<undefined>;
+  getPubkeyRelayHint?: (pubkey: string) => string|undefined | Promise<string> | Promise<undefined>,
   signer?: EventFactorySigner;
 };
 
