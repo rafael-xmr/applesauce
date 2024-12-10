@@ -8,14 +8,13 @@
       "applesauce-channel",
       "applesauce-content",
       "applesauce-core",
-      "applesauce-docs",
+      "applesauce-factory",
       "applesauce-lists",
       "applesauce-loaders",
       "applesauce-net",
       "applesauce-react",
       "applesauce-signer",
-      "applesauce-user-status",
-      "applesauce-factory"
+      "applesauce-user-status"
     ]
   ],
   "access": "public",
