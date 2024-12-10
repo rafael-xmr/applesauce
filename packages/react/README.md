@@ -6,7 +6,8 @@ React hooks for applesauce
 
 ```jsx
 import { EventStore, QueryStore, Queries } from "applesauce-core";
-import { QueryStoreProvider, useStoreQuery } from "applesauce-react";
+import { QueryStoreProvider } from "applesauce-react/providers";
+import { useStoreQuery } from "applesauce-react/hooks";
 
 const events = new EventStore();
 const store = new QueryStore(events);

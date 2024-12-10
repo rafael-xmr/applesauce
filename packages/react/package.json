@@ -33,6 +33,14 @@
       "import": "./dist/hooks/*.js",
       "types": "./dist/hooks/*.d.ts"
     },
+    "./providers": {
+      "import": "./dist/providers/index.js",
+      "types": "./dist/providers/index.d.ts"
+    },
+    "./providers/*": {
+      "import": "./dist/providers/*.js",
+      "types": "./dist/providers/*.d.ts"
+    },
     "./helpers": {
       "import": "./dist/helpers/index.js",
       "types": "./dist/helpers/index.d.ts"
@@ -41,6 +49,7 @@
   "dependencies": {
     "applesauce-content": "^0.9.0",
     "applesauce-core": "^0.9.0",
+    "applesauce-factory": "^0.9.0",
     "nostr-tools": "^2.10.3",
     "react": "^18.3.1",
     "rxjs": "^7.8.1"

@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { QueryStoreContext } from "../provider.js";
+import { QueryStoreContext } from "../providers/query-store-provider.js";
 
 /**
  * Gets the QueryStore from a parent {@link QueryStoreProvider} component

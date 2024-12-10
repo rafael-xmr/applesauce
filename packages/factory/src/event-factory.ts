@@ -1,7 +1,15 @@
 import { unixNow } from "applesauce-core/helpers";
-import { EventTemplate, NostrEvent, VerifiedEvent } from "nostr-tools";
+import { COMMENT_KIND } from "applesauce-core/helpers/comment";
+import { AddressPointer } from "nostr-tools/nip19";
+import { EventTemplate, kinds, NostrEvent, VerifiedEvent } from "nostr-tools";
 
-export type EventFactoryTemplate = { kind: number; content?: string; pubkey: string };
+import { includeCommentTags } from "./operations/comment.js";
+import { setContent } from "./operations/content.js";
+import { includeQuoteTags } from "./operations/quote.js";
+import { includeClientTag } from "./operations/client.js";
+import { includeContentHashtags } from "./operations/hashtags.js";
+
+export type EventFactoryTemplate = { kind: number; content?: string; pubkey?: string };
 
 export type EventFactorySigner = {
   getPublicKey: () => Promise<string> | string;
@@ -16,7 +24,13 @@ export type EventFactorySigner = {
   };
 };
 
+export type EventFactoryClient = {
+  name: string;
+  address?: AddressPointer;
+};
+
 export type EventFactoryContext = {
+  client?: EventFactoryClient;
   getRelayHint?: (event: NostrEvent) => string | undefined | Promise<string> | Promise<undefined>;
   signer?: EventFactorySigner;
 };
@@ -27,14 +41,45 @@ export type EventFactoryOperation = (
 ) => EventTemplate | Promise<EventTemplate>;
 
 export class EventFactory {
-  context: EventFactoryContext = {};
+  constructor(protected context: EventFactoryContext) {}
 
-  async create(template: EventFactoryTemplate, ...operations: EventFactoryOperation[]): Promise<EventTemplate> {
+  async create(
+    template: EventFactoryTemplate,
+    ...operations: (EventFactoryOperation | undefined)[]
+  ): Promise<EventTemplate> {
     let draft: EventTemplate = { ...template, content: "", created_at: unixNow(), tags: [] };
 
     // run operations
-    for (const operation of operations) draft = await operation(draft, this.context);
+    for (const operation of operations) {
+      if (operation) draft = await operation(draft, this.context);
+    }
+
+    // add client tag
+    if (this.context.client) {
+      draft = await includeClientTag(this.context.client.name, this.context.client.address)(draft, this.context);
+    }
 
     return draft;
+  }
+
+  /** Create a NIP-22 comment */
+  comment(parent: NostrEvent, content: string) {
+    return this.create(
+      { kind: COMMENT_KIND },
+      includeCommentTags(parent),
+      setContent(content),
+      includeQuoteTags(),
+      includeContentHashtags(),
+    );
+  }
+
+  /** Creates a short text note */
+  note(content: string) {
+    return this.create(
+      { kind: kinds.ShortTextNote },
+      setContent(content),
+      includeQuoteTags(),
+      includeContentHashtags(),
+    );
   }
 }
