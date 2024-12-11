@@ -1,4 +1,4 @@
-import { unixNow } from "applesauce-core/helpers";
+import { Emoji, unixNow } from "applesauce-core/helpers";
 import { COMMENT_KIND } from "applesauce-core/helpers/comment";
 import { AddressPointer } from "nostr-tools/nip19";
 import { EventTemplate, kinds, NostrEvent, VerifiedEvent } from "nostr-tools";
@@ -6,6 +6,8 @@ import { EventTemplate, kinds, NostrEvent, VerifiedEvent } from "nostr-tools";
 import { includeCommentTags } from "./operations/comment.js";
 import { createTextContentOperations, TextContentOptions } from "./operations/content.js";
 import { includeClientTag } from "./operations/client.js";
+import { includeEmojiTags } from "./operations/emojis.js";
+import { includeReactionTags, setReactionContent } from "./helpers/reaction.js";
 
 export type EventFactoryTemplate = { kind: number; content?: string; pubkey?: string };
 
@@ -24,13 +26,13 @@ export type EventFactorySigner = {
 
 export type EventFactoryClient = {
   name: string;
-  address?: AddressPointer;
+  address?: Omit<AddressPointer, "kind" | "relays"> & { kind: 31990 };
 };
 
 export type EventFactoryContext = {
   client?: EventFactoryClient;
   getRelayHint?: (event: NostrEvent) => string | undefined | Promise<string> | Promise<undefined>;
-  getPubkeyRelayHint?: (pubkey: string) => string|undefined | Promise<string> | Promise<undefined>,
+  getPubkeyRelayHint?: (pubkey: string) => string | undefined | Promise<string> | Promise<undefined>;
   signer?: EventFactorySigner;
 };
 
@@ -40,7 +42,7 @@ export type EventFactoryOperation = (
 ) => EventTemplate | Promise<EventTemplate>;
 
 export class EventFactory {
-  constructor(protected context: EventFactoryContext) {}
+  constructor(protected context: EventFactoryContext = {}) {}
 
   async create(
     template: EventFactoryTemplate,
@@ -73,5 +75,15 @@ export class EventFactory {
   /** Creates a short text note */
   note(content: string, options?: TextContentOptions) {
     return this.create({ kind: kinds.ShortTextNote }, ...createTextContentOperations(content, options));
+  }
+
+  /** Creates a reaction event */
+  reaction(event: NostrEvent, emoji: string | Emoji = "+") {
+    return this.create(
+      { kind: kinds.Reaction },
+      setReactionContent(emoji),
+      includeReactionTags(event),
+      typeof emoji !== "string" ? includeEmojiTags([emoji]) : undefined,
+    );
   }
 }

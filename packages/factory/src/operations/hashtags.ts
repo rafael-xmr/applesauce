@@ -11,6 +11,7 @@ export function includeContentHashtags(): EventFactoryOperation {
     for (const [_, hashtag] of matches) {
       const lower = hashtag.toLocaleLowerCase();
 
+      // add tag if its not present
       if (!tags.find((t) => t[0] === "t" && t[1] === lower)) {
         tags.push(["t", lower]);
       }

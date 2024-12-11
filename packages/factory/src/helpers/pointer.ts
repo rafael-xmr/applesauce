@@ -11,9 +11,14 @@ export function createATagFromAddressPointer(pointer: AddressPointer): string[] 
 
 export type ETagMarker = "root" | "reply" | "mention" | "";
 
-/** Returns a tag for an event pointer */
-export function createETagFromEventPointer(pointer: EventPointer, marker?: ETagMarker): string[] {
+/** Returns a tag for an event pointer with a marker*/
+export function createETagWithMarkerFromEventPointer(pointer: EventPointer, marker?: ETagMarker): string[] {
   return fillAndTrimTag(["e", pointer.id, pointer.relays?.[0], marker, pointer.author]);
+}
+
+/** Returns a tag for an event pointer without a marker */
+export function createETagFromEventPointer(pointer: EventPointer): string[] {
+  return fillAndTrimTag(["e", pointer.id, pointer.relays?.[0]]);
 }
 
 /** Returns a tag for an profile pointer */

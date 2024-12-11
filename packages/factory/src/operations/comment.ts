@@ -7,7 +7,7 @@ import { ensureProfilePointerTag } from "../helpers/common-tags.js";
 /** Includes NIP-22 comment tags */
 export function includeCommentTags(parent: NostrEvent): EventFactoryOperation {
   return async (draft, ctx) => {
-    const relayHint = ctx.getRelayHint ? await ctx.getRelayHint(parent) : undefined;
+    const relayHint = await ctx.getRelayHint?.(parent);
     let tags = [...draft.tags, ...createCommentTagsForReply(parent, relayHint)];
 
     // include notification tag for pubkey

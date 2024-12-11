@@ -1,7 +1,7 @@
 import { describe, test, it, expect } from "vitest";
 
 import { EventPointer } from "nostr-tools/nip19";
-import { ensureAddressPointerTag, ensureEventPointerTag, ensureProfilePointerTag } from "./common-tags.js";
+import { ensureAddressPointerTag, ensureMarkedEventPointerTag, ensureProfilePointerTag } from "./common-tags.js";
 import { ETagMarker } from "./pointer.js";
 
 describe("common tags helpers", () => {
@@ -26,7 +26,7 @@ describe("common tags helpers", () => {
         [["e", "event-id", "wss://relay.example.com", "", "pubkey"]],
       ],
     ])("should correctly merge the tag", (input, pointer, marker, output) => {
-      expect(ensureEventPointerTag(input, pointer, marker)).toEqual(output);
+      expect(ensureMarkedEventPointerTag(input, pointer, marker)).toEqual(output);
     });
 
     test.each<[string[][], EventPointer, ETagMarker | undefined, string[][]]>([
@@ -47,11 +47,11 @@ describe("common tags helpers", () => {
         [["e", "event-id", "wss://relay.example.com", "", "pubkey"]],
       ],
     ])("should keep fields", (input, pointer, marker, output) => {
-      expect(ensureEventPointerTag(input, pointer, marker)).toEqual(output);
+      expect(ensureMarkedEventPointerTag(input, pointer, marker)).toEqual(output);
     });
 
     it("should append a tag when markers are different", () => {
-      expect(ensureEventPointerTag([["e", "event-id", "", "root"]], { id: "event-id" })).toEqual([
+      expect(ensureMarkedEventPointerTag([["e", "event-id", "", "root"]], { id: "event-id" })).toEqual([
         ["e", "event-id", "", "root"],
         ["e", "event-id"],
       ]);
@@ -59,11 +59,11 @@ describe("common tags helpers", () => {
 
     it("should only merge tag when markers are equal", () => {
       // should not merge
-      expect(ensureEventPointerTag([["e", "event-id", "", "root"]], { id: "event-id" })).toHaveLength(2);
+      expect(ensureMarkedEventPointerTag([["e", "event-id", "", "root"]], { id: "event-id" })).toHaveLength(2);
 
       // should merge since both root
       expect(
-        ensureEventPointerTag([["e", "event-id", "", "root"]], { id: "event-id", author: "pubkey" }, "root"),
+        ensureMarkedEventPointerTag([["e", "event-id", "", "root"]], { id: "event-id", author: "pubkey" }, "root"),
       ).toHaveLength(1);
     });
   });

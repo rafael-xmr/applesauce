@@ -1,7 +1,11 @@
 import { describe, test, expect, it } from "vitest";
 
 import { EventPointer } from "nostr-tools/nip19";
-import { createATagFromAddressPointer, createETagFromEventPointer, createPTagFromProfilePointer } from "./pointer.js";
+import {
+  createATagFromAddressPointer,
+  createETagWithMarkerFromEventPointer,
+  createPTagFromProfilePointer,
+} from "./pointer.js";
 
 describe(`pointer helpers`, () => {
   describe("createATagFromAddressPointer", () => {
@@ -89,7 +93,9 @@ describe(`pointer helpers`, () => {
         ["e", "event-id", "wss://example.com", "root", "pubkey"],
       ],
     ])("Creates correct tag for pointer", (pointer, marker, tag) => {
-      expect(createETagFromEventPointer(pointer, marker as "root" | "reply" | "mention" | undefined)).toEqual(tag);
+      expect(createETagWithMarkerFromEventPointer(pointer, marker as "root" | "reply" | "mention" | undefined)).toEqual(
+        tag,
+      );
     });
   });
 
