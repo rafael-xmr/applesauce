@@ -1,3 +1,4 @@
+import { describe, beforeEach, it, expect } from "vitest";
 import { getHiddenTags, HiddenTagsSigner, unixNow, unlockHiddenTags } from "applesauce-core/helpers";
 import { finalizeEvent, generateSecretKey, getPublicKey, kinds, nip04, NostrEvent } from "nostr-tools";
 

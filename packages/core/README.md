@@ -1,6 +1,6 @@
 # applesauce-core
 
-AppleSauce Core is an interpretation layer for nostr clients, Push events into the in-memory [database](https://hzrd149.github.io/applesauce/classes/Database.html) and get nicely formatted data out with [queries](https://hzrd149.github.io/applesauce/modules/Queries)
+AppleSauce Core is an interpretation layer for nostr clients, Push events into the in-memory [database](https://hzrd149.github.io/applesauce/typedoc/classes/Database.html) and get nicely formatted data out with [queries](https://hzrd149.github.io/applesauce/typedoc/modules/Queries)
 
 # Example
 

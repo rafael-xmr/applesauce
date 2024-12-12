@@ -1,13 +1,13 @@
 import { NostrEvent } from "nostr-tools";
 import { AddressPointer, EventPointer, ProfilePointer } from "nostr-tools/nip19";
-import { getAddressPointerFromTag, getEventPointerFromTag, getProfilePointerFromTag } from "applesauce-core/helpers";
+import {
+  getAddressPointerFromTag,
+  getEventPointerFromTag,
+  getOrComputeCachedValue,
+  getProfilePointerFromTag,
+} from "applesauce-core/helpers";
 
 export const UserStatusPointerSymbol = Symbol.for("user-status-pointer");
-declare module "nostr-tools" {
-  export interface Event {
-    [UserStatusPointerSymbol]?: UserStatusPointer | null;
-  }
-}
 
 export type UserStatusPointer =
   | { type: "nevent"; data: EventPointer }
@@ -32,11 +32,5 @@ function getStatusPointer(status: NostrEvent): UserStatusPointer | null {
 }
 
 export function getUserStatusPointer(status: NostrEvent) {
-  let pointer = status[UserStatusPointerSymbol];
-
-  if (pointer === undefined) {
-    pointer = status[UserStatusPointerSymbol] = getStatusPointer(status);
-  }
-
-  return pointer;
+  return getOrComputeCachedValue(status, UserStatusPointerSymbol, () => getStatusPointer(status));
 }

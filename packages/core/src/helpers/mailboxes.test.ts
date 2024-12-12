@@ -1,4 +1,4 @@
-/// <reference types="jest-extended" />
+import { describe, test, expect } from "vitest";
 import { NostrEvent } from "nostr-tools";
 import { getInboxes, getOutboxes } from "./mailboxes.js";
 
@@ -22,7 +22,7 @@ describe("Mailboxes", () => {
             tags: [["r", "wss://inbox.com"]],
           }),
         ),
-      ).toIncludeAllMembers(["wss://inbox.com/"]);
+      ).toEqual(expect.arrayContaining(["wss://inbox.com/"]));
     });
 
     test("should remove bad urls", () => {
@@ -33,7 +33,7 @@ describe("Mailboxes", () => {
             tags: [["r", "bad://inbox.com"]],
           }),
         ),
-      ).toBeArrayOfSize(0);
+      ).toHaveLength(0);
 
       expect(
         Array.from(
@@ -42,7 +42,7 @@ describe("Mailboxes", () => {
             tags: [["r", "something that is not a url"]],
           }),
         ),
-      ).toBeArrayOfSize(0);
+      ).toHaveLength(0);
 
       expect(
         Array.from(
@@ -51,7 +51,7 @@ describe("Mailboxes", () => {
             tags: [["r", "wss://inbox.com,wss://inbox.org"]],
           }),
         ),
-      ).toBeArrayOfSize(0);
+      ).toHaveLength(0);
     });
 
     test("without marker", () => {
@@ -62,7 +62,7 @@ describe("Mailboxes", () => {
             tags: [["r", "wss://inbox.com/"]],
           }),
         ),
-      ).toIncludeAllMembers(["wss://inbox.com/"]);
+      ).toEqual(expect.arrayContaining(["wss://inbox.com/"]));
     });
 
     test("with marker", () => {
@@ -73,7 +73,7 @@ describe("Mailboxes", () => {
             tags: [["r", "wss://inbox.com/", "read"]],
           }),
         ),
-      ).toIncludeAllMembers(["wss://inbox.com/"]);
+      ).toEqual(expect.arrayContaining(["wss://inbox.com/"]));
     });
   });
 
@@ -86,7 +86,7 @@ describe("Mailboxes", () => {
             tags: [["r", "wss://outbox.com"]],
           }),
         ),
-      ).toIncludeAllMembers(["wss://outbox.com/"]);
+      ).toEqual(expect.arrayContaining(["wss://outbox.com/"]));
     });
 
     test("should remove bad urls", () => {
@@ -97,7 +97,7 @@ describe("Mailboxes", () => {
             tags: [["r", "bad://inbox.com"]],
           }),
         ),
-      ).toBeArrayOfSize(0);
+      ).toHaveLength(0);
 
       expect(
         Array.from(
@@ -106,7 +106,7 @@ describe("Mailboxes", () => {
             tags: [["r", "something that is not a url"]],
           }),
         ),
-      ).toBeArrayOfSize(0);
+      ).toHaveLength(0);
 
       expect(
         Array.from(
@@ -115,7 +115,7 @@ describe("Mailboxes", () => {
             tags: [["r", "wss://outbox.com,wss://inbox.org"]],
           }),
         ),
-      ).toBeArrayOfSize(0);
+      ).toHaveLength(0);
     });
 
     test("without marker", () => {
@@ -126,7 +126,7 @@ describe("Mailboxes", () => {
             tags: [["r", "wss://outbox.com/"]],
           }),
         ),
-      ).toIncludeAllMembers(["wss://outbox.com/"]);
+      ).toEqual(expect.arrayContaining(["wss://outbox.com/"]));
     });
 
     test("with marker", () => {
@@ -137,7 +137,7 @@ describe("Mailboxes", () => {
             tags: [["r", "wss://outbox.com/", "write"]],
           }),
         ),
-      ).toIncludeAllMembers(["wss://outbox.com/"]);
+      ).toEqual(expect.arrayContaining(["wss://outbox.com/"]));
     });
   });
 });

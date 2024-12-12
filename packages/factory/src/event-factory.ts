@@ -1,15 +1,22 @@
-import { Emoji, unixNow } from "applesauce-core/helpers";
-import { COMMENT_KIND } from "applesauce-core/helpers/comment";
+import { unixNow } from "applesauce-core/helpers";
 import { AddressPointer } from "nostr-tools/nip19";
-import { EventTemplate, kinds, NostrEvent, VerifiedEvent } from "nostr-tools";
+import { EventTemplate, NostrEvent, VerifiedEvent } from "nostr-tools";
 
-import { includeCommentTags } from "./operations/comment.js";
-import { createTextContentOperations, TextContentOptions } from "./operations/content.js";
 import { includeClientTag } from "./operations/client.js";
-import { includeEmojiTags } from "./operations/emojis.js";
-import { includeReactionTags, setReactionContent } from "./helpers/reaction.js";
+import { CommentBlueprint } from "./blueprints/comment.js";
+import { NoteBlueprint } from "./blueprints/note.js";
+import { ReactionBlueprint } from "./blueprints/reaction.js";
 
 export type EventFactoryTemplate = { kind: number; content?: string; pubkey?: string };
+
+/** A single operation in the factory process */
+export type EventFactoryOperation = (
+  draft: EventTemplate,
+  context: EventFactoryContext,
+) => EventTemplate | Promise<EventTemplate>;
+
+/** A prebuilt event template */
+export type EventFactoryBlueprint = (context: EventFactoryContext) => EventTemplate | Promise<EventTemplate>;
 
 export type EventFactorySigner = {
   getPublicKey: () => Promise<string> | string;
@@ -36,54 +43,59 @@ export type EventFactoryContext = {
   signer?: EventFactorySigner;
 };
 
-export type EventFactoryOperation = (
-  draft: EventTemplate,
-  context: EventFactoryContext,
-) => EventTemplate | Promise<EventTemplate>;
-
 export class EventFactory {
   constructor(protected context: EventFactoryContext = {}) {}
 
-  async create(
+  static async runProcess(
     template: EventFactoryTemplate,
+    context: EventFactoryContext,
     ...operations: (EventFactoryOperation | undefined)[]
   ): Promise<EventTemplate> {
     let draft: EventTemplate = { ...template, content: "", created_at: unixNow(), tags: [] };
 
     // run operations
     for (const operation of operations) {
-      if (operation) draft = await operation(draft, this.context);
+      if (operation) draft = await operation(draft, context);
     }
 
     // add client tag
-    if (this.context.client) {
-      draft = await includeClientTag(this.context.client.name, this.context.client.address)(draft, this.context);
+    if (context.client) {
+      draft = await includeClientTag(context.client.name, context.client.address)(draft, context);
     }
 
     return draft;
   }
 
+  /** Process an event template with operations */
+  async process(
+    template: EventFactoryTemplate,
+    ...operations: (EventFactoryOperation | undefined)[]
+  ): Promise<EventTemplate> {
+    return await EventFactory.runProcess(template, this.context, ...operations);
+  }
+
+  /** Create an event from a blueprint */
+  async create<Args extends Array<any>>(
+    blueprint: (...args: Args) => EventFactoryBlueprint,
+    ...args: Args
+  ): Promise<EventTemplate> {
+    return await blueprint(...args)(this.context);
+  }
+
+  // Helpers
+
   /** Create a NIP-22 comment */
-  comment(parent: NostrEvent, content: string, options?: TextContentOptions) {
-    return this.create(
-      { kind: COMMENT_KIND },
-      includeCommentTags(parent),
-      ...createTextContentOperations(content, options),
-    );
+  comment(...args: Parameters<typeof CommentBlueprint>) {
+    return this.create(CommentBlueprint, ...args);
   }
 
   /** Creates a short text note */
-  note(content: string, options?: TextContentOptions) {
-    return this.create({ kind: kinds.ShortTextNote }, ...createTextContentOperations(content, options));
+  note(...args: Parameters<typeof NoteBlueprint>) {
+    return this.create(NoteBlueprint, ...args);
   }
 
   /** Creates a reaction event */
-  reaction(event: NostrEvent, emoji: string | Emoji = "+") {
-    return this.create(
-      { kind: kinds.Reaction },
-      setReactionContent(emoji),
-      includeReactionTags(event),
-      typeof emoji !== "string" ? includeEmojiTags([emoji]) : undefined,
-    );
+  reaction(...args: Parameters<typeof ReactionBlueprint>) {
+    return this.create(ReactionBlueprint, ...args);
   }
 }
