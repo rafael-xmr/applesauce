@@ -2,7 +2,7 @@ import { kinds, nip57, NostrEvent } from "nostr-tools";
 import { getOrComputeCachedValue } from "./cache.js";
 import { getTagValue } from "./event.js";
 import { isATag, isETag } from "./tags.js";
-import { getAddressPointerFromTag, getEventPointerFromTag } from "./pointers.js";
+import { getAddressPointerFromATag, getEventPointerFromETag } from "./pointers.js";
 import { parseBolt11 } from "./bolt11.js";
 
 export const ZapRequestSymbol = Symbol.for("zap-request");
@@ -38,7 +38,7 @@ export function getZapPayment(zap: NostrEvent) {
 export function getZapAddressPointer(zap: NostrEvent) {
   return getOrComputeCachedValue(zap, ZapAddressPointerSymbol, () => {
     const a = zap.tags.find(isATag);
-    return a ? getAddressPointerFromTag(a) : null;
+    return a ? getAddressPointerFromATag(a) : null;
   });
 }
 
@@ -46,7 +46,7 @@ export function getZapAddressPointer(zap: NostrEvent) {
 export function getZapEventPointer(zap: NostrEvent) {
   return getOrComputeCachedValue(zap, ZapEventPointerSymbol, () => {
     const e = zap.tags.find(isETag);
-    return e ? getEventPointerFromTag(e) : null;
+    return e ? getEventPointerFromETag(e) : null;
   });
 }
 

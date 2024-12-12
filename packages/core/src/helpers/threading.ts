@@ -1,7 +1,8 @@
 import { EventTemplate, NostrEvent } from "nostr-tools";
 import { AddressPointer, EventPointer } from "nostr-tools/nip19";
-import { getAddressPointerFromTag, getEventPointerFromTag } from "./pointers.js";
+import { getAddressPointerFromATag } from "./pointers.js";
 import { getOrComputeCachedValue } from "./cache.js";
+import { safeRelayUrls } from "./relays.js";
 
 export type ThreadReferences = {
   root?:
@@ -15,16 +16,34 @@ export type ThreadReferences = {
 };
 
 export const Nip10ThreadRefsSymbol = Symbol.for("nip10-thread-refs");
-declare module "nostr-tools" {
-  export interface Event {
-    [Nip10ThreadRefsSymbol]?: ThreadReferences;
+
+/**
+ * Gets an EventPointer form a NIP-10 threading "e" tag
+ * @throws
+ */
+export function getEventPointerFromThreadTag(tag: string[]): EventPointer {
+  if (!tag[1]) throw new Error("Missing event id in tag");
+  let pointer: EventPointer = { id: tag[1] };
+  if (tag[2]) pointer.relays = safeRelayUrls([tag[2]]);
+
+  // get author from NIP-18 quote tags, nip-22 comments tags, or nip-10 thread tags
+  if (
+    tag[0] === "e" &&
+    (tag[3] === "root" || tag[3] === "reply" || tag[3] === "mention") &&
+    tag[4] &&
+    tag[4].length === 64
+  ) {
+    // NIP-10 "e" tag
+    pointer.author = tag[4];
   }
+
+  return pointer;
 }
 
 /** Parses NIP-10 tags and handles legacy behavior */
-export function interpretThreadTags(event: NostrEvent | EventTemplate) {
-  const eTags = event.tags.filter((t) => t[0] === "e" && t[1]);
-  const aTags = event.tags.filter((t) => t[0] === "a" && t[1]);
+export function interpretThreadTags(tags: string[][]) {
+  const eTags = tags.filter((t) => t[0] === "e" && t[1]);
+  const aTags = tags.filter((t) => t[0] === "a" && t[1]);
 
   // find the root and reply tags.
   let rootETag = eTags.find((t) => t[3] === "root");
@@ -74,14 +93,14 @@ export function interpretThreadTags(event: NostrEvent | EventTemplate) {
 /** Returns the parsed NIP-10 tags for an event */
 export function getNip10References(event: NostrEvent | EventTemplate): ThreadReferences {
   return getOrComputeCachedValue(event, Nip10ThreadRefsSymbol, () => {
-    const tags = interpretThreadTags(event);
+    const tags = interpretThreadTags(event.tags);
 
     let root: ThreadReferences["root"];
     if (tags.root) {
       try {
         root = {
-          e: tags.root.e && getEventPointerFromTag(tags.root.e),
-          a: tags.root.a && getAddressPointerFromTag(tags.root.a),
+          e: tags.root.e && getEventPointerFromThreadTag(tags.root.e),
+          a: tags.root.a && getAddressPointerFromATag(tags.root.a),
         } as ThreadReferences["root"];
       } catch (error) {}
     }
@@ -90,8 +109,8 @@ export function getNip10References(event: NostrEvent | EventTemplate): ThreadRef
     if (tags.reply) {
       try {
         reply = {
-          e: tags.reply.e && getEventPointerFromTag(tags.reply.e),
-          a: tags.reply.a && getAddressPointerFromTag(tags.reply.a),
+          e: tags.reply.e && getEventPointerFromThreadTag(tags.reply.e),
+          a: tags.reply.a && getAddressPointerFromATag(tags.reply.a),
         } as ThreadReferences["reply"];
       } catch (error) {}
     }

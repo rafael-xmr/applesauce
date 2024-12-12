@@ -2,7 +2,8 @@ import { NostrEvent } from "nostr-tools";
 
 import { ExternalPointer, ExternalIdentifiers, getExternalPointerFromTag } from "./external-id.js";
 import { getOrComputeCachedValue } from "./cache.js";
-import { getAddressPointerFromTag, getEventPointerFromTag } from "./pointers.js";
+import { getAddressPointerFromATag } from "./pointers.js";
+import { safeRelayUrl } from "./relays.js";
 
 export const COMMENT_KIND = 1111;
 
@@ -39,14 +40,14 @@ export function getCommentEventPointer(tags: string[][], root = false): CommentE
   if (tag) {
     if (!kind) throw new Error("Missing kind tag");
 
-    const eventPointer = getEventPointerFromTag(tag);
-
-    return {
-      id: eventPointer.id,
+    const pointer: CommentPointer = {
+      id: tag[1],
       kind: parseInt(kind),
-      pubkey: eventPointer.author,
-      relay: eventPointer.relays?.[0],
+      pubkey: tag[3] || undefined,
+      relay: tag[2] && (safeRelayUrl(tag[2]) ?? undefined),
     };
+
+    return pointer;
   }
   return null;
 }
@@ -65,7 +66,7 @@ export function getCommentAddressPointer(tags: string[][], root = false): Commen
 
     const pointer: CommentAddressPointer = {
       id,
-      ...getAddressPointerFromTag(tag),
+      ...getAddressPointerFromATag(tag),
       kind: parseInt(kind),
     };
 

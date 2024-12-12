@@ -3,8 +3,8 @@ import { Expressions } from "applesauce-content/helpers";
 
 import { EventFactoryOperation } from "../event-factory.js";
 
-/** Adds "emoji" tags for NIP-30 emojis */
-export function includeEmojiTags(emojis: Emoji[]): EventFactoryOperation {
+/** Adds "emoji" tags for NIP-30 emojis used in the content */
+export function includeContentEmojiTags(emojis: Emoji[]): EventFactoryOperation {
   return (draft) => {
     const tags = Array.from(draft.tags);
 

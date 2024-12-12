@@ -4,16 +4,18 @@ import { getPubkeyFromDecodeResult } from "applesauce-core/helpers";
 import { EventFactoryOperation } from "../event-factory.js";
 import { includeQuoteTags } from "./quote.js";
 import { includeContentHashtags } from "./hashtags.js";
-import { includeEmojiTags } from "./emojis.js";
+import { includeContentEmojiTags } from "./emojis.js";
 import { getContentPointers } from "../helpers/content.js";
 import { ensureProfilePointerTag } from "../helpers/common-tags.js";
 
+/** Override the event content */
 export function setContent(content: string): EventFactoryOperation {
   return async (draft) => {
     return { ...draft, content };
   };
 }
 
+/** Encrypts the content to a pubkey */
 export function setEncryptedContent(pubkey: string, content: string, method: "nip04" | "nip44"): EventFactoryOperation {
   return async (draft, { signer }) => {
     if (!signer) throw new Error("Signer required for encrypted content");
@@ -23,7 +25,7 @@ export function setEncryptedContent(pubkey: string, content: string, method: "ni
   };
 }
 
-/** Replaces any @npub or npub mentions with nostr: prefix */
+/** Replaces any `@npub` or bare npub mentions with nostr: prefix */
 export function repairContentNostrLinks(): EventFactoryOperation {
   return (draft) => ({
     ...draft,
@@ -58,6 +60,6 @@ export function createTextContentOperations(content: string, options?: TextConte
     tagPubkeyMentionedInContent(),
     includeQuoteTags(),
     includeContentHashtags(),
-    options?.emojis && includeEmojiTags(options.emojis),
+    options?.emojis && includeContentEmojiTags(options.emojis),
   ].filter((o) => !!o);
 }

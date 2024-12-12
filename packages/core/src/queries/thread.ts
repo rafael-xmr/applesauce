@@ -7,6 +7,7 @@ import { Query } from "../query-store/index.js";
 import { getNip10References, interpretThreadTags, ThreadReferences } from "../helpers/threading.js";
 import { getCoordinateFromAddressPointer, isAddressPointer, isEventPointer } from "../helpers/pointers.js";
 import { getEventUID, getReplaceableUID, getTagValue, isEvent } from "../helpers/event.js";
+import { COMMENT_KIND } from "../helpers/comment.js";
 
 export type Thread = {
   root?: ThreadItem;
@@ -103,12 +104,12 @@ export function ThreadQuery(root: string | AddressPointer | EventPointer, opts?:
   };
 }
 
-/** A query that gets all legacy and NIP-10 replies for an event */
+/** A query that gets all legacy and NIP-10, and NIP-22 replies for an event */
 export function RepliesQuery(event: NostrEvent, overrideKinds?: number[]): Query<NostrEvent[]> {
   return {
     key: getEventUID(event),
     run: (events) => {
-      const kinds = overrideKinds || event.kind === 1 ? [1, 1111] : [1111];
+      const kinds = overrideKinds || event.kind === 1 ? [1, COMMENT_KIND] : [COMMENT_KIND];
       const filter: Filter = { kinds };
 
       if (isEvent(parent) || isEventPointer(event)) filter["#e"] = [event.id];
@@ -123,7 +124,7 @@ export function RepliesQuery(event: NostrEvent, overrideKinds?: number[]): Query
       return events.timeline(filter).pipe(
         map((events) => {
           return events.filter((e) => {
-            const refs = interpretThreadTags(e);
+            const refs = interpretThreadTags(e.tags);
             return refs.reply?.e?.[1] === event.id || refs.reply?.a?.[1] === address;
           });
         }),

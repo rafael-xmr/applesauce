@@ -45,15 +45,16 @@
 
 ## Pointers
 
-- [`getEventPointerFromTag`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getEventPointerFromTag.html) Creates an `EventPointer` from a standard "e" tag
-- [`getAddressPointerFromTag`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getAddressPointerFromTag.html) Creates an `AddressPointer` from a standard "a" tag
-- [`getProfilePointerFromTag`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getProfilePointerFromTag.html) Creates an `ProfilePointer` from a standard "p" tag
+- [`getEventPointerFromETag`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getEventPointerFromETag.html) Creates an `EventPointer` from a standard "e" tag
+- [`getEventPointerFromQTag`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getEventPointerFromQTag.html) Creates an `EventPointer` from a standard "q" tag
+- [`getAddressPointerFromATag`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getAddressPointerFromATag.html) Creates an `AddressPointer` from a standard "a" tag
+- [`getProfilePointerFromPTag`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getProfilePointerFromPTag.html) Creates an `ProfilePointer` from a standard "p" tag
+- [`getAddressPointerForEvent`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getAddressPointerForEvent.html) Returns an `AddressPointer` for a replaceable event
 
 ## Delete events
 
 - [`getDeleteIds`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getDeleteIds.html) Gets a list of referenced event ids
 - [`getDeleteCoordinates`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getDeleteCoordinates.html) Get the list of replaceable event coordinates the event is referencing
-- [`createDeleteEvent`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.createDeleteEvent.html) Creates a draft delete event for a list of events
 
 ## Emojis
 

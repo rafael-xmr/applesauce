@@ -1,5 +1,4 @@
 import { describe, it, expect } from "vitest";
-import { kinds } from "nostr-tools";
 
 import { EventFactory } from "../event-factory.js";
 import { NoteBlueprint } from "./note.js";
@@ -79,7 +78,6 @@ describe("NoteBlueprint", () => {
       client: {
         name: "noStrudel",
         address: {
-          kind: kinds.Handlerinformation,
           pubkey: "266815e0c9210dfa324c6cba3573b14bee49da4209a9456f9484e5106cd408a5",
           identifier: "1686066542546",
         },

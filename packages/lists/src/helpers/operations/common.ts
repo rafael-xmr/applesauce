@@ -1,10 +1,7 @@
 import { AddressPointer, EventPointer, ProfilePointer } from "nostr-tools/nip19";
-import {
-  getATagFromAddressPointer,
-  getCoordinateFromAddressPointer,
-  getETagFromEventPointer,
-  TagOperation,
-} from "applesauce-core/helpers";
+import { getCoordinateFromAddressPointer, TagOperation } from "applesauce-core/helpers";
+
+import { createETagFromEventPointer, createATagFromAddressPointer } from "applesauce-factory/helpers/pointer";
 
 export function addPubkeyTag(pubkey: string | ProfilePointer): TagOperation {
   pubkey = typeof pubkey !== "string" ? pubkey.pubkey : pubkey;
@@ -17,7 +14,7 @@ export function removePubkeyTag(pubkey: string | ProfilePointer): TagOperation {
 
 export function addEventTag(id: string | EventPointer): TagOperation {
   if (typeof id === "string") return (tags) => [...tags, ["e", id]];
-  else return (tags) => [...tags, getETagFromEventPointer(id)];
+  else return (tags) => [...tags, createETagFromEventPointer(id)];
 }
 export function removeEvent(id: string | EventPointer): TagOperation {
   if (typeof id === "string") return (tags) => tags.filter((t) => !(t[0] === "e" && t[1] === id));
@@ -26,7 +23,7 @@ export function removeEvent(id: string | EventPointer): TagOperation {
 
 export function addCoordinateTag(cord: string | AddressPointer): TagOperation {
   if (typeof cord === "string") return (tags) => [...tags, ["a", cord]];
-  else return (tags) => [...tags, getATagFromAddressPointer(cord)];
+  else return (tags) => [...tags, createATagFromAddressPointer(cord)];
 }
 export function removeCoordinateTag(cord: string | AddressPointer): TagOperation {
   cord = typeof cord !== "string" ? getCoordinateFromAddressPointer(cord) : cord;

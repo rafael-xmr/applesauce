@@ -1,9 +1,9 @@
 import {
-  getAddressPointerFromTag,
+  getAddressPointerFromATag,
   getCoordinateFromAddressPointer,
-  getEventPointerFromTag,
+  getEventPointerFromETag,
   getHiddenTags,
-  getProfilePointerFromTag,
+  getProfilePointerFromPTag,
   isATag,
   isETag,
   isPTag,
@@ -48,15 +48,15 @@ export function isProfilePointerInList(list: NostrEvent, pointer: string | Profi
 
 /** Returns all the EventPointer in a list */
 export function getEventPointersFromList(list: NostrEvent): EventPointer[] {
-  return listGetAllTags(list).filter(isETag).map(getEventPointerFromTag);
+  return listGetAllTags(list).filter(isETag).map(getEventPointerFromETag);
 }
 
 /** Returns all the AddressPointer in a list */
 export function getAddressPointersFromList(list: NostrEvent): AddressPointer[] {
-  return listGetAllTags(list).filter(isATag).map(getAddressPointerFromTag);
+  return listGetAllTags(list).filter(isATag).map(getAddressPointerFromATag);
 }
 
 /** Returns all the ProfilePointer in a list */
 export function getProfilePointersFromList(list: NostrEvent): ProfilePointer[] {
-  return listGetAllTags(list).filter(isPTag).map(getProfilePointerFromTag);
+  return listGetAllTags(list).filter(isPTag).map(getProfilePointerFromPTag);
 }

@@ -1,7 +1,8 @@
 import { kinds, NostrEvent } from "nostr-tools";
+
 import { createTextContentOperations, TextContentOptions } from "../operations/content.js";
 import { EventFactory, EventFactoryBlueprint } from "../event-factory.js";
-import { includeNoteReplyTags } from "../operations/note.js";
+import { includeNoteThreadingTags, includeNoteThreadingNotifyTags } from "../operations/note.js";
 
 /** Short text note reply (kind 1) blueprint */
 export function NoteReplyBlueprint(
@@ -17,7 +18,9 @@ export function NoteReplyBlueprint(
       { kind: 1 },
       ctx,
       // add NIP-10 tags
-      includeNoteReplyTags(parent),
+      includeNoteThreadingTags(parent),
+      // copy "p" tags from parent
+      includeNoteThreadingNotifyTags(parent),
       // set default text content
       ...createTextContentOperations(content, options),
     );

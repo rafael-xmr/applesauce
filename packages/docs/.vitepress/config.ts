@@ -56,6 +56,16 @@ export default defineConfig({
         ],
       },
       {
+        text: "Factory",
+        items: [
+          { text: "Installation", link: "/factory/installation" },
+          { text: "Event Factory", link: "/factory/factory" },
+          { text: "Blueprints", link: "/factory/blueprints" },
+          { text: "Operations", link: "/factory/operations" },
+          { text: "Helpers", link: "/factory/helpers" },
+        ],
+      },
+      {
         text: "Lists",
         items: [{ text: "Installation", link: "/lists/installation" }],
       },

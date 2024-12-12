@@ -24,6 +24,14 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
+    "./blueprints": {
+      "import": "./dist/blueprints/index.js",
+      "types": "./dist/blueprints/index.d.ts"
+    },
+    "./blueprints/*": {
+      "import": "./dist/blueprints/*.js",
+      "types": "./dist/blueprints/*.d.ts"
+    },
     "./operations": {
       "import": "./dist/operations/index.js",
       "types": "./dist/operations/index.d.ts"

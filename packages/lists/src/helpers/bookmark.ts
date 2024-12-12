@@ -1,4 +1,4 @@
-import { getAddressPointerFromTag, getEventPointerFromTag, getHiddenTags } from "applesauce-core/helpers";
+import { getAddressPointerFromATag, getEventPointerFromETag, getHiddenTags } from "applesauce-core/helpers";
 import { kinds, NostrEvent } from "nostr-tools";
 import { getOrComputeCachedValue } from "applesauce-core/helpers/cache";
 import { AddressPointer, EventPointer } from "nostr-tools/nip19";
@@ -14,10 +14,10 @@ export type Bookmarks = {
 };
 
 export function parseBookmarkTags(tags: string[][]): Bookmarks {
-  const notes = tags.filter((t) => t[0] === "e" && t[1]).map(getEventPointerFromTag);
+  const notes = tags.filter((t) => t[0] === "e" && t[1]).map(getEventPointerFromETag);
   const articles = tags
     .filter((t) => t[0] === "a" && t[1])
-    .map(getAddressPointerFromTag)
+    .map(getAddressPointerFromATag)
     .filter((addr) => addr.kind === kinds.LongFormArticle);
   const hashtags = tags.filter((t) => t[0] === "t" && t[1]).map((t) => t[1]);
   const urls = tags.filter((t) => t[0] === "r" && t[1]).map((t) => t[1]);

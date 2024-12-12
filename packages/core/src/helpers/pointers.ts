@@ -14,6 +14,7 @@ import { getPublicKey, kinds, NostrEvent } from "nostr-tools";
 
 import { safeRelayUrls } from "./relays.js";
 import { getTagValue } from "./index.js";
+import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
 
 export type AddressPointerWithoutD = Omit<AddressPointer, "identifier"> & {
   identifier?: string;
@@ -89,30 +90,46 @@ export function encodeDecodeResult(result: DecodeResult) {
   return "";
 }
 
-/** @throws */
-export function getEventPointerFromTag(tag: string[]): EventPointer {
+/**
+ * Gets an EventPointer form a common "e" tag
+ * @throws
+ */
+export function getEventPointerFromETag(tag: string[]): EventPointer {
   if (!tag[1]) throw new Error("Missing event id in tag");
   let pointer: EventPointer = { id: tag[1] };
   if (tag[2]) pointer.relays = safeRelayUrls([tag[2]]);
+  return pointer;
+}
 
-  // get author from NIP-18 quote tags and nip-22 comments
-  if ((tag[0] === "q" || tag[0] === "e" || tag[0] === "E") && tag[3] && tag[3].length === 64) {
-    pointer.author = tag[3];
-  }
+/**
+ * Gets an EventPointer form a "q" tag
+ * @throws
+ */
+export function getEventPointerFromQTag(tag: string[]): EventPointer {
+  if (!tag[1]) throw new Error("Missing event id in tag");
+  let pointer: EventPointer = { id: tag[1] };
+  if (tag[2]) pointer.relays = safeRelayUrls([tag[2]]);
+  if (tag[3] && tag[3].length === 64) pointer.author = tag[3];
 
   return pointer;
 }
 
-/** @throws */
-export function getAddressPointerFromTag(tag: string[]): AddressPointer {
+/**
+ * Get an AddressPointer from an "a" tag
+ * @throws
+ */
+export function getAddressPointerFromATag(tag: string[]): AddressPointer {
   if (!tag[1]) throw new Error("Missing coordinate in tag");
   const pointer = parseCoordinate(tag[1], true, false);
   if (tag[2]) pointer.relays = safeRelayUrls([tag[2]]);
   return pointer;
 }
 
-/** @throws */
-export function getProfilePointerFromTag(tag: string[]): ProfilePointer {
+/**
+ * Gets a ProfilePointer from a "p" tag
+ * @throws
+ */
+export function getProfilePointerFromPTag(tag: string[]): ProfilePointer {
   if (!tag[1]) throw new Error("Missing pubkey in tag");
   const pointer: ProfilePointer = { pubkey: tag[1] };
   if (tag[2]) pointer.relays = safeRelayUrls([tag[2]]);
@@ -124,20 +141,20 @@ export function getPointerFromTag(tag: string[]): DecodeResult | null {
   try {
     switch (tag[0]) {
       case "e":
-        return { type: "nevent", data: getEventPointerFromTag(tag) };
+        return { type: "nevent", data: getEventPointerFromETag(tag) };
 
       case "a":
         return {
           type: "naddr",
-          data: getAddressPointerFromTag(tag),
+          data: getAddressPointerFromATag(tag),
         };
 
       case "p":
-        return { type: "nprofile", data: getProfilePointerFromTag(tag) };
+        return { type: "nprofile", data: getProfilePointerFromPTag(tag) };
 
       // NIP-18 quote tags
       case "q":
-        return { type: "nevent", data: getEventPointerFromTag(tag) };
+        return { type: "nevent", data: getEventPointerFromETag(tag) };
     }
   } catch (error) {}
 
@@ -161,16 +178,34 @@ export function getCoordinateFromAddressPointer(pointer: AddressPointer) {
   return `${pointer.kind}:${pointer.pubkey}:${pointer.identifier}`;
 }
 
-/** Returns a tag for an address pointer */
-export function getATagFromAddressPointer(pointer: AddressPointer): ["a", ...string[]] {
-  const relay = pointer.relays?.[0];
-  const coordinate = getCoordinateFromAddressPointer(pointer);
-  return relay ? ["a", coordinate, relay] : ["a", coordinate];
+/**
+ * Returns an AddressPointer for a replaceable event
+ * @throws
+ */
+export function getAddressPointerForEvent(event: NostrEvent, relays?: string[]): AddressPointer {
+  if (!isParameterizedReplaceableKind(event.kind)) throw new Error("Cant get AddressPointer for non-replaceable event");
+
+  const d = getTagValue(event, "d");
+  if (!d) throw new Error("Event missing identifier");
+  return {
+    identifier: d,
+    kind: event.kind,
+    pubkey: event.pubkey,
+    relays,
+  };
 }
 
-/** Returns a tag for an event pointer */
-export function getETagFromEventPointer(pointer: EventPointer): ["e", ...string[]] {
-  return pointer.relays?.length ? ["e", pointer.id, pointer.relays[0]] : ["e", pointer.id];
+/**
+ * Returns an EventPointer for an event
+ * @throws
+ */
+export function getEventPointerForEvent(event: NostrEvent, relays?: string[]): EventPointer {
+  return {
+    id: event.id,
+    kind: event.kind,
+    author: event.pubkey,
+    relays,
+  };
 }
 
 /** Returns a pointer for a given event */

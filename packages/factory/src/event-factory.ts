@@ -1,11 +1,13 @@
 import { unixNow } from "applesauce-core/helpers";
 import { AddressPointer } from "nostr-tools/nip19";
-import { EventTemplate, NostrEvent, VerifiedEvent } from "nostr-tools";
+import { EventTemplate, kinds, NostrEvent, VerifiedEvent } from "nostr-tools";
 
 import { includeClientTag } from "./operations/client.js";
 import { CommentBlueprint } from "./blueprints/comment.js";
 import { NoteBlueprint } from "./blueprints/note.js";
 import { ReactionBlueprint } from "./blueprints/reaction.js";
+import { DeleteBlueprint } from "./blueprints/delete.js";
+import { NoteReplyBlueprint } from "./blueprints/reply.js";
 
 export type EventFactoryTemplate = { kind: number; content?: string; pubkey?: string };
 
@@ -33,7 +35,7 @@ export type EventFactorySigner = {
 
 export type EventFactoryClient = {
   name: string;
-  address?: Omit<AddressPointer, "kind" | "relays"> & { kind: 31990 };
+  address?: Omit<AddressPointer, "kind" | "relays">;
 };
 
 export type EventFactoryContext = {
@@ -51,7 +53,7 @@ export class EventFactory {
     context: EventFactoryContext,
     ...operations: (EventFactoryOperation | undefined)[]
   ): Promise<EventTemplate> {
-    let draft: EventTemplate = { ...template, content: "", created_at: unixNow(), tags: [] };
+    let draft: EventTemplate = { content: "", created_at: unixNow(), tags: [], ...template };
 
     // run operations
     for (const operation of operations) {
@@ -60,7 +62,10 @@ export class EventFactory {
 
     // add client tag
     if (context.client) {
-      draft = await includeClientTag(context.client.name, context.client.address)(draft, context);
+      draft = await includeClientTag(
+        context.client.name,
+        context.client.address && { ...context.client.address, kind: kinds.Handlerinformation },
+      )(draft, context);
     }
 
     return draft;
@@ -94,8 +99,18 @@ export class EventFactory {
     return this.create(NoteBlueprint, ...args);
   }
 
+  /** Creates a short text note reply */
+  noteReply(...args: Parameters<typeof NoteReplyBlueprint>) {
+    return this.create(NoteReplyBlueprint, ...args);
+  }
+
   /** Creates a reaction event */
   reaction(...args: Parameters<typeof ReactionBlueprint>) {
     return this.create(ReactionBlueprint, ...args);
+  }
+
+  /** Creates a delete event */
+  delete(...args: Parameters<typeof DeleteBlueprint>) {
+    return this.create(DeleteBlueprint, ...args);
   }
 }

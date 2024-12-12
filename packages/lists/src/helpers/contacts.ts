@@ -1,5 +1,5 @@
 import { NostrEvent } from "nostr-tools";
-import { getProfilePointerFromTag, isPTag, safeRelayUrl } from "applesauce-core/helpers";
+import { getProfilePointerFromPTag, isPTag, safeRelayUrl } from "applesauce-core/helpers";
 import { getOrComputeCachedValue } from "applesauce-core/helpers/cache";
 
 export const ContactsRelaysSymbol = Symbol.for("contacts-relays");
@@ -7,7 +7,7 @@ export const ContactsPeopleSymbol = Symbol.for("contacts-people");
 
 export function getContactsPeople(contacts: NostrEvent) {
   return getOrComputeCachedValue(contacts, ContactsPeopleSymbol, () =>
-    contacts.tags.filter(isPTag).map(getProfilePointerFromTag),
+    contacts.tags.filter(isPTag).map(getProfilePointerFromPTag),
   );
 }
 

@@ -15,3 +15,8 @@ export function includeSingletonTag(tag: [string, ...string[]], replace = true):
     return { ...draft, tags };
   };
 }
+
+/** Includes a NIP-31 alt tag */
+export function includeAltTag(description: string): EventFactoryOperation {
+  return includeSingletonTag(["alt", description]);
+}
