@@ -1,7 +1,7 @@
 import { EventFactoryOperation } from "../event-factory.js";
 
 /** Includes only a single instance of tag */
-export function includeSingletonTag(tag: [string, ...string[]], replace = true): EventFactoryOperation {
+export function includeSingletonTag(tag: string[], replace = true): EventFactoryOperation {
   return (draft) => {
     let tags = Array.from(draft.tags);
     const existing = tags.find((t) => t[0] === tag[0]);

@@ -1,6 +1,6 @@
 import { unixNow } from "applesauce-core/helpers";
 import { AddressPointer } from "nostr-tools/nip19";
-import { EventTemplate, NostrEvent, VerifiedEvent } from "nostr-tools";
+import { EventTemplate, NostrEvent } from "nostr-tools";
 
 import { includeClientTag } from "./operations/client.js";
 import { CommentBlueprint } from "./blueprints/comment.js";
@@ -9,7 +9,13 @@ import { ReactionBlueprint } from "./blueprints/reaction.js";
 import { DeleteBlueprint } from "./blueprints/delete.js";
 import { NoteReplyBlueprint } from "./blueprints/reply.js";
 
-export type EventFactoryTemplate = { kind: number; content?: string; pubkey?: string };
+export type EventFactoryTemplate = {
+  kind: number;
+  content?: string;
+  pubkey?: string;
+  tags?: string[][];
+  created_at?: number;
+};
 
 /** A single operation in the factory process */
 export type EventFactoryOperation = (
@@ -22,7 +28,7 @@ export type EventFactoryBlueprint = (context: EventFactoryContext) => EventTempl
 
 export type EventFactorySigner = {
   getPublicKey: () => Promise<string> | string;
-  signEvent: (template: EventTemplate) => Promise<VerifiedEvent> | VerifiedEvent;
+  signEvent: (template: EventTemplate) => Promise<NostrEvent> | NostrEvent;
   nip04?: {
     encrypt: (pubkey: string, plaintext: string) => Promise<string> | string;
     decrypt: (pubkey: string, ciphertext: string) => Promise<string> | string;
