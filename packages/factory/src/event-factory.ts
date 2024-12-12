@@ -1,6 +1,6 @@
 import { unixNow } from "applesauce-core/helpers";
 import { AddressPointer } from "nostr-tools/nip19";
-import { EventTemplate, kinds, NostrEvent, VerifiedEvent } from "nostr-tools";
+import { EventTemplate, NostrEvent, VerifiedEvent } from "nostr-tools";
 
 import { includeClientTag } from "./operations/client.js";
 import { CommentBlueprint } from "./blueprints/comment.js";
@@ -62,10 +62,7 @@ export class EventFactory {
 
     // add client tag
     if (context.client) {
-      draft = await includeClientTag(
-        context.client.name,
-        context.client.address && { ...context.client.address, kind: kinds.Handlerinformation },
-      )(draft, context);
+      draft = await includeClientTag(context.client.name, context.client.address)(draft, context);
     }
 
     return draft;
