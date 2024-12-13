@@ -3,7 +3,9 @@ import { EventTemplate, NostrEvent } from "nostr-tools";
 export type Nip07Interface = {
   getPublicKey: () => Promise<string> | string;
   signEvent: (template: EventTemplate) => Promise<NostrEvent> | NostrEvent;
-  getRelays?: () => Record<string, { read: boolean; write: boolean }> | string[];
+  getRelays?: () =>
+    | Record<string, { read: boolean; write: boolean }>
+    | Promise<Record<string, { read: boolean; write: boolean }>>;
   nip04?: {
     encrypt: (pubkey: string, plaintext: string) => Promise<string> | string;
     decrypt: (pubkey: string, ciphertext: string) => Promise<string> | string;

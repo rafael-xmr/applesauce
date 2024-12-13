@@ -1,4 +1,5 @@
 export * from "./amber-clipboard-signer.js";
+export * from "./extension-signer.js";
 export * from "./nostr-connect-signer.js";
 export * from "./password-signer.js";
 export * from "./readonly-signer.js";
