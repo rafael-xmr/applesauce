@@ -17,18 +17,14 @@ export class AmberClipboardSigner implements Nip07Interface {
 
   verifyEvent: typeof verifyEvent = verifyEvent;
 
-  nip04?:
-    | {
-        encrypt: (pubkey: string, plaintext: string) => Promise<string> | string;
-        decrypt: (pubkey: string, ciphertext: string) => Promise<string> | string;
-      }
-    | undefined;
-  nip44?:
-    | {
-        encrypt: (pubkey: string, plaintext: string) => Promise<string> | string;
-        decrypt: (pubkey: string, ciphertext: string) => Promise<string> | string;
-      }
-    | undefined;
+  nip04: {
+    encrypt: (pubkey: string, plaintext: string) => Promise<string> | string;
+    decrypt: (pubkey: string, ciphertext: string) => Promise<string> | string;
+  };
+  nip44: {
+    encrypt: (pubkey: string, plaintext: string) => Promise<string> | string;
+    decrypt: (pubkey: string, ciphertext: string) => Promise<string> | string;
+  };
 
   constructor() {
     document.addEventListener("visibilitychange", this.onVisibilityChange);

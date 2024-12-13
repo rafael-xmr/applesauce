@@ -10,18 +10,14 @@ export class PasswordSigner implements Nip07Interface {
 
   ncryptsec?: string;
 
-  nip04?:
-    | {
-        encrypt: (pubkey: string, plaintext: string) => Promise<string> | string;
-        decrypt: (pubkey: string, ciphertext: string) => Promise<string> | string;
-      }
-    | undefined;
-  nip44?:
-    | {
-        encrypt: (pubkey: string, plaintext: string) => Promise<string> | string;
-        decrypt: (pubkey: string, ciphertext: string) => Promise<string> | string;
-      }
-    | undefined;
+  nip04: {
+    encrypt: (pubkey: string, plaintext: string) => Promise<string> | string;
+    decrypt: (pubkey: string, ciphertext: string) => Promise<string> | string;
+  };
+  nip44: {
+    encrypt: (pubkey: string, plaintext: string) => Promise<string> | string;
+    decrypt: (pubkey: string, ciphertext: string) => Promise<string> | string;
+  };
 
   get unlocked() {
     return !!this.key;

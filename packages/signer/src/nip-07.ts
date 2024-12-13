@@ -1,8 +1,8 @@
-import { EventTemplate, VerifiedEvent } from "nostr-tools";
+import { EventTemplate, NostrEvent } from "nostr-tools";
 
 export type Nip07Interface = {
   getPublicKey: () => Promise<string> | string;
-  signEvent: (template: EventTemplate) => Promise<VerifiedEvent> | VerifiedEvent;
+  signEvent: (template: EventTemplate) => Promise<NostrEvent> | NostrEvent;
   getRelays?: () => Record<string, { read: boolean; write: boolean }> | string[];
   nip04?: {
     encrypt: (pubkey: string, plaintext: string) => Promise<string> | string;

@@ -20,10 +20,23 @@ export const rxNostr = createRxNostr({
   connectionStrategy: "lazy-keep",
 });
 
+// create method to load events from the cache relay
+function cacheRequest(filters: Filter[]) {
+  return new Observable((observer) => {
+    const sub = cacheRelay.subscribe(filters, {
+      onevent: (event) => observer.next(event),
+      oneose: () => {
+        sub.close();
+        observer.complete();
+      },
+    });
+  });
+}
+
 const replaceableLoader = new ReplaceableLoader(rxNostr, {
   bufferTime: 1000,
-  // cache relays will always be checked first
-  cacheRelays: ["ws://localhost:4869/"],
+  // check the cache first for events
+  cacheRequest: cacheRequest,
   // lookup relays are used as a fallback if the event cant be found
   lookupRelays: ["wss://purplepag.es/"],
 });
