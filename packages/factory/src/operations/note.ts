@@ -33,9 +33,9 @@ export function includeNoteThreadingNotifyTags(parent: NostrEvent): EventFactory
   return async (draft, ctx) => {
     let tags = Array.from(draft.tags);
 
-    // copy "p" tags from parent event
+    // copy "p" tags from parent event that are not mentions
     for (const tag of parent.tags) {
-      if (isPTag(tag)) tags.push(tag);
+      if (isPTag(tag) && tag[3] !== "mention") tags.push(tag);
     }
 
     // add new "p" tag

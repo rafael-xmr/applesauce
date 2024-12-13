@@ -53,7 +53,7 @@ export type EventFactoryContext = {
 };
 
 export class EventFactory {
-  constructor(protected context: EventFactoryContext = {}) {}
+  constructor(public context: EventFactoryContext = {}) {}
 
   static async runProcess(
     template: EventFactoryTemplate,

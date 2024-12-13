@@ -54,7 +54,7 @@ export function setContentWarning(warning: boolean | string): EventFactoryOperat
     let tags = Array.from(draft.tags);
 
     // remove existing content warning
-    tags = tags.filter((t) => t[0] === "content-warning");
+    tags = tags.filter((t) => t[0] !== "content-warning");
 
     if (typeof warning === "string") tags.push(["content-warning", warning]);
     else if (warning === true) tags.push(["content-warning"]);
