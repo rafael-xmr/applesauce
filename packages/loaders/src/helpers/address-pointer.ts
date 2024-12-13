@@ -1,12 +1,12 @@
 import { AddressPointerWithoutD, getReplaceableUID } from "applesauce-core/helpers";
-import { LazyFilter } from "rx-nostr";
+import { Filter } from "nostr-tools";
 import { isParameterizedReplaceableKind, isReplaceableKind } from "nostr-tools/kinds";
 
 import { unique } from "./array.js";
 
 /** Converts an array of address pointers to a filter */
-export function createFilterFromAddressPointers(pointers: AddressPointerWithoutD[]) {
-  const filter: LazyFilter = {};
+export function createFilterFromAddressPointers(pointers: AddressPointerWithoutD[]): Filter {
+  const filter: Filter = {};
 
   filter.kinds = unique(pointers.map((p) => p.kind));
   filter.authors = unique(pointers.map((p) => p.pubkey));
@@ -17,7 +17,7 @@ export function createFilterFromAddressPointers(pointers: AddressPointerWithoutD
 }
 
 /** Takes a set of address pointers, groups them, then returns filters for the groups */
-export function createFiltersFromAddressPointers(pointers: AddressPointerWithoutD[]) {
+export function createFiltersFromAddressPointers(pointers: AddressPointerWithoutD[]): Filter[] {
   const groups = groupAddressPointersByPubkeyOrKind(pointers);
 
   return Array.from(groups.values()).map((pointers) => createFilterFromAddressPointers(pointers));

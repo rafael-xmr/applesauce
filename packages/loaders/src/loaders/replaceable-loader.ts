@@ -1,13 +1,19 @@
-import { share, tap, from, Observable, OperatorFunction, filter, bufferTime, map } from "rxjs";
+import { share, tap, from, Observable, OperatorFunction, filter, bufferTime, map, mergeMap } from "rxjs";
 import { EventPacket, RxNostr } from "rx-nostr";
 import { getEventUID, getReplaceableUID, markFromCache } from "applesauce-core/helpers";
+import { Filter, NostrEvent } from "nostr-tools";
 import { logger } from "applesauce-core";
 import { nanoid } from "nanoid";
 
 import { Loader } from "./loader.js";
 import { generatorSequence } from "../operators/generator-sequence.js";
 import { replaceableRequest } from "../operators/address-pointers-request.js";
-import { getAddressPointerId, getRelaysFromPointers, isLoadableAddressPointer } from "../helpers/address-pointer.js";
+import {
+  createFiltersFromAddressPointers,
+  getAddressPointerId,
+  getRelaysFromPointers,
+  isLoadableAddressPointer,
+} from "../helpers/address-pointer.js";
 import { unique } from "../helpers/array.js";
 
 export type LoadableAddressPointer = {
@@ -21,6 +27,8 @@ export type LoadableAddressPointer = {
   force?: boolean;
 };
 
+export type CacheRequest = (filters: Filter[]) => Observable<NostrEvent>;
+
 /** deep clone a loadable pointer to ensure its safe to modify */
 function cloneLoadablePointer(pointer: LoadableAddressPointer): LoadableAddressPointer {
   const clone = { ...pointer };
@@ -33,7 +41,7 @@ function* cacheFirstSequence(
   rxNostr: RxNostr,
   pointers: LoadableAddressPointer[],
   log: typeof logger,
-  opts?: { cacheRelays?: string[]; lookupRelays?: string[] },
+  opts?: { cacheRequest?: CacheRequest; lookupRelays?: string[] },
 ): Generator<Observable<EventPacket>, undefined, EventPacket[]> {
   const id = nanoid(8);
   log = log.extend(id);
@@ -59,12 +67,17 @@ function* cacheFirstSequence(
   };
 
   // first attempt, load from cache relays
-  if (opts?.cacheRelays && opts?.cacheRelays.length > 0) {
-    log(`Checking cache`, opts.cacheRelays, remaining);
+  if (opts?.cacheRequest) {
+    log(`Checking cache`, remaining);
     const results = yield from([remaining]).pipe(
-      replaceableRequest(rxNostr, id, opts.cacheRelays),
+      // convert pointers to filters
+      map(createFiltersFromAddressPointers),
+      // make requests
+      mergeMap((filters) => opts.cacheRequest!(filters)),
       // mark the event as from the cache
-      tap((p) => markFromCache(p.event)),
+      tap((event) => markFromCache(event)),
+      // convert to event packets
+      map((e) => ({ event: e, from: "cache", subId: "cache", type: "EVENT" }) as EventPacket),
     );
 
     if (handleResults(results)) return;
@@ -178,8 +191,8 @@ export type ReplaceableLoaderOptions = {
    * @default 1000
    */
   bufferTime?: number;
-  /** The cache relays to check first */
-  cacheRelays?: string[];
+  /** Request events from the cache first */
+  cacheRequest?: CacheRequest;
   /** Fallback lookup relays to check when event cant be found */
   lookupRelays?: string[];
 };
