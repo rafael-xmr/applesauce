@@ -9,10 +9,10 @@ export function createATagFromAddressPointer(pointer: AddressPointer): string[] 
   return fillAndTrimTag(["a", coordinate, pointer.relays?.[0]]);
 }
 
-export type ETagMarker = "root" | "reply" | "mention" | "";
+export type Nip10TagMarker = "root" | "reply" | "mention" | "";
 
 /** Returns a tag for an event pointer with a marker*/
-export function createETagWithMarkerFromEventPointer(pointer: EventPointer, marker?: ETagMarker): string[] {
+export function createETagWithMarkerFromEventPointer(pointer: EventPointer, marker?: Nip10TagMarker): string[] {
   return fillAndTrimTag(["e", pointer.id, pointer.relays?.[0], marker, pointer.author]);
 }
 

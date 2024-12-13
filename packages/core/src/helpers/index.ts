@@ -1,6 +1,7 @@
 export * from "./bolt11.js";
 export * from "./cache.js";
 export * from "./comment.js";
+export * from "./content.js";
 export * from "./delete.js";
 export * from "./emoji.js";
 export * from "./event.js";

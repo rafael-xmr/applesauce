@@ -84,3 +84,21 @@ export function isValidZap(zap?: NostrEvent) {
     return false;
   }
 }
+
+export type ZapSplit = { pubkey: string; percent: number; weight: number; relay?: string };
+
+/** Returns the zap splits for an event */
+export function getZapSplits(event: NostrEvent): ZapSplit[] | undefined {
+  const tags = event.tags.filter((t) => t[0] === "zap" && t[1] && t[3]) as [string, string, string, string][];
+
+  if (tags.length > 0) {
+    const targets = tags
+      .map((t) => ({ pubkey: t[1], relay: t[2], weight: parseFloat(t[3]) }))
+      .filter((p) => Number.isFinite(p.weight));
+
+    const total = targets.reduce((v, p) => v + p.weight, 0);
+    return targets.map((p) => ({ ...p, percent: p.weight / total }));
+  }
+
+  return undefined;
+}

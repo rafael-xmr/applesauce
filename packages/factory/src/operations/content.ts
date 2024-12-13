@@ -48,8 +48,24 @@ export function tagPubkeyMentionedInContent(): EventFactoryOperation {
   };
 }
 
+/** Sets the NIP-36 content-warning tag */
+export function setContentWarning(warning: boolean | string): EventFactoryOperation {
+  return (draft) => {
+    let tags = Array.from(draft.tags);
+
+    // remove existing content warning
+    tags = tags.filter((t) => t[0] === "content-warning");
+
+    if (typeof warning === "string") tags.push(["content-warning", warning]);
+    else if (warning === true) tags.push(["content-warning"]);
+
+    return { ...draft, tags };
+  };
+}
+
 export type TextContentOptions = {
   emojis?: Emoji[];
+  contentWarning?: boolean | string;
 };
 
 /** Create a set of operations for common text content */
@@ -61,5 +77,6 @@ export function createTextContentOperations(content: string, options?: TextConte
     includeQuoteTags(),
     includeContentHashtags(),
     options?.emojis && includeContentEmojiTags(options.emojis),
+    options?.contentWarning !== undefined ? setContentWarning(options.contentWarning) : undefined,
   ].filter((o) => !!o);
 }

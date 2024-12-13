@@ -1,4 +1,4 @@
-import { unixNow } from "applesauce-core/helpers";
+import { Emoji, unixNow } from "applesauce-core/helpers";
 import { AddressPointer } from "nostr-tools/nip19";
 import { EventTemplate, NostrEvent } from "nostr-tools";
 
@@ -49,6 +49,7 @@ export type EventFactoryContext = {
   getRelayHint?: (event: NostrEvent) => string | undefined | Promise<string> | Promise<undefined>;
   getPubkeyRelayHint?: (pubkey: string) => string | undefined | Promise<string> | Promise<undefined>;
   signer?: EventFactorySigner;
+  emojis?: Emoji[];
 };
 
 export class EventFactory {

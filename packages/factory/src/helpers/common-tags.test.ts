@@ -2,11 +2,11 @@ import { describe, test, it, expect } from "vitest";
 
 import { EventPointer } from "nostr-tools/nip19";
 import { ensureAddressPointerTag, ensureMarkedEventPointerTag, ensureProfilePointerTag } from "./common-tags.js";
-import { ETagMarker } from "./pointer.js";
+import { Nip10TagMarker } from "./pointer.js";
 
 describe("common tags helpers", () => {
   describe("ensureEventPointerTag", () => {
-    test.each<[string[][], EventPointer, ETagMarker | undefined, string[][]]>([
+    test.each<[string[][], EventPointer, Nip10TagMarker | undefined, string[][]]>([
       // merge simple into simple
       [[["e", "event-id"]], { id: "event-id" }, undefined, [["e", "event-id"]]],
       // merge hint into simple
@@ -29,7 +29,7 @@ describe("common tags helpers", () => {
       expect(ensureMarkedEventPointerTag(input, pointer, marker)).toEqual(output);
     });
 
-    test.each<[string[][], EventPointer, ETagMarker | undefined, string[][]]>([
+    test.each<[string[][], EventPointer, Nip10TagMarker | undefined, string[][]]>([
       // keep hint
       [
         [["e", "event-id", "wss://relay.example.com"]],

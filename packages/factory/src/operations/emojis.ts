@@ -4,14 +4,15 @@ import { Expressions } from "applesauce-content/helpers";
 import { EventFactoryOperation } from "../event-factory.js";
 
 /** Adds "emoji" tags for NIP-30 emojis used in the content */
-export function includeContentEmojiTags(emojis: Emoji[]): EventFactoryOperation {
-  return (draft) => {
+export function includeContentEmojiTags(emojis?: Emoji[]): EventFactoryOperation {
+  return (draft, ctx) => {
+    const all = [...(ctx.emojis ?? []), ...(emojis ?? [])];
     const tags = Array.from(draft.tags);
 
     // create tags for all occurrences of #hashtag
     const matches = draft.content.matchAll(Expressions.emoji);
     for (const [_, name] of matches) {
-      const emoji = emojis.find((e) => e.name === name);
+      const emoji = all.find((e) => e.name === name);
 
       if (emoji?.url) {
         tags.push(["emoji", emoji.name, emoji.url]);
