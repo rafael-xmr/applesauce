@@ -27,7 +27,7 @@ export class ReadonlySigner implements Nip07Interface {
     return this.pubkey;
   }
   getRelays() {
-    return [];
+    return {};
   }
 
   signEvent(): VerifiedEvent {

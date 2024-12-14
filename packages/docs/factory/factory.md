@@ -59,6 +59,7 @@ await factory.create(NoteBlueprint, "hello world");
 - [`factory.noteReply`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#noteReply) is a shortcut for `NoteReplyBlueprint`
 - [`factory.comment`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#comment) is a shortcut for `CommentBlueprint`
 - [`factory.reaction`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#reaction) is a shortcut for `ReactionBlueprint`
+- [`factory.share`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#share) is a shortcut for `ShareBlueprint`
 - [`factory.delete`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#delete) is a shortcut for `DeleteBlueprint`
 
 ## Manually creating an event

@@ -8,6 +8,7 @@ import { NoteBlueprint } from "./blueprints/note.js";
 import { ReactionBlueprint } from "./blueprints/reaction.js";
 import { DeleteBlueprint } from "./blueprints/delete.js";
 import { NoteReplyBlueprint } from "./blueprints/reply.js";
+import { ShareBlueprint } from "./blueprints/share.js";
 
 export type EventFactoryTemplate = {
   kind: number;
@@ -116,5 +117,10 @@ export class EventFactory {
   /** Creates a delete event */
   delete(...args: Parameters<typeof DeleteBlueprint>) {
     return this.create(DeleteBlueprint, ...args);
+  }
+
+  /** Creates a share event */
+  share(...args: Parameters<typeof ShareBlueprint>) {
+    return this.create(ShareBlueprint, ...args);
   }
 }

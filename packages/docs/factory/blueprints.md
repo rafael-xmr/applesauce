@@ -19,6 +19,10 @@ The [`CommentBlueprint`](https://hzrd149.github.io/applesauce/typedoc/functions/
 
 The [`ReactionBlueprint`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_factory.Blueprints.ReactionBlueprint.html) can be used to create [NIP-25](https://github.com/nostr-protocol/nips/blob/master/25.md) reactions and supports the common `+` and `-` reactions along with [NIP-30](https://github.com/nostr-protocol/nips/blob/master/30.md) emojis
 
+## ShareBlueprint
+
+The [`ShareBlueprint`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_factory.Blueprints.ShareBlueprint.html) can be used to create [NIP-18](https://github.com/nostr-protocol/nips/blob/master/18.md) repost / share event
+
 ## DeleteBlueprint
 
-The [`DeleteBlueprint`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_factory.Blueprints.DeleteBlueprint.html) can be used to create [NIP-09](https://github.com/nostr-protocol/nips/blob/master/25.md) delete event
+The [`DeleteBlueprint`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_factory.Blueprints.DeleteBlueprint.html) can be used to create [NIP-09](https://github.com/nostr-protocol/nips/blob/master/09.md) delete event
