@@ -4,7 +4,5 @@
 
 ### Patch Changes
 
-- Updated dependencies [26264fc]
-- Updated dependencies [81a6174]
-- Updated dependencies [82d68bb]
+- Updated dependencies
   - applesauce-signer@0.10.0
