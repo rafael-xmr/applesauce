@@ -34,7 +34,7 @@ importers:
         specifier: ^1.5.0
         version: 1.5.0
       applesauce-signer:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../signer
       nanoid:
         specifier: ^5.0.9
@@ -56,10 +56,10 @@ importers:
   packages/channel:
     dependencies:
       applesauce-core:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../core
       applesauce-factory:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../factory
       nostr-tools:
         specifier: ^2.10.3
@@ -90,7 +90,7 @@ importers:
         specifier: ^3.0.3
         version: 3.0.3
       applesauce-core:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../core
       mdast-util-find-and-replace:
         specifier: ^3.0.1
@@ -167,10 +167,10 @@ importers:
   packages/factory:
     dependencies:
       applesauce-content:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../content
       applesauce-core:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../core
       nostr-tools:
         specifier: ^2.10.3
@@ -207,10 +207,10 @@ importers:
         specifier: ^1.0.6
         version: 1.0.6
       applesauce-core:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../core
       applesauce-factory:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../factory
       debug:
         specifier: ^4.3.7
@@ -235,7 +235,7 @@ importers:
   packages/loaders:
     dependencies:
       applesauce-core:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../core
       nanoid:
         specifier: ^5.0.9
@@ -260,7 +260,7 @@ importers:
   packages/net:
     dependencies:
       applesauce-core:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../core
       nanoid:
         specifier: ^5.0.7
@@ -282,13 +282,13 @@ importers:
   packages/react:
     dependencies:
       applesauce-content:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../content
       applesauce-core:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../core
       applesauce-factory:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../factory
       nostr-tools:
         specifier: ^2.10.3
@@ -325,10 +325,10 @@ importers:
         specifier: ^1.0.6
         version: 1.0.6
       applesauce-core:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../core
       applesauce-net:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../net
       debug:
         specifier: ^4.3.7
@@ -353,7 +353,7 @@ importers:
   packages/user-status:
     dependencies:
       applesauce-core:
-        specifier: ^0.9.0
+        specifier: ^0.10.0
         version: link:../core
       nostr-tools:
         specifier: ^2.10.3

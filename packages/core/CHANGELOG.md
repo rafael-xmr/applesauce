@@ -1,5 +1,32 @@
 # applesauce-core
 
+## 0.10.0
+
+### Minor Changes
+
+- 5882997: Add `getContentWarning` helper
+- 304c912: Add support for keeping old versions of replaceable events
+- 5882997: Add `getZapSplits` helper
+- f5be45d: Add helpers for hidden tags
+- 494e934: Add media attachment helpers
+- 1a4176e: Remove `createDeleteEvent`
+- 304c912: Remove `stringifyFilter` helper method
+- 88841a4: Add `RepliesQuery` query
+- 83d7c48: Change `queryStore.runQuery` to `createQuery` and to accept query arguments as rest arguments instead of returning new method
+- 494e934: Add `CommentsQuery` query for NIP-22 comments
+- 8a9beea: Add support for delete events
+- 88841a4: Add `isEvent` method
+- 375d3da: Add `replaceableSet` method to event store
+- 7671525: Add `getPointerForEvent` method
+- ad0cb76: Add NIP-22 comment helpers
+- 32a94cd: Add `getPackName` and `getEmojis` for NIP-30 emoji packs
+
+### Patch Changes
+
+- 26264fc: Bump nostr-tools package
+- 93acc43: Use Reflect.has instead of Object.hasOwn
+- e99383c: Fix `matchFilter` method treating indexable tag filters as AND
+
 ## 0.9.0
 
 ### Minor Changes

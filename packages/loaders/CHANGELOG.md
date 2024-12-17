@@ -1,11 +1,9 @@
-# applesauce-net
+# applesauce-loaders
 
 ## 0.10.0
 
 ### Patch Changes
 
-- 26264fc: Bump nostr-tools package
-- 21fd622: Remove unused dependency
 - Updated dependencies [5882997]
 - Updated dependencies [304c912]
 - Updated dependencies [26264fc]
@@ -26,25 +24,3 @@
 - Updated dependencies [e99383c]
 - Updated dependencies [32a94cd]
   - applesauce-core@0.10.0
-
-## 0.9.0
-
-### Minor Changes
-
-- 493aee0: Bump nostr-tools to 2.10
-
-### Patch Changes
-
-- Updated dependencies
-  - applesauce-core@0.9.0
-
-## 0.8.0
-
-### Minor Changes
-
-- 0dae7f5: Replace zen-observable with rxjs
-
-### Patch Changes
-
-- Updated dependencies
-  - applesauce-core@0.8.0
