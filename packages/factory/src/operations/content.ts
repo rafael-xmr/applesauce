@@ -29,7 +29,10 @@ export function setEncryptedContent(pubkey: string, content: string, method: "ni
 export function repairContentNostrLinks(): EventFactoryOperation {
   return (draft) => ({
     ...draft,
-    content: draft.content.replaceAll(/(?<=^|\s)(?:@)?(npub1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{58})/gi, "nostr:$1"),
+    content: draft.content.replaceAll(
+      /(?<=^|\s)(?:@)?((?:npub|note|nprofile|nevent|naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{58})/gi,
+      "nostr:$1",
+    ),
   });
 }
 

@@ -6,13 +6,13 @@ The [`getParsedContent`](https://hzrd149.github.io/applesauce/typedoc/functions/
 
 ## Cashing
 
-Because parsing and transforming content is an expensive operation `getParsedContent` will cache the results on the event under a [Symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol), by default this is the [`TextNoteContentSymbol`](https://hzrd149.github.io/applesauce/typedoc/variables/applesauce_content.Text.TextNoteContentSymbol.html)
+Because parsing and transforming content is an expensive operation `getParsedContent` method will cache the results on the event under a [Symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol), by default this is the [`TextNoteContentSymbol`](https://hzrd149.github.io/applesauce/typedoc/variables/applesauce_content.Text.TextNoteContentSymbol.html)
 
 If your parsing or transforming different event kinds than kind 1, its recommended to create a new `Symbol` to and pass to `getParsedContent` to avoid cache collisions with the default kind 1 processor
 
 ## Links
 
-TODO
+The [`links`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_content.Text.links.html) transformer can be used to parse URLs and add [`Link`](https://hzrd149.github.io/applesauce/typedoc/interfaces/applesauce_content.Nast.Link.html) nodes to the tree
 
 ## Mentions
 
@@ -32,8 +32,8 @@ The [`galleries`](https://hzrd149.github.io/applesauce/typedoc/functions/applesa
 
 ## Lightning invoices
 
-TODO
+The [`lightningInvoices`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_content.Text.lightningInvoices.html) transformer can be used to parse bolt11 lightning invoices in the content
 
 ## Cashu tokens and payment requests
 
-TODO
+The [`cashuTokens`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_content.Text.cashuTokens.html) transformer can be used to parse cashu tokens in the content

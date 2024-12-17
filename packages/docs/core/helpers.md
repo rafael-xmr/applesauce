@@ -23,6 +23,11 @@
 - [`getInboxes`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getInboxes.html) Gets the inbox relays from a `10002` event
 - [`getOutboxes`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getOutboxes.html) Gets the outbox relays from a `10002` event
 
+## Comments
+
+- [`getCommentRootPointer`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getCommentRootPointer.html) Get the root pointer for a NIP-22 comment
+- [`getCommentReplyPointer`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getCommentReplyPointer.html) Get the reply pointer for a NIP-22 comment
+
 ## Event relays
 
 - [`addSeenRelay`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.addSeenRelay.html) Adds a relay to the list of relay the event was seen on

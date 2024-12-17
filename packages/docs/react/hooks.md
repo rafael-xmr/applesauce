@@ -2,7 +2,7 @@
 
 ## useObservable
 
-TODO
+The [`useObservable`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.Hooks.useObservable.html) hook can be used to subscribe to the current and future values of an rxjs observable. its use internally in the `useStoreQuery` hook to subscribe to the query
 
 ## useQueryStore
 
