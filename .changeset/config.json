@@ -5,6 +5,7 @@
   "fixed": [],
   "linked": [
     [
+      "applesauce-accounts",
       "applesauce-channel",
       "applesauce-content",
       "applesauce-core",
