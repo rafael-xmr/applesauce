@@ -1,7 +1,7 @@
 /// <reference types="@types/dom-serial" />
 import { EventTemplate, getEventHash, NostrEvent, verifyEvent } from "nostr-tools";
 import { base64 } from "@scure/base";
-import { randomBytes, hexToBytes } from "@noble/hashes/utils";
+import { randomBytes, hexToBytes, bytesToHex } from "@noble/hashes/utils";
 import { Point } from "@noble/secp256k1";
 import { createDefer, Deferred } from "applesauce-core/promise";
 
@@ -224,11 +224,19 @@ export class SerialPortSigner implements Nip07Interface {
     return text;
   }
 
+  /** Returns the public key on the device */
   public async getPublicKey() {
     const pubkey = await this.callMethodOnDevice(SerialPortSigner.METHOD_PUBLIC_KEY, []);
     this.pubkey = pubkey;
     return pubkey;
   }
+
+  /** Sets the secret key used on the device */
+  public async restore(secretKey: Uint8Array) {
+    await this.callMethodOnDevice(SerialPortSigner.METHOD_RESTORE, [bytesToHex(secretKey)]);
+  }
+
+  /** Requires the device to sign an event */
   public async signEvent(draft: EventTemplate & { pubkey?: string }) {
     const pubkey = draft.pubkey || this.pubkey;
     if (!pubkey) throw new Error("Unknown signer pubkey");
@@ -241,6 +249,7 @@ export class SerialPortSigner implements Nip07Interface {
     return event;
   }
 
+  /** Pings to device to see if the connection is open */
   public ping() {
     this.sendCommand(SerialPortSigner.METHOD_PING, [window.location.host]);
   }
@@ -254,10 +263,12 @@ export class SerialPortSigner implements Nip07Interface {
   static METHOD_SIGN_MESSAGE = "/sign-message";
   static METHOD_SHARED_SECRET = "/shared-secret";
   static METHOD_PUBLIC_KEY = "/public-key";
+  static METHOD_RESTORE = "/restore";
 
   static PUBLIC_METHODS = [
     SerialPortSigner.METHOD_PUBLIC_KEY,
     SerialPortSigner.METHOD_SIGN_MESSAGE,
     SerialPortSigner.METHOD_SHARED_SECRET,
+    SerialPortSigner.METHOD_RESTORE,
   ];
 }
