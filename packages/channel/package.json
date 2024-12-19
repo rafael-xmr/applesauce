@@ -22,38 +22,47 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
+      "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./blueprints": {
       "import": "./dist/blueprints/index.js",
+      "require": "./dist/blueprints/index.js",
       "types": "./dist/blueprints/index.d.ts"
     },
     "./blueprints/*": {
       "import": "./dist/blueprints/*.js",
+      "require": "./dist/blueprints/*.js",
       "types": "./dist/blueprints/*.d.ts"
     },
     "./operations": {
       "import": "./dist/operations/index.js",
+      "require": "./dist/operations/index.js",
       "types": "./dist/operations/index.d.ts"
     },
     "./operations/*": {
       "import": "./dist/operations/*.js",
+      "require": "./dist/operations/*.js",
       "types": "./dist/operations/*.d.ts"
     },
     "./queries": {
       "import": "./dist/queries/index.js",
+      "require": "./dist/queries/index.js",
       "types": "./dist/queries/index.d.ts"
     },
     "./queries/*": {
       "import": "./dist/queries/*.js",
+      "require": "./dist/queries/*.js",
       "types": "./dist/queries/*.d.ts"
     },
     "./helpers": {
       "import": "./dist/helpers/index.js",
+      "require": "./dist/helpers/index.js",
       "types": "./dist/helpers/index.d.ts"
     },
     "./helpers/*": {
       "import": "./dist/helpers/*.js",
+      "require": "./dist/helpers/*.js",
       "types": "./dist/helpers/*.d.ts"
     }
   },

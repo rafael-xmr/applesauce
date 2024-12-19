@@ -22,22 +22,27 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
+      "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./loaders": {
       "import": "./dist/loaders/index.js",
+      "require": "./dist/loaders/index.js",
       "types": "./dist/loaders/index.d.ts"
     },
     "./loaders/*": {
       "import": "./dist/loaders/*.js",
+      "require": "./dist/loaders/*.js",
       "types": "./dist/loaders/*.d.ts"
     },
     "./operators": {
       "import": "./dist/operators/index.js",
+      "require": "./dist/operators/index.js",
       "types": "./dist/operators/index.d.ts"
     },
     "./operators/*": {
       "import": "./dist/operators/*.js",
+      "require": "./dist/operators/*.js",
       "types": "./dist/operators/*.d.ts"
     }
   },

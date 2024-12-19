@@ -22,14 +22,17 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
+      "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./helpers": {
       "import": "./dist/helpers/index.js",
+      "require": "./dist/helpers/index.js",
       "types": "./dist/helpers/index.d.ts"
     },
     "./queries": {
       "import": "./dist/queries/index.js",
+      "require": "./dist/queries/index.js",
       "types": "./dist/queries/index.d.ts"
     }
   },

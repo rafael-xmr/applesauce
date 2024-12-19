@@ -22,22 +22,27 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
+      "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./connection": {
       "import": "./dist/connection/index.js",
+      "require": "./dist/connection/index.js",
       "types": "./dist/connection/index.d.ts"
     },
     "./connection/*": {
       "import": "./dist/connection/*.js",
+      "require": "./dist/connection/*.js",
       "types": "./dist/connection/*.d.ts"
     },
     "./subscription": {
       "import": "./dist/subscription/index.js",
+      "require": "./dist/subscription/index.js",
       "types": "./dist/subscription/index.d.ts"
     },
     "./subscription/*": {
       "import": "./dist/subscription/*.js",
+      "require": "./dist/subscription/*.js",
       "types": "./dist/subscription/*.d.ts"
     }
   },

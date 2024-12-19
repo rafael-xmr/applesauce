@@ -22,34 +22,42 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
+      "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./blueprints": {
       "import": "./dist/blueprints/index.js",
+      "require": "./dist/blueprints/index.js",
       "types": "./dist/blueprints/index.d.ts"
     },
     "./blueprints/*": {
       "import": "./dist/blueprints/*.js",
+      "require": "./dist/blueprints/*.js",
       "types": "./dist/blueprints/*.d.ts"
     },
     "./operations": {
       "import": "./dist/operations/index.js",
+      "require": "./dist/operations/index.js",
       "types": "./dist/operations/index.d.ts"
     },
     "./operations/*": {
       "import": "./dist/operations/*.js",
+      "require": "./dist/operations/*.js",
       "types": "./dist/operations/*.d.ts"
     },
     "./helpers": {
       "import": "./dist/helpers/index.js",
+      "require": "./dist/helpers/index.js",
       "types": "./dist/helpers/index.d.ts"
     },
     "./helpers/*": {
       "import": "./dist/helpers/*.js",
+      "require": "./dist/helpers/*.js",
       "types": "./dist/helpers/*.d.ts"
     },
     "./event-factory": {
       "import": "./dist/event-factory.js",
+      "require": "./dist/event-factory.js",
       "types": "./dist/event-factory.d.ts"
     }
   },

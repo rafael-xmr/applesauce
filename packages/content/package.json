@@ -22,22 +22,27 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
+      "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./helpers": {
       "import": "./dist/helpers/index.js",
+      "require": "./dist/helpers/index.js",
       "types": "./dist/helpers/index.d.ts"
     },
     "./nast": {
       "import": "./dist/nast/index.js",
+      "require": "./dist/nast/index.js",
       "types": "./dist/nast/index.d.ts"
     },
     "./markdown": {
       "import": "./dist/markdown/index.js",
+      "require": "./dist/markdown/index.js",
       "types": "./dist/markdown/index.d.ts"
     },
     "./text": {
       "import": "./dist/text/index.js",
+      "require": "./dist/text/index.js",
       "types": "./dist/text/index.d.ts"
     }
   },
