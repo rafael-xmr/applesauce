@@ -8,6 +8,7 @@ import {
   isATag,
   isETag,
   isPTag,
+  processTags,
 } from "applesauce-core/helpers";
 import { AddressPointer, EventPointer, ProfilePointer } from "nostr-tools/nip19";
 import { isParameterizedReplaceableKind, isReplaceableKind } from "nostr-tools/kinds";
@@ -50,31 +51,31 @@ export function isProfilePointerInList(list: NostrEvent, pointer: string | Profi
 
 /** Returns all the EventPointer in a list or set */
 export function getEventPointersFromList(list: NostrEvent): EventPointer[] {
-  return listGetAllTags(list).filter(isETag).map(getEventPointerFromETag);
+  return processTags(listGetAllTags(list), (tag) => (isETag(tag) ? tag : undefined), getEventPointerFromETag);
 }
 
 /** Returns all the AddressPointer in a list or set */
 export function getAddressPointersFromList(list: NostrEvent): AddressPointer[] {
-  return listGetAllTags(list).filter(isATag).map(getAddressPointerFromATag);
+  return processTags(listGetAllTags(list), (t) => (isATag(t) ? t : undefined), getAddressPointerFromATag);
 }
 
 /** Returns all the ProfilePointer in a list or set */
 export function getProfilePointersFromList(list: NostrEvent): ProfilePointer[] {
-  return listGetAllTags(list).filter(isPTag).map(getProfilePointerFromPTag);
+  return processTags(listGetAllTags(list), (t) => (isPTag(t) ? t : undefined), getProfilePointerFromPTag);
 }
 
 /** Returns if an event is a valid list or set */
-export function isValidList(list: NostrEvent): boolean {
+export function isValidList(event: NostrEvent): boolean {
   try {
-    if (isParameterizedReplaceableKind(list.kind)) {
-      // sets
+    if (isParameterizedReplaceableKind(event.kind)) {
+      // event is a set
 
       // ensure the set has an identifier
-      getReplaceableIdentifier(list);
+      getReplaceableIdentifier(event);
 
       return true;
-    } else if (isReplaceableKind(list.kind) && list.kind >= 10000 && list.kind < 20000) {
-      // lists
+    } else if (isReplaceableKind(event.kind) && event.kind >= 10000 && event.kind < 20000) {
+      // event is a list
       return true;
     }
   } catch (error) {}
