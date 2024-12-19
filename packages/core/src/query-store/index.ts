@@ -27,6 +27,7 @@ export class QueryStore {
 
   store: EventStore;
   constructor(store: EventStore) {
+    if (!store) throw new Error("EventStore required");
     this.store = store;
   }
 
