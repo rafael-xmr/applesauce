@@ -9,6 +9,7 @@ export * from "./external-id.js";
 export * from "./filter.js";
 export * from "./hashtag.js";
 export * from "./hidden-tags.js";
+export * from "./json.js";
 export * from "./lnurl.js";
 export * from "./lru.js";
 export * from "./mailboxes.js";

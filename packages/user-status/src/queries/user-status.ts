@@ -1,6 +1,6 @@
 import { kinds, NostrEvent } from "nostr-tools";
 import { Query } from "applesauce-core/query-store";
-import { getTagValue } from "applesauce-core/helpers";
+import { getReplaceableIdentifier } from "applesauce-core/helpers/event";
 import { map } from "rxjs";
 
 import { getUserStatusPointer, UserStatusPointer } from "../helpers/user-status.js";
@@ -40,10 +40,12 @@ export function UserStatusesQuery(pubkey: string): Query<Record<string, UserStat
       events.timeline([{ kinds: [kinds.UserStatuses], authors: [pubkey] }]).pipe(
         map((events) => {
           return events.reduce((dir, event) => {
-            const d = getTagValue(event, "d");
-            if (!d) return dir;
-
-            return { ...dir, [d]: { event, ...getUserStatusPointer(event), content: event.content } };
+            try {
+              const d = getReplaceableIdentifier(event);
+              return { ...dir, [d]: { event, ...getUserStatusPointer(event), content: event.content } };
+            } catch (error) {
+              return dir;
+            }
           }, {});
         }),
       ),

@@ -1,10 +1,13 @@
 import { kinds, NostrEvent, VerifiedEvent, verifiedSymbol } from "nostr-tools";
 import { INDEXABLE_TAGS } from "../event-store/common.js";
 import { getHiddenTags } from "./hidden-tags.js";
+import { getOrComputeCachedValue } from "./cache.js";
+import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
 
 export const EventUIDSymbol = Symbol.for("event-uid");
 export const EventIndexableTagsSymbol = Symbol.for("indexable-tags");
 export const FromCacheSymbol = Symbol.for("from-cache");
+export const ReplaceableIdentifierSymbol = Symbol.for("replaceable-identifier");
 
 declare module "nostr-tools" {
   export interface Event {
@@ -109,4 +112,18 @@ export function markFromCache(event: NostrEvent) {
 /** Returns if an event was from a cache */
 export function isFromCache(event: NostrEvent) {
   return !!event[FromCacheSymbol];
+}
+
+/**
+ * Returns the replaceable identifier for a replaceable event
+ * @throws
+ */
+export function getReplaceableIdentifier(event: NostrEvent): string {
+  if (!isParameterizedReplaceableKind(event.kind)) throw new Error("Event is not replaceable");
+
+  return getOrComputeCachedValue(event, ReplaceableIdentifierSymbol, () => {
+    const d = getTagValue(event, "d");
+    if (d === undefined) throw new Error("Event missing identifier");
+    return d;
+  });
 }
