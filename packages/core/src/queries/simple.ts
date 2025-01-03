@@ -13,7 +13,7 @@ export function SingleEventQuery(id: string): Query<NostrEvent | undefined> {
 }
 
 /** Creates a Query that returns a multiple events in a map */
-export function MultipleEventsQuery(ids: string[]): Query<Map<string, NostrEvent>> {
+export function MultipleEventsQuery(ids: string[]): Query<Record<string, NostrEvent>> {
   return {
     key: ids.join(","),
     run: (events) => events.events(ids),
@@ -41,7 +41,7 @@ export function TimelineQuery(filters: Filter | Filter[], keepOldVersions?: bool
 /** Creates a Query that returns a directory of events by their UID */
 export function ReplaceableSetQuery(
   pointers: { kind: number; pubkey: string; identifier?: string }[],
-): Query<Map<string, NostrEvent>> {
+): Query<Record<string, NostrEvent>> {
   return {
     key: hash_sum(pointers),
     run: (events) => events.replaceableSet(pointers),

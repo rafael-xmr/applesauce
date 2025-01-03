@@ -168,14 +168,14 @@ export class EventStore {
   }
 
   /** Creates an observable that subscribes to multiple events */
-  events(ids: string[]): Observable<Map<string, NostrEvent>> {
-    return new Observable<Map<string, NostrEvent>>((observer) => {
-      const events = new Map<string, NostrEvent>();
+  events(ids: string[]): Observable<Record<string, NostrEvent>> {
+    return new Observable<Record<string, NostrEvent>>((observer) => {
+      let events: Record<string, NostrEvent> = {};
 
       for (const id of ids) {
         const event = this.getEvent(id);
         if (event) {
-          events.set(id, event);
+          events = { ...events, [id]: event };
           this.database.claimEvent(event, observer);
         }
       }
@@ -185,8 +185,8 @@ export class EventStore {
       // subscribe to future events
       const inserted = this.database.inserted.subscribe((event) => {
         const id = event.id;
-        if (ids.includes(id) && !events.has(id)) {
-          events.set(id, event);
+        if (ids.includes(id) && !events[id]) {
+          events = { ...events, [id]: event };
           observer.next(events);
 
           // claim new event
@@ -203,12 +203,12 @@ export class EventStore {
       const deleted = this.database.deleted.subscribe((event) => {
         const id = event.id;
         if (ids.includes(id)) {
-          const current = events.get(id);
+          const current: NostrEvent | undefined = events[id];
 
           if (current) {
             this.database.removeClaim(current, observer);
 
-            events.delete(id);
+            delete events[id];
             observer.next(events);
           }
         }
@@ -219,7 +219,7 @@ export class EventStore {
         deleted.unsubscribe();
         updated.unsubscribe();
 
-        for (const [_uid, event] of events) {
+        for (const [_uid, event] of Object.entries(events)) {
           this.database.removeClaim(event, observer);
         }
       };
@@ -281,22 +281,22 @@ export class EventStore {
   /** Creates an observable with the latest versions of replaceable events */
   replaceableSet(
     pointers: { kind: number; pubkey: string; identifier?: string }[],
-  ): Observable<Map<string, NostrEvent>> {
-    return new Observable<Map<string, NostrEvent>>((observer) => {
+  ): Observable<Record<string, NostrEvent>> {
+    return new Observable<Record<string, NostrEvent>>((observer) => {
       const coords = pointers.map((p) => getReplaceableUID(p.kind, p.pubkey, p.identifier));
-      const events = new Map<string, NostrEvent>();
+      let events: Record<string, NostrEvent> = {};
 
       const handleEvent = (event: NostrEvent) => {
         const uid = getEventUID(event);
 
-        const current = events.get(uid);
+        const current = events[uid];
         if (current) {
           if (event.created_at > current.created_at) {
             this.database.removeClaim(current, observer);
           } else return;
         }
 
-        events.set(uid, event);
+        events = { ...events, [uid]: event };
         this.database.claimEvent(event, observer);
       };
 
@@ -326,8 +326,8 @@ export class EventStore {
       // subscribe to deleted events
       const deleted = this.database.deleted.subscribe((event) => {
         const uid = getEventUID(event);
-        if (events.has(uid)) {
-          events.delete(uid);
+        if (events[uid]) {
+          delete events[uid];
           this.database.removeClaim(event, observer);
           observer.next(events);
         }
@@ -338,7 +338,7 @@ export class EventStore {
         deleted.unsubscribe();
         updated.unsubscribe();
 
-        for (const [_id, event] of events) {
+        for (const [_id, event] of Object.entries(events)) {
           this.database.removeClaim(event, observer);
         }
       };
