@@ -4,7 +4,7 @@ import { getOrComputeCachedValue } from "./cache.js";
 export type MediaAttachment = {
   /** URL of the file */
   url: string;
-  /** mime type */
+  /** MIME type */
   type?: string;
   /** sha256 hash of the file */
   sha256?: string;
@@ -17,15 +17,17 @@ export type MediaAttachment = {
   /** torrent infohash */
   infohash?: string;
   /** URL to a thumbnail */
-  thumb?: string;
+  thumbnail?: string;
   /** URL to a preview image with the same dimensions */
   image?: string;
   /** summary */
   summary?: string;
   /** description for accessability */
   alt?: string;
-  /** fallback URL */
-  // fallback?: string[];
+  /** blurhash */
+  blurhash?: string;
+  /** fallback URLs */
+  fallback?: string[];
 };
 
 /**
@@ -36,16 +38,26 @@ export function parseMediaAttachmentTag(tag: string[]): MediaAttachment {
   const parts = tag.slice(1);
   const fields: Record<string, string> = {};
 
+  let fallback: string[] | undefined = undefined;
+
   for (const part of parts) {
     const match = part.match(/^(.+?)\s(.+)$/);
     if (match) {
       const [_, name, value] = match;
-      fields[name] = value;
+
+      switch (name) {
+        case "fallback":
+          fallback = fallback ? [...fallback, value] : [value];
+          break;
+        default:
+          fields[name] = value;
+          break;
+      }
     }
   }
 
   if (!fields.url) throw new Error("Missing required url in attachment");
-  const attachment: MediaAttachment = { url: fields.url };
+  const attachment: MediaAttachment = { url: fields.url, fallback };
 
   // parse size
   if (fields.size) attachment.size = parseInt(fields.size);
@@ -56,10 +68,11 @@ export function parseMediaAttachmentTag(tag: string[]): MediaAttachment {
   if (fields.dim) attachment.dimensions = fields.dim;
   if (fields.magnet) attachment.magnet = fields.magnet;
   if (fields.i) attachment.infohash = fields.i;
-  if (fields.thumb) attachment.thumb = fields.thumb;
+  if (fields.thumb) attachment.thumbnail = fields.thumb;
   if (fields.image) attachment.image = fields.image;
   if (fields.summary) attachment.summary = fields.summary;
   if (fields.alt) attachment.alt = fields.alt;
+  if (fields.blurhash) attachment.blurhash = fields.blurhash;
 
   return attachment;
 }
