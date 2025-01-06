@@ -46,10 +46,13 @@ export type EventFactoryClient = {
 };
 
 export type EventFactoryContext = {
+  /** NIP-89 client tag */
   client?: EventFactoryClient;
   getRelayHint?: (event: NostrEvent) => string | undefined | Promise<string> | Promise<undefined>;
   getPubkeyRelayHint?: (pubkey: string) => string | undefined | Promise<string> | Promise<undefined>;
+  /** A signer used to encrypt the content of some notes */
   signer?: EventFactorySigner;
+  /** An array of custom emojis that will be used in text note content */
   emojis?: Emoji[];
 };
 

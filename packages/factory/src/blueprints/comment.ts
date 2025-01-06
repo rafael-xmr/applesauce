@@ -5,6 +5,7 @@ import { EventFactory, EventFactoryBlueprint } from "../event-factory.js";
 import { createTextContentOperations, TextContentOptions } from "../operations/content.js";
 import { includeCommentTags } from "../operations/comment.js";
 
+/** A blueprint to create a NIP-22 comment event */
 export function CommentBlueprint(
   parent: NostrEvent,
   content: string,
