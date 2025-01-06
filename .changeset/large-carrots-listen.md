@@ -2,4 +2,4 @@
 "applesauce-core": minor
 ---
 
-Add `getMediaPostAttachments` helper
+Add `getPicturePostAttachments` helper

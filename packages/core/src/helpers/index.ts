@@ -14,7 +14,7 @@ export * from "./lnurl.js";
 export * from "./lru.js";
 export * from "./mailboxes.js";
 export * from "./file-metadata.js";
-export * from "./media-post.js";
+export * from "./picture-post.js";
 export * from "./pointers.js";
 export * from "./profile.js";
 export * from "./relays.js";

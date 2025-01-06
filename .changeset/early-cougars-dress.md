@@ -2,4 +2,4 @@
 "applesauce-factory": minor
 ---
 
-Add `PicturePostBlueprint` blueprint
+Add `includeHashtags` operation
