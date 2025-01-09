@@ -1,13 +1,12 @@
-import { EventTemplate, kinds, NostrEvent, verifyEvent } from "nostr-tools";
-import { nanoid } from "nanoid";
+import { EventTemplate, Filter, kinds, NostrEvent, verifyEvent } from "nostr-tools";
 import { Nip07Interface, SimpleSigner } from "applesauce-signer";
-import { IConnectionPool } from "applesauce-net/connection";
 import { Deferred, createDefer } from "applesauce-core/promise";
 import { isHexKey, unixNow } from "applesauce-core/helpers";
-import { MultiSubscription } from "applesauce-net/subscription";
 import { logger } from "applesauce-core";
-import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 import { getPublicKey } from "nostr-tools";
+import { nanoid } from "nanoid";
+
+import { isNIP04 } from "../helpers/encryption.js";
 
 export function isErrorResponse(response: any): response is NostrConnectErrorResponse {
   return !!response.error;
@@ -70,8 +69,6 @@ async function defaultHandleAuth(url: string) {
 }
 
 export type NostrConnectSignerOptions = {
-  /** The connection pool to use for relay connections */
-  pool: IConnectionPool;
   /** The relays to communicate over */
   relays: string[];
   /** A {@link SimpleSigner} for this client */
@@ -82,18 +79,47 @@ export type NostrConnectSignerOptions = {
   pubkey?: string;
 };
 
+export type NostrConnectConnectionMethods = {
+  /** A method that is called when the subscription needs to be updated */
+  onSubOpen: (filters: Filter[], relays: string[], onEvent: (event: NostrEvent) => void) => Promise<void>;
+  /** A method called when the subscription should be closed */
+  onSubClose: () => Promise<void>;
+  /** A method that is called when an event needs to be published */
+  onPublishEvent: (event: NostrEvent, relays: string[]) => Promise<void>;
+  /** A method for handling "auth" requests */
+  onAuth?: (url: string) => Promise<void>;
+};
+
+export type NostrConnectAppMetadata = {
+  name?: string;
+  image?: string;
+  url?: string | URL;
+  permissions?: string[];
+};
+
 export class NostrConnectSigner implements Nip07Interface {
-  protected pool: IConnectionPool;
-  protected sub: MultiSubscription;
+  /** A method that is called when the subscription needs to be updated */
+  public onSubOpen?: (filters: Filter[], relays: string[], onEvent: (event: NostrEvent) => void) => Promise<void>;
+
+  /** A method called when the subscription should be closed */
+  public onSubClose?: () => Promise<void>;
+
+  /** A method that is called when an event needs to be published */
+  public onPublishEvent?: (event: NostrEvent, relays: string[]) => Promise<void>;
+
+  // protected pool: IConnectionPool;
+  // protected sub: MultiSubscription;
   protected log = logger.extend("NostrConnectSigner");
   /** The local client signer */
-  protected signer: SimpleSigner;
+  public signer: SimpleSigner;
+
+  protected subscriptionOpen = false;
 
   /** Whether the signer is connected to the remote signer */
   isConnected = false;
 
   /** The users pubkey */
-  pubkey?: string;
+  protected pubkey?: string;
   /** Relays to communicate over */
   relays: string[];
   /** The remote signer pubkey */
@@ -104,9 +130,12 @@ export class NostrConnectSigner implements Nip07Interface {
     return getPublicKey(this.signer.key);
   }
 
-  handleAuth: (url: string) => Promise<void> = defaultHandleAuth;
+  onAuth: (url: string) => Promise<void> = defaultHandleAuth;
 
   verifyEvent: typeof verifyEvent = verifyEvent;
+
+  /** A secret used when initiating a connection from the client side */
+  protected clientSecret = nanoid(12);
 
   nip04?:
     | {
@@ -121,14 +150,17 @@ export class NostrConnectSigner implements Nip07Interface {
       }
     | undefined;
 
-  constructor(opts: NostrConnectSignerOptions) {
-    this.pool = opts.pool;
-    this.sub = new MultiSubscription(this.pool);
+  constructor(opts: NostrConnectConnectionMethods & NostrConnectSignerOptions) {
     this.relays = opts.relays;
     this.pubkey = opts.pubkey;
+    this.remote = opts.remote;
+    this.onSubOpen = opts.onSubOpen;
+    this.onSubClose = opts.onSubClose;
+    this.onPublishEvent = opts.onPublishEvent;
+
+    if (opts.onAuth) this.onAuth = opts.onAuth;
 
     this.signer = opts?.signer || new SimpleSigner();
-    this.sub.onEvent.subscribe((e) => this.handleEvent(e));
 
     this.nip04 = {
       encrypt: this.nip04Encrypt.bind(this),
@@ -142,48 +174,56 @@ export class NostrConnectSigner implements Nip07Interface {
 
   /** Open the connection */
   async open() {
+    if (this.subscriptionOpen) return;
+
+    this.subscriptionOpen = true;
     const pubkey = await this.signer.getPublicKey();
 
     // Setup subscription
-    this.sub.setRelays(this.relays);
-    this.sub.setFilters([
-      {
-        kinds: [kinds.NostrConnect],
-        "#p": [pubkey],
-      },
-    ]);
+    await this.onSubOpen?.(
+      [
+        {
+          kinds: [kinds.NostrConnect],
+          "#p": [pubkey],
+        },
+      ],
+      this.relays,
+      this.handleEvent.bind(this),
+    );
 
-    this.sub.open();
-    await this.sub.waitForAllConnection();
-    this.log("Opened subscription", this.relays);
+    this.log("Opened", this.relays);
   }
 
   /** Close the connection */
-  close() {
-    this.log("Closed");
-    this.sub.close();
+  async close() {
+    this.subscriptionOpen = false;
     this.isConnected = false;
+    await this.onSubClose?.();
+    this.log("Closed");
   }
 
   protected requests = new Map<string, Deferred<any>>();
   protected auths = new Set<string>();
-  protected async handleEvent(event: NostrEvent) {
+
+  /** Call this method with incoming events */
+  public async handleEvent(event: NostrEvent) {
     if (!this.verifyEvent(event)) return;
 
     // ignore the event if its not from the remote signer
     if (this.remote && event.pubkey !== this.remote) return;
 
     try {
-      const responseStr = await this.signer.nip04.decrypt(event.pubkey, event.content);
+      const responseStr = isNIP04(event.content)
+        ? await this.signer.nip04.decrypt(event.pubkey, event.content)
+        : await this.signer.nip44.decrypt(event.pubkey, event.content);
       const response = JSON.parse(responseStr);
 
-      // Handle client connections
-      if (!this.pubkey && response.result === "ack") {
-        this.log("Got ack response from", event.pubkey);
-        this.pubkey = event.pubkey;
-        this.remote = event.pubkey;
+      // handle remote signer connection
+      if (!this.remote && (response.result === "ack" || (this.clientSecret && response.result === this.clientSecret))) {
+        this.log("Got ack response from", event.pubkey, response.result);
         this.isConnected = true;
-        this.waitingPromise?.resolve(response.result);
+        this.remote = event.pubkey;
+        this.waitingPromise?.resolve();
         this.waitingPromise = null;
         return;
       }
@@ -196,9 +236,9 @@ export class NostrConnectSigner implements Nip07Interface {
           if (response.result === "auth_url") {
             if (!this.auths.has(response.id)) {
               this.auths.add(response.id);
-              if (this.handleAuth) {
+              if (this.onAuth) {
                 try {
-                  await this.handleAuth(response.error);
+                  await this.onAuth(response.error);
                 } catch (e) {
                   p.reject(e);
                 }
@@ -230,30 +270,34 @@ export class NostrConnectSigner implements Nip07Interface {
     kind = kinds.NostrConnect,
   ): Promise<ResponseResults[T]> {
     // Talk to the remote signer or the users pubkey
-    const remote = this.remote || this.pubkey;
-    if (!remote) throw new Error("Missing remote signer pubkey");
+    if (!this.remote) throw new Error("Missing remote signer pubkey");
 
     const id = nanoid(8);
     const request: NostrConnectRequest<T> = { id, method, params };
-    const encrypted = await this.signer.nip04.encrypt(remote, JSON.stringify(request));
-    const event = await this.createRequestEvent(encrypted, remote, kind);
-    this.log(`Sending request ${id} (${method}) ${JSON.stringify(params)}`, event);
-    this.sub.publish(event);
+    const encrypted = await this.signer.nip44.encrypt(this.remote, JSON.stringify(request));
+    const event = await this.createRequestEvent(encrypted, this.remote, kind);
+    this.log(`Sending request ${id} (${method}) ${JSON.stringify(params)}`);
 
     const p = createDefer<ResponseResults[T]>();
     this.requests.set(id, p);
+
+    await this.onPublishEvent?.(event, this.relays);
+
     return p;
   }
 
   /** Connect to remote signer */
-  async connect(token?: string | undefined, permissions?: string[]) {
-    if (!this.pubkey) throw new Error("Missing user pubkey");
+  async connect(secret?: string | undefined, permissions?: string[]) {
+    // Attempt to connect to the users pubkey if remote note set
+    if (!this.remote && this.pubkey) this.remote = this.pubkey;
+
+    if (!this.remote) throw new Error("Missing remote signer pubkey");
 
     await this.open();
     try {
       const result = await this.makeRequest(NostrConnectMethod.Connect, [
-        this.pubkey,
-        token || "",
+        this.remote,
+        secret || "",
         permissions?.join(",") ?? "",
       ]);
       this.isConnected = true;
@@ -265,11 +309,12 @@ export class NostrConnectSigner implements Nip07Interface {
     }
   }
 
-  private waitingPromise: Deferred<"ack"> | null = null;
+  private waitingPromise: Deferred<void> | null = null;
 
   /** Wait for a remote signer to connect */
-  waitForSigner(): Promise<"ack"> {
-    if (this.pubkey) throw new Error("There is already a pubkey");
+  waitForSigner(): Promise<void> {
+    if (this.isConnected) return Promise.resolve();
+
     this.open();
     this.waitingPromise = createDefer();
     return this.waitingPromise;
@@ -350,44 +395,51 @@ export class NostrConnectSigner implements Nip07Interface {
     return plaintext;
   }
 
+  /** Returns the nostrconnect:// URI for this signer */
+  getNostrConnectURI(metadata?: NostrConnectAppMetadata) {
+    const params = new URLSearchParams();
+
+    params.set("secret", this.clientSecret);
+    if (metadata?.name) params.set("name", metadata.name);
+    if (metadata?.url) params.set("url", String(metadata.url));
+    if (metadata?.image) params.set("image", metadata.image);
+    if (metadata?.permissions) params.set("perms", metadata.permissions.join(","));
+    for (const relay of this.relays) params.append("relay", relay);
+
+    const client = getPublicKey(this.signer.key);
+    return `nostrconnect://${client}?` + params.toString();
+  }
+
+  /** Parses a bunker:// URI */
+  static parseBunkerURI(uri: string): { remote: string; relays: string[]; secret?: string } {
+    const url = new URL(uri);
+
+    // firefox puts pubkey part in host, chrome puts pubkey in pathname
+    const remote = url.host || url.pathname.replace("//", "");
+    if (!isHexKey(remote)) throw new Error("Invalid connection URI");
+
+    const relays = url.searchParams.getAll("relay");
+    if (relays.length === 0) throw new Error("Missing relays");
+    const secret = url.searchParams.get("secret") ?? undefined;
+
+    return { remote, relays, secret };
+  }
+
+  /** Builds an array of signing permissions for event kinds */
   static buildSigningPermissions(kinds: number[]) {
     return [Permission.GetPublicKey, ...kinds.map((k) => `${Permission.SignEvent}:${k}`)];
   }
 
-  static async fromBunkerURI(uri: string, pool: IConnectionPool, permissions?: string[]) {
-    const url = new URL(uri);
+  /** Create a {@link NostrConnectSigner} from a bunker:// URI */
+  static async fromBunkerURI(
+    uri: string,
+    options: NostrConnectConnectionMethods & { permissions?: string[]; signer?: SimpleSigner },
+  ) {
+    const { remote, relays, secret } = NostrConnectSigner.parseBunkerURI(uri);
 
-    // firefox puts pubkey part in host, chrome puts pubkey in pathname
-    const pubkey = url.host || url.pathname.replace("//", "");
-    if (!isHexKey(pubkey)) throw new Error("Invalid connection URI");
-
-    const relays = url.searchParams.getAll("relay");
-    if (relays.length === 0) throw new Error("Missing relays");
-
-    const client = new NostrConnectSigner({ pool, relays, pubkey });
-
-    const token = url.searchParams.get("secret");
-    await client.connect(token ?? undefined, permissions);
+    const client = new NostrConnectSigner({ relays, remote, ...options });
+    await client.connect(secret, options.permissions);
 
     return client;
-  }
-
-  toJSON() {
-    return {
-      relays: this.relays,
-      client: bytesToHex(this.signer.key),
-      pubkey: this.pubkey,
-      remote: this.remote,
-    };
-  }
-  static fromJSON(pool: IConnectionPool, data: ReturnType<NostrConnectSigner["toJSON"]>) {
-    const client = new SimpleSigner(hexToBytes(data.client));
-    return new NostrConnectSigner({
-      pool,
-      signer: client,
-      pubkey: data.pubkey,
-      remote: data.remote,
-      relays: data.relays,
-    });
   }
 }

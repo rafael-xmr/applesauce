@@ -42,7 +42,6 @@
     "@scure/base": "^1.1.9",
     "@types/dom-serial": "^1.0.6",
     "applesauce-core": "^0.10.0",
-    "applesauce-net": "^0.10.0",
     "debug": "^4.3.7",
     "nanoid": "^5.0.7",
     "nostr-tools": "^2.10.3"
