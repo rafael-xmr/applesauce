@@ -10,7 +10,11 @@ import { Nip07Interface } from "../nip-07.js";
  */
 export class AmberClipboardSigner implements Nip07Interface {
   /** If the signer is supported on this platform */
-  static SUPPORTED = navigator.userAgent.includes("Android") && navigator.clipboard && navigator.clipboard.readText;
+  static SUPPORTED =
+    `navigator` in globalThis &&
+    navigator.userAgent.includes("Android") &&
+    navigator.clipboard &&
+    navigator.clipboard.readText;
 
   private pendingRequest: Deferred<string> | null = null;
   public pubkey?: string;

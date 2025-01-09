@@ -70,7 +70,7 @@ export class SerialPortSigner implements Nip07Interface {
   }
 
   async connectToDevice({ onConnect, onDisconnect, onError, onDone }: DeviceOpts): Promise<void> {
-    let port: SerialPort = await navigator.serial.requestPort();
+    let port: SerialPort = await window.navigator.serial.requestPort();
     let reader;
 
     const startSerialPortReading = async () => {
@@ -255,7 +255,7 @@ export class SerialPortSigner implements Nip07Interface {
   }
 
   // static const
-  static SUPPORTED = !!navigator.serial;
+  static SUPPORTED = "navigator" in globalThis && !!navigator.serial;
 
   static METHOD_PING = "/ping";
   static METHOD_LOG = "/log";
