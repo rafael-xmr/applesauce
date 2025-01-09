@@ -66,6 +66,13 @@ export default defineConfig({
         ],
       },
       {
+        text: "Loaders",
+        items: [
+          { text: "Installation", link: "/loaders/installation" },
+          { text: "Replaceable Loader", link: "/loaders/replaceable-loader" },
+        ],
+      },
+      {
         text: "Lists",
         items: [{ text: "Installation", link: "/lists/installation" }],
       },
