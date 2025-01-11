@@ -24,7 +24,7 @@ export enum Permission {
 export enum NostrConnectMethod {
   Connect = "connect",
   CreateAccount = "create_account",
-  GetPublicKey = "get_pubic_key",
+  GetPublicKey = "get_public_key",
   SignEvent = "sign_event",
   Nip04Encrypt = "nip04_encrypt",
   Nip04Decrypt = "nip04_decrypt",
