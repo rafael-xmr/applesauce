@@ -3,9 +3,10 @@ import { Filter } from "nostr-tools";
 import { isParameterizedReplaceableKind, isReplaceableKind } from "nostr-tools/kinds";
 
 import { unique } from "./array.js";
+import { AddressPointer } from "nostr-tools/nip19";
 
 /** Converts an array of address pointers to a filter */
-export function createFilterFromAddressPointers(pointers: AddressPointerWithoutD[]): Filter {
+export function createFilterFromAddressPointers(pointers: AddressPointerWithoutD[] | AddressPointer[]): Filter {
   const filter: Filter = {};
 
   filter.kinds = unique(pointers.map((p) => p.kind));
@@ -18,9 +19,23 @@ export function createFilterFromAddressPointers(pointers: AddressPointerWithoutD
 
 /** Takes a set of address pointers, groups them, then returns filters for the groups */
 export function createFiltersFromAddressPointers(pointers: AddressPointerWithoutD[]): Filter[] {
-  const groups = groupAddressPointersByPubkeyOrKind(pointers);
+  // split the points in to two groups so they they don't mix in the filters
+  const parameterizedReplaceable = pointers.filter((p) => isParameterizedReplaceableKind(p.kind) && !!p.identifier);
+  const replaceable = pointers.filter((p) => isReplaceableKind(p.kind) && !p.identifier);
 
-  return Array.from(groups.values()).map((pointers) => createFilterFromAddressPointers(pointers));
+  const filters: Filter[] = [];
+
+  if (replaceable.length > 0) {
+    const groups = groupAddressPointersByPubkeyOrKind(replaceable);
+    filters.push(...Array.from(groups.values()).map(createFilterFromAddressPointers));
+  }
+
+  if (parameterizedReplaceable.length > 0) {
+    const groups = groupAddressPointersByPubkeyOrKind(parameterizedReplaceable);
+    filters.push(...Array.from(groups.values()).map(createFilterFromAddressPointers));
+  }
+
+  return filters;
 }
 
 /** Checks if a relay will understand an address pointer */
@@ -60,7 +75,7 @@ export function groupAddressPointersByPubkeyOrKind(pointers: AddressPointerWitho
   const kinds = new Set(pointers.map((p) => p.kind));
   const pubkeys = new Set(pointers.map((p) => p.pubkey));
 
-  return pubkeys.size > kinds.size ? groupAddressPointersByKind(pointers) : groupAddressPointersByPubkey(pointers);
+  return pubkeys.size < kinds.size ? groupAddressPointersByPubkey(pointers) : groupAddressPointersByKind(pointers);
 }
 
 export function getRelaysFromPointers(pointers: AddressPointerWithoutD[]) {

@@ -1,6 +1,6 @@
 import { Expressions } from "applesauce-content/helpers";
 import { EventFactoryOperation } from "../event-factory.js";
-import { ensureSingletonTag } from "../helpers/tag.js";
+import { ensureNamedValueTag } from "../helpers/tag.js";
 
 /** Adds "t" tags for every #hashtag in the content */
 export function includeContentHashtags(): EventFactoryOperation {
@@ -11,7 +11,7 @@ export function includeContentHashtags(): EventFactoryOperation {
     const matches = draft.content.matchAll(Expressions.hashtag);
     for (const [_, hashtag] of matches) {
       const lower = hashtag.toLocaleLowerCase();
-      tags = ensureSingletonTag(tags, ["t", lower]);
+      tags = ensureNamedValueTag(tags, ["t", lower]);
     }
 
     return { ...draft, tags };
@@ -25,7 +25,7 @@ export function includeHashtags(hashtags: string[]): EventFactoryOperation {
 
     for (const hashtag of hashtags) {
       const lower = hashtag.toLocaleLowerCase();
-      tags = ensureSingletonTag(tags, ["t", lower]);
+      tags = ensureNamedValueTag(tags, ["t", lower]);
     }
 
     return { ...draft, tags };
