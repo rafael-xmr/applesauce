@@ -6,7 +6,7 @@ import { nanoid } from "nanoid";
 import { Loader } from "./loader.js";
 import { LoadableAddressPointer } from "./replaceable-loader.js";
 import { isLoadableAddressPointer } from "../helpers/address-pointer.js";
-import { replaceableRequest } from "../operators/address-pointers-request.js";
+import { addressPointersRequest } from "../operators/address-pointers-request.js";
 
 export type SingleRelayReplaceableOptions = Partial<{
   /**
@@ -61,7 +61,7 @@ export class SingleRelayReplaceableLoader extends Loader<LoadableAddressPointer,
         // batch and filter
         singleRelayBatcher(opts),
         // breakout the batches so they can complete
-        mergeMap((pointers) => from([pointers]).pipe(replaceableRequest(rxNostr, nanoid(8), [relay]))),
+        mergeMap((pointers) => from([pointers]).pipe(addressPointersRequest(rxNostr, nanoid(8), [relay]))),
         // share the response with all subscribers
         share(),
       ),

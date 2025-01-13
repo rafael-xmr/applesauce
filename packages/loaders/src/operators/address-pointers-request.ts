@@ -7,20 +7,20 @@ import { relaysRequest } from "./relay-request.js";
 import { createFiltersFromAddressPointers } from "../helpers/address-pointer.js";
 
 /** Makes a request to relays for every set of address pointers */
-export function replaceableRequest<T extends AddressPointerWithoutD>(
+export function addressPointersRequest<T extends AddressPointerWithoutD>(
   rxNostr: RxNostr,
   id: string,
   relays?: string[],
 ): OperatorFunction<T[], EventPacket> {
   return (source) => {
-    const log = logger.extend(`replaceableRequest:${id}`);
+    const log = logger.extend(`addressPointersRequest:${id}`);
 
     return source.pipe(
       // convert pointers to filters
       map(createFiltersFromAddressPointers),
       // make requests
       tap((filters) => {
-        log(`Requesting`, relays, filters);
+        log(`Requesting`, filters, "from", relays);
       }),
       // make requests
       relaysRequest(rxNostr, id, relays),

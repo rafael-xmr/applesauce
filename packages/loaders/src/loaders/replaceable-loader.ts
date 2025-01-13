@@ -7,7 +7,7 @@ import { nanoid } from "nanoid";
 
 import { Loader } from "./loader.js";
 import { generatorSequence } from "../operators/generator-sequence.js";
-import { replaceableRequest } from "../operators/address-pointers-request.js";
+import { addressPointersRequest } from "../operators/address-pointers-request.js";
 import {
   createFiltersFromAddressPointers,
   getAddressPointerId,
@@ -90,7 +90,7 @@ function* cacheFirstSequence(
   const remoteRelays = [...pointerRelays, ...defaultRelays];
   if (remoteRelays.length > 0) {
     log(`Requesting`, remoteRelays, remaining);
-    const results = yield from([remaining]).pipe(replaceableRequest(rxNostr, id, remoteRelays));
+    const results = yield from([remaining]).pipe(addressPointersRequest(rxNostr, id, remoteRelays));
 
     if (handleResults(results)) return;
   }
@@ -101,7 +101,7 @@ function* cacheFirstSequence(
     const relays = opts.lookupRelays.filter((r) => !pointerRelays.includes(r));
     if (relays.length > 0) {
       log(`Request from lookup`, relays, remaining);
-      const results = yield from([remaining]).pipe(replaceableRequest(rxNostr, id, relays));
+      const results = yield from([remaining]).pipe(addressPointersRequest(rxNostr, id, relays));
 
       if (handleResults(results)) return;
     }
