@@ -1,4 +1,4 @@
-import { bufferTime, filter, from, map, mergeAll, Observable, OperatorFunction, tap } from "rxjs";
+import { bufferTime, filter, from, map, mergeAll, Observable, OperatorFunction, share, tap } from "rxjs";
 import { createRxOneshotReq, EventPacket, RxNostr } from "rx-nostr";
 import { markFromCache } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
@@ -8,6 +8,8 @@ import { nanoid } from "nanoid";
 import { CacheRequest, Loader } from "./loader.js";
 import { generatorSequence } from "../operators/generator-sequence.js";
 import { distinctRelays } from "../operators/distinct-by-relays.js";
+import { groupByRelay } from "../helpers/pointer.js";
+import { consolidateEventPointers } from "../helpers/event-pointer.js";
 
 export type LoadableEventPointer = {
   id: string;
@@ -32,29 +34,7 @@ export type SingleEventLoaderOptions = {
 
 /** Consolidate a batch of event pointers */
 function consolidateLoadableEventPointers(): OperatorFunction<LoadableEventPointer[], LoadableEventPointer[]> {
-  return (source) =>
-    source.pipe(
-      map((pointers) => {
-        const ids = new Map<string, LoadableEventPointer>();
-
-        for (const pointer of pointers) {
-          const current = ids.get(pointer.id);
-          if (current) {
-            // merge relays
-            if (pointer.relays) {
-              if (!current.relays) current.relays = [...pointer.relays];
-              else {
-                for (const relay of pointer.relays) {
-                  if (!current.relays.includes(relay)) current.relays.push(relay);
-                }
-              }
-            }
-          } else ids.set(pointer.id, pointer);
-        }
-
-        return Array.from(ids.values());
-      }),
-    );
+  return (source) => source.pipe(map(consolidateEventPointers));
 }
 
 function* cacheFirstSequence(
@@ -64,6 +44,8 @@ function* cacheFirstSequence(
   log: typeof logger,
 ): Generator<Observable<EventPacket>, undefined, EventPacket[]> {
   let remaining = [...pointers];
+  const id = nanoid(8);
+  log = log.extend(id);
 
   const loaded = (packets: EventPacket[]) => {
     const ids = new Set(packets.map((p) => p.event.id));
@@ -86,26 +68,20 @@ function* cacheFirstSequence(
     }
   }
 
-  let byRelay = new Map<string, LoadableEventPointer[]>();
-  for (const pointer of remaining) {
-    let relays = pointer.relays?.length ? pointer.relays : ["default"];
-    for (const relay of relays) {
-      if (!byRelay.has(relay)) byRelay.set(relay, [pointer]);
-      else byRelay.get(relay)?.push(pointer);
-    }
-  }
+  // exit early if all pointers are loaded
+  if (remaining.length === 0) return;
+
+  let byRelay = groupByRelay(remaining, "default");
 
   // load remaining pointers from the relays
   let results = yield from(
     Array.from(byRelay.entries()).map(([relay, pointers]) => {
-      let relayLog = log.extend(relay);
       let filter: Filter = { ids: pointers.map((e) => e.id) };
 
       let count = 0;
-      const id = nanoid(8);
       const req = createRxOneshotReq({ filters: [filter], rxReqId: id });
 
-      relayLog(`Requesting ${id}`, filter.ids);
+      log(`Requesting from ${relay}`, filter.ids);
 
       let sub$: Observable<EventPacket>;
       // don't specify relay if this is the "default" relay
@@ -115,7 +91,7 @@ function* cacheFirstSequence(
       return sub$.pipe(
         tap({
           next: () => count++,
-          complete: () => relayLog(`Completed ${id} loaded ${count} events`),
+          complete: () => log(`Completed ${relay}, loaded ${count} events`),
         }),
       );
     }),
@@ -151,6 +127,8 @@ export class SingleEventLoader extends Loader<LoadableEventPointer, EventPacket>
         generatorSequence<LoadableEventPointer[], EventPacket>((pointers) =>
           cacheFirstSequence(rxNostr, pointers, options, this.log),
         ),
+        // share the response with all subscribers
+        share(),
       ),
     );
   }

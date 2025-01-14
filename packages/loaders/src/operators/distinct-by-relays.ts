@@ -2,11 +2,13 @@ import { filter, map, OperatorFunction, share } from "rxjs";
 
 interface Message {
   relays?: string[];
+  /** Ignore timeout and force message through */
+  force?: boolean;
   [key: string]: any;
 }
 
 export function distinctRelays<T extends Message>(
-  keyFn: (message: Message) => string,
+  keyFn: (message: T) => string,
   timeout = 1000,
 ): OperatorFunction<T, T> {
   return (source$) => {
@@ -14,6 +16,8 @@ export function distinctRelays<T extends Message>(
 
     return source$.pipe(
       map((message) => {
+        if (message.force) return message;
+
         let key = keyFn(message);
         let now = Date.now();
 

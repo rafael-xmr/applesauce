@@ -20,8 +20,8 @@ export function createFilterFromAddressPointers(pointers: AddressPointerWithoutD
 /** Takes a set of address pointers, groups them, then returns filters for the groups */
 export function createFiltersFromAddressPointers(pointers: AddressPointerWithoutD[]): Filter[] {
   // split the points in to two groups so they they don't mix in the filters
-  const parameterizedReplaceable = pointers.filter((p) => isParameterizedReplaceableKind(p.kind) && !!p.identifier);
-  const replaceable = pointers.filter((p) => isReplaceableKind(p.kind) && !p.identifier);
+  const parameterizedReplaceable = pointers.filter((p) => isParameterizedReplaceableKind(p.kind));
+  const replaceable = pointers.filter((p) => isReplaceableKind(p.kind));
 
   const filters: Filter[] = [];
 
@@ -93,4 +93,31 @@ export function getRelaysFromPointers(pointers: AddressPointerWithoutD[]) {
 
 export function getAddressPointerId<T extends AddressPointerWithoutD>(pointer: T): string {
   return getReplaceableUID(pointer.kind, pointer.pubkey, pointer.identifier);
+}
+
+/** deduplicates an array of address pointers and merges their relays array */
+export function consolidateAddressPointers<
+  T extends { kind: number; pubkey: string; identifier?: string; relays?: string[]; force?: boolean },
+>(pointers: T[]): T[] {
+  const byCoordinate = new Map<string, T>();
+
+  for (const pointer of pointers) {
+    let cord = getAddressPointerId(pointer);
+    let existing = byCoordinate.get(cord);
+
+    if (existing) {
+      // override force flag
+      if (pointer.force) existing.force = pointer.force;
+
+      // merge relays
+      if (pointer.relays) {
+        if (!existing.relays) existing.relays = [...pointer.relays];
+        else existing.relays = [...existing.relays, ...pointer.relays.filter((r) => !existing.relays!.includes(r))];
+      }
+    } else {
+      byCoordinate.set(cord, pointer);
+    }
+  }
+
+  return Array.from(byCoordinate.values());
 }
