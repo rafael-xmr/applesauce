@@ -1,4 +1,7 @@
+import { Filter, NostrEvent } from "nostr-tools";
 import { Observable, OperatorFunction, Subject, Subscribable } from "rxjs";
+
+export type CacheRequest = (filters: Filter[]) => Observable<NostrEvent>;
 
 export interface ILoader<T, R> extends Subscribable<R> {
   next: (value: T) => void;

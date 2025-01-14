@@ -1,11 +1,10 @@
 import { share, tap, from, Observable, OperatorFunction, filter, bufferTime, map, mergeMap } from "rxjs";
 import { EventPacket, RxNostr } from "rx-nostr";
 import { getEventUID, getReplaceableUID, markFromCache } from "applesauce-core/helpers";
-import { Filter, NostrEvent } from "nostr-tools";
 import { logger } from "applesauce-core";
 import { nanoid } from "nanoid";
 
-import { Loader } from "./loader.js";
+import { CacheRequest, Loader } from "./loader.js";
 import { generatorSequence } from "../operators/generator-sequence.js";
 import { addressPointersRequest } from "../operators/address-pointers-request.js";
 import {
@@ -26,8 +25,6 @@ export type LoadableAddressPointer = {
   /** Load this address pointer even if it has already been loaded */
   force?: boolean;
 };
-
-export type CacheRequest = (filters: Filter[]) => Observable<NostrEvent>;
 
 /** deep clone a loadable pointer to ensure its safe to modify */
 function cloneLoadablePointer(pointer: LoadableAddressPointer): LoadableAddressPointer {
@@ -191,7 +188,7 @@ export type ReplaceableLoaderOptions = {
    * @default 1000
    */
   bufferTime?: number;
-  /** Request events from the cache first */
+  /** A method used to load events from a local cache */
   cacheRequest?: CacheRequest;
   /** Fallback lookup relays to check when event cant be found */
   lookupRelays?: string[];
