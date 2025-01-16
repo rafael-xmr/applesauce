@@ -36,5 +36,5 @@ export function addNameValueTag(tag: string[]): TagOperation {
   return (tags) => ensureNamedValueTag(tags, tag);
 }
 export function removeNameValueTag(tag: string[]): TagOperation {
-  return (tags) => tags.filter((t) => t[0] === tag[0] && t[1] === tag[1]);
+  return (tags) => tags.filter((t) => !(t[0] === tag[0] && t[1] === tag[1]));
 }
