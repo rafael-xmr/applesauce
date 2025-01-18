@@ -33,7 +33,7 @@ jobs:
         run: pnpm typedoc
 
       - name: Build vitepress
-        run: pnpm build --filter applesauce-docs -- --base /applesauce/
+        run: pnpm build --filter applesauce-docs
 
       - name: Copy vitepress
         run: cp -r packages/docs/.vitepress/dist/* docs
