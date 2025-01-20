@@ -7,13 +7,13 @@ import { safeRelayUrl } from "./relays.js";
 
 export const COMMENT_KIND = 1111;
 
-type CommentEventPointer = {
+export type CommentEventPointer = {
   id: string;
   kind: number;
   pubkey?: string;
   relay?: string;
 };
-type CommentAddressPointer = {
+export type CommentAddressPointer = {
   // address pointer can have optional event id if there is an "E" or "e" tag
   id?: string;
   kind: number;
@@ -22,7 +22,7 @@ type CommentAddressPointer = {
   relay?: string;
 };
 
-type CommentExternalPointer = ExternalPointer<keyof ExternalIdentifiers>;
+export type CommentExternalPointer = ExternalPointer<keyof ExternalIdentifiers>;
 
 export type CommentPointer = CommentEventPointer | CommentAddressPointer | CommentExternalPointer;
 

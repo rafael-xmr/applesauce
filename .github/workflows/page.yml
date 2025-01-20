@@ -51,6 +51,12 @@ jobs:
       - name: Build typedoc
         run: pnpm typedoc
 
+      - name: Build examples
+        run: VITE_BASE=/applesauce/examples pnpm build --filter applesauce-examples
+
+      - name: Copy examples
+        run: mkdir -p docs/examples && cp -r packages/examples/dist/* docs/examples
+
       - name: Build vitepress
         run: pnpm build --filter applesauce-docs -- --base /applesauce/
 

@@ -1,6 +1,6 @@
 /**
  * Checks if a string is encrypted with NIP-04 or NIP-44
- * @sse https://github.com/nostr-protocol/nips/pull/1248#issuecomment-2437731316
+ * @see https://github.com/nostr-protocol/nips/pull/1248#issuecomment-2437731316
  */
 export function isNIP04(ciphertext: string): boolean {
   const l = ciphertext.length;
