@@ -2,7 +2,7 @@
   "$schema": "https://typedoc.org/schema.json",
   "name": "AppleSauce",
   "entryPoints": ["packages/*"],
-  "exclude": ["packages/docs"],
+  "exclude": ["packages/docs", "packages/examples"],
   "entryPointStrategy": "packages",
   "packageOptions": {
     "entryPoints": ["src/index.ts"]
