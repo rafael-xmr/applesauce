@@ -9,7 +9,6 @@
 "applesauce-lists": patch
 "applesauce-react": patch
 "applesauce-core": patch
-"applesauce-net": patch
 ---
 
 Add `require` support in node v22
