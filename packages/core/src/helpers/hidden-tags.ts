@@ -103,13 +103,24 @@ export async function unlockHiddenTags(
  */
 export async function modifyEventTags(
   event: NostrEvent | UnsignedEvent,
-  operations: { public?: TagOperation; hidden?: TagOperation },
+  operations: { public?: TagOperation | TagOperation[]; hidden?: TagOperation | TagOperation[] },
   signer?: HiddenTagsSigner,
 ): Promise<EventTemplate> {
-  const draft: EventTemplate = { content: event.content, tags: event.tags, kind: event.kind, created_at: unixNow() };
+  const draft: EventTemplate = {
+    content: event.content,
+    tags: Array.from(event.tags),
+    kind: event.kind,
+    created_at: unixNow(),
+  };
 
   if (operations.public) {
-    draft.tags = operations.public(event.tags);
+    if (Array.isArray(operations.public)) {
+      for (const operation of operations.public) {
+        draft.tags = operation(draft.tags);
+      }
+    } else {
+      draft.tags = operations.public(draft.tags);
+    }
   }
 
   if (operations.hidden) {
@@ -119,7 +130,14 @@ export async function modifyEventTags(
     const hidden = hasHiddenTags(event) ? getHiddenTags(event) : [];
     if (!hidden) throw new Error("Hidden tags are locked");
 
-    const newHidden = operations.hidden(hidden);
+    let newHidden = Array.from(hidden);
+    if (Array.isArray(operations.hidden)) {
+      for (const operation of operations.hidden) {
+        newHidden = operation(newHidden);
+      }
+    } else {
+      newHidden = operations.hidden(newHidden);
+    }
     const encryption = getEventEncryption(event.kind, signer);
     draft.content = await encryption.encrypt(event.pubkey, JSON.stringify(newHidden));
   }
