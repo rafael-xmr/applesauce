@@ -12,7 +12,32 @@ The [account classes](https://hzrd149.github.io/applesauce/typedoc/modules/apple
 - [ReadonlyAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_accounts.Accounts.ReadonlyAccount.html) is a wrapper around [ReadonlySigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_signer.ReadonlySigner.html)
 - [AmberClipboardAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_accounts.Accounts.AmberClipboardAccount.html) is a wrapper around [AmberClipboardSigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_signer.AmberClipboardSigner.html)
 
-## Creating a custom account type
+## Creating new accounts
+
+All account classes require the signer to be created and setup first
+
+```ts
+// create the signer first
+const signer = new SimpleSigner();
+
+// setup signer
+const pubkey = await signer.getPublicKey();
+
+// create account
+const account = new SimpleAccount(pubkey, signer);
+```
+
+For a nostr connect signer it would look something like
+
+```ts
+const signer = await NostrConnectSigner.fromBunkerURI("bunker://....");
+
+const pubkey = await signer.getPublicKey();
+
+const account = new NostrConnectAccount(pubkey, signer);
+```
+
+## Custom account types
 
 To create your own account type first your going to need to create a new signer class that implements [Nip07Interface](https://hzrd149.github.io/applesauce/typedoc/types/applesauce_signer.Nip07Interface.html)
 
