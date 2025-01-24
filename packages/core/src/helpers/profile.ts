@@ -5,10 +5,13 @@ export const ProfileContentSymbol = Symbol.for("profile-content");
 
 export type ProfileContent = {
   name?: string;
+  /** @deprecated use name instead */
+  username?: string;
   display_name?: string;
+  /** @deprecated use display_name instead */
   displayName?: string;
   about?: string;
-  /** @deprecated */
+  /** @deprecated use picture instead */
   image?: string;
   picture?: string;
   banner?: string;
@@ -46,4 +49,9 @@ export function isValidProfile(profile?: NostrEvent) {
   } catch (error) {
     return false;
   }
+}
+
+/** Gets the display name from a profile with fallbacks */
+export function getDisplayName(metadata: ProfileContent) {
+  return metadata?.display_name || metadata?.displayName || metadata?.name;
 }
