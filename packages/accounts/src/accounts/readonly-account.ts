@@ -3,20 +3,20 @@ import { BaseAccount } from "../account.js";
 import { SerializedAccount } from "../types.js";
 
 /** An account that cannot sign or encrypt anything */
-export default class ReadonlyAccount extends BaseAccount<"readonly", void> {
-  constructor(pubkey: string, signer?: ReadonlySigner) {
-    super(pubkey, signer || new ReadonlySigner(pubkey));
-  }
+export default class ReadonlyAccount<Metadata extends unknown> extends BaseAccount<ReadonlySigner, void, Metadata> {
+  static type = "readonly";
 
-  toJSON(): SerializedAccount<"readonly", void> {
+  toJSON() {
     return {
-      type: "readonly",
+      type: ReadonlyAccount.type,
+      id: this.id,
       pubkey: this.pubkey,
+      metadata: this.metadata,
       signer: undefined,
     };
   }
 
-  static fromJSON(json: SerializedAccount<"readonly", void>) {
-    return new ReadonlyAccount(json.pubkey);
+  static fromJSON<Metadata extends unknown>(json: SerializedAccount<void, Metadata>): ReadonlyAccount<Metadata> {
+    return new ReadonlyAccount(json.pubkey, new ReadonlySigner(json.pubkey));
   }
 }

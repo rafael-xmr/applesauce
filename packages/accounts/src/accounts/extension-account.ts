@@ -2,16 +2,27 @@ import { ExtensionSigner } from "applesauce-signer/signers/extension-signer";
 import { BaseAccount } from "../account.js";
 import { SerializedAccount } from "../types.js";
 
-export default class ExtensionAccount extends BaseAccount<"extension", void> {
-  constructor(pubkey: string) {
-    super(pubkey, new ExtensionSigner());
+export default class ExtensionAccount<Metadata extends unknown> extends BaseAccount<ExtensionSigner, void, Metadata> {
+  static type = "extension";
+
+  constructor(
+    pubkey: string,
+    override signer: ExtensionSigner,
+  ) {
+    super(pubkey, signer || new ExtensionSigner());
   }
 
-  toJSON(): SerializedAccount<"extension", void> {
-    return { type: "extension", pubkey: this.pubkey, signer: undefined };
+  toJSON() {
+    return {
+      type: ExtensionAccount.type,
+      id: this.id,
+      pubkey: this.pubkey,
+      metadata: this.metadata,
+      signer: undefined,
+    };
   }
 
-  static fromJSON(json: SerializedAccount<"extension", void>): ExtensionAccount {
-    return new ExtensionAccount(json.pubkey);
+  static fromJSON<MD extends unknown>(json: SerializedAccount<void, MD>) {
+    return new ExtensionAccount(json.pubkey, new ExtensionSigner());
   }
 }

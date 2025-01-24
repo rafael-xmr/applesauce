@@ -1,0 +1,87 @@
+# Account Manager
+
+The [AccountManager](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_accounts.AccountManager.html) class is the core of the library, as its name suggests its used to manage multiple accounts
+
+## Account types
+
+By default the account manager comes with no account types. you have to manually add them when you create the instance. luckily there is a handy method to add the most common types [registerCommonAccountTypes](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_accounts.registerCommonAccountTypes.html)
+
+```ts
+import { AccountManager, registerCommonAccountTypes, AmberClipboardAccount } from "applesauce-accounts";
+
+// create an account manager instance
+const manager = new AccountManager();
+
+// register common account types
+registerCommonAccountTypes(manager);
+
+// manually add account type
+manager.registerType(AmberClipboardAccount);
+```
+
+## Adding and removing accounts
+
+```ts
+import { AccountManager, registerCommonAccountTypes, SimpleAccount } from "applesauce-accounts";
+
+// create an account manager instance
+const manager = new AccountManager();
+
+// register common account types
+registerCommonAccountTypes(manager);
+
+// subscribe to the active account
+manager.active.subscribe((account) => {
+  if (account) console.log(`${account.id} is now active`);
+  else console.log("no account is active");
+
+  updateUI();
+});
+
+// create an account
+const account = SimpleAccount.fromKey("788229e1801c4576391d39a03610293ea7e6645c9d39aca54c62fc6d71cbc385");
+
+// add it to the manager
+manager.addAccount(account);
+
+// set it as active
+manager.setActive(account);
+
+// later, remove the account and the active account will also update
+manager.removeAccount(account.id);
+```
+
+## Persisting accounts
+
+The account manager exposes two methods that can be used to persist accounts between app reloads. `toJSON` and `fromJSON`
+
+```ts
+import { AccountManager, registerCommonAccountTypes, SimpleAccount } from "applesauce-accounts";
+
+// create an account manager instance
+const manager = new AccountManager();
+
+// register common account types
+registerCommonAccountTypes(manager);
+
+// first load all accounts from
+const json = JSON.parse(localStorage.getItem("accounts") || "[]");
+await manager.fromJSON(json);
+
+// next, subscribe to any accounts added or removed
+manager.accounts.subscribe((accounts) => {
+  // save all the accounts into the "accounts" field
+  localStorage.setItem("accounts", JSON.stringify(manager.toJSON()));
+});
+
+// load active account from storage
+if (localStorage.hasItem("active")) {
+  manger.setActive(localStorage.getItem("active"));
+}
+
+// subscribe to active changes
+manager.active.subscribe((account) => {
+  if (account) localStorage.setItem("active", account.id);
+  else localStorage.clearItem("active");
+});
+```

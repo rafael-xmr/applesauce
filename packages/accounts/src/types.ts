@@ -1,24 +1,39 @@
 import { Nip07Interface } from "applesauce-signer";
 
-export type SerializedAccount<T extends string, S> = {
-  type: T;
-  name?: string;
-  pubkey: string;
-  signer: S;
+export type EventTemplate = {
+  kind: number;
+  content: string;
+  tags: string[][];
+  created_at: number;
 };
 
-export interface IAccount<T extends string, S> extends Nip07Interface {
+export type SerializedAccount<SignerData, Metadata extends unknown> = {
+  /** Internal account ID */
+  id: string;
+  /** account type */
+  type: string;
+  /** local name of the account */
+  name?: string;
+  /** pubkey of the account */
+  pubkey: string;
+  /** Signer data */
+  signer: SignerData;
+  /** Extra application specific account metadata */
+  metadata?: Metadata;
+};
+
+export interface IAccount<Signer extends Nip07Interface, SignerData, Metadata extends unknown> extends Nip07Interface {
+  id: string;
   name?: string;
   pubkey: string;
+  metadata?: Metadata;
+  signer: Signer;
 
-  locked: boolean;
-  unlock(): Promise<boolean>;
-  lock(): void;
-
-  toJSON(): SerializedAccount<T, S>;
+  toJSON(): SerializedAccount<SignerData, Metadata>;
 }
 
-export interface IAccountConstructor<T extends string, S> {
-  new (pubkey: string, signer: Nip07Interface): IAccount<T, S>;
-  fromJSON(json: SerializedAccount<T, S>): IAccount<T, S>;
+export interface IAccountConstructor<Signer extends Nip07Interface, SignerData, Metadata extends unknown> {
+  type: string;
+  new (pubkey: string, signer: Signer): IAccount<Signer, SignerData, Metadata>;
+  fromJSON(json: SerializedAccount<SignerData, Metadata>): IAccount<Signer, SignerData, Metadata>;
 }

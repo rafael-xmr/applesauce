@@ -39,6 +39,14 @@ export default defineConfig({
         ],
       },
       {
+        text: "Accounts",
+        items: [
+          { text: "Installation", link: "/accounts/installation" },
+          { text: "Accounts", link: "/accounts/accounts" },
+          { text: "Manager", link: "/accounts/manager" },
+        ],
+      },
+      {
         text: "React",
         items: [
           { text: "Installation", link: "/react/installation" },

@@ -9,26 +9,27 @@ type SignerData = {
   key: string;
 };
 
-export default class SimpleAccount extends BaseAccount<"nsec", SignerData> {
-  constructor(
-    pubkey: string,
-    override signer: SimpleSigner,
-  ) {
-    super(pubkey, signer);
+export default class SimpleAccount<Metadata extends unknown> extends BaseAccount<SimpleSigner, SignerData, Metadata> {
+  static type = "nsec";
+
+  toJSON(): SerializedAccount<SignerData, Metadata> {
+    return {
+      type: SimpleAccount.type,
+      id: this.id,
+      pubkey: this.pubkey,
+      metadata: this.metadata,
+      signer: { key: bytesToHex(this.signer.key) },
+    };
   }
 
-  static fromKey(key: Uint8Array | string) {
+  static fromJSON<Metadata extends unknown>(json: SerializedAccount<SignerData, Metadata>): SimpleAccount<Metadata> {
+    const key = hexToBytes(json.signer.key);
+    return new SimpleAccount(json.pubkey, new SimpleSigner(key));
+  }
+
+  static fromKey<Metadata extends unknown>(key: Uint8Array | string): SimpleAccount<Metadata> {
     if (typeof key === "string") key = hexToBytes(key);
     const pubkey = getPublicKey(key);
     return new SimpleAccount(pubkey, new SimpleSigner(key));
-  }
-
-  toJSON(): SerializedAccount<"nsec", SignerData> {
-    return { type: "nsec", pubkey: this.pubkey, signer: { key: bytesToHex(this.signer.key) } };
-  }
-
-  static fromJSON(json: SerializedAccount<"nsec", SignerData>) {
-    const key = hexToBytes(json.signer.key);
-    return new SimpleAccount(json.pubkey, new SimpleSigner(key));
   }
 }

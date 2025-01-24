@@ -1,21 +1,22 @@
 import { AmberClipboardSigner } from "applesauce-signer/signers/amber-clipboard-signer";
 import { BaseAccount } from "../account.js";
-import { IAccount, SerializedAccount } from "../types.js";
+import { SerializedAccount } from "../types.js";
 
 /** An account for the amber clipboard api */
-export class AmberClipboardAccount extends BaseAccount<"amber-clipboard", void> {
-  constructor(
-    pubkey: string,
-    override signer: AmberClipboardSigner,
-  ) {
-    super(pubkey, signer);
+export class AmberClipboardAccount<Metadata extends unknown> extends BaseAccount<AmberClipboardSigner, void, Metadata> {
+  static type = "amber-clipboard";
+
+  toJSON(): SerializedAccount<void, Metadata> {
+    return {
+      type: AmberClipboardAccount.type,
+      id: this.id,
+      pubkey: this.pubkey,
+      metadata: this.metadata,
+      signer: undefined,
+    };
   }
 
-  toJSON(): SerializedAccount<"amber-clipboard", void> {
-    return { type: "amber-clipboard", pubkey: this.pubkey, name: this.name, signer: void 0 };
-  }
-
-  static fromJSON(json: SerializedAccount<"amber-clipboard", void>): IAccount<"amber-clipboard", void> {
+  static fromJSON<MD extends unknown>(json: SerializedAccount<void, MD>): AmberClipboardAccount<MD> {
     return new AmberClipboardAccount(json.pubkey, new AmberClipboardSigner());
   }
 }

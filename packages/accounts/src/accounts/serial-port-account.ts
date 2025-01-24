@@ -3,10 +3,8 @@ import { BaseAccount } from "../account.js";
 import { SerializedAccount } from "../types.js";
 
 /** An account for SerialPortSigner */
-export default class SerialPortAccount extends BaseAccount<"serial-port", void> {
-  constructor(pubkey: string, signer?: SerialPortSigner) {
-    super(pubkey, signer || new SerialPortSigner());
-  }
+export default class SerialPortAccount<Metadata extends unknown> extends BaseAccount<SerialPortSigner, void, Metadata> {
+  static type = "serial-port";
 
   async unlock(): Promise<boolean> {
     try {
@@ -18,11 +16,17 @@ export default class SerialPortAccount extends BaseAccount<"serial-port", void> 
     }
   }
 
-  toJSON(): SerializedAccount<"serial-port", void> {
-    return { type: "serial-port", pubkey: this.pubkey, signer: undefined };
+  toJSON(): SerializedAccount<void, Metadata> {
+    return {
+      type: SerialPortAccount.type,
+      id: this.id,
+      pubkey: this.pubkey,
+      metadata: this.metadata,
+      signer: undefined,
+    };
   }
 
-  static fromJSON(json: SerializedAccount<"serial-port", void>) {
-    return new SerialPortAccount(json.pubkey);
+  static fromJSON<Metadata extends unknown>(json: SerializedAccount<void, Metadata>): SerialPortAccount<Metadata> {
+    return new SerialPortAccount(json.pubkey, new SerialPortSigner());
   }
 }
