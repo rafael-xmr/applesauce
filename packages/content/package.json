@@ -30,6 +30,11 @@
       "require": "./dist/helpers/index.js",
       "types": "./dist/helpers/index.d.ts"
     },
+    "./helpers/*": {
+      "import": "./dist/helpers/*.js",
+      "require": "./dist/helpers/*.js",
+      "types": "./dist/helpers/*.d.ts"
+    },
     "./nast": {
       "import": "./dist/nast/index.js",
       "require": "./dist/nast/index.js",
