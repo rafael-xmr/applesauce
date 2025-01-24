@@ -9,7 +9,7 @@ type SignerData = {
   key: string;
 };
 
-export default class SimpleAccount<Metadata extends unknown> extends BaseAccount<SimpleSigner, SignerData, Metadata> {
+export class SimpleAccount<Metadata extends unknown> extends BaseAccount<SimpleSigner, SignerData, Metadata> {
   static type = "nsec";
 
   toJSON(): SerializedAccount<SignerData, Metadata> {

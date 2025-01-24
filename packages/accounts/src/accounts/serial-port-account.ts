@@ -3,7 +3,7 @@ import { BaseAccount } from "../account.js";
 import { SerializedAccount } from "../types.js";
 
 /** An account for SerialPortSigner */
-export default class SerialPortAccount<Metadata extends unknown> extends BaseAccount<SerialPortSigner, void, Metadata> {
+export class SerialPortAccount<Metadata extends unknown> extends BaseAccount<SerialPortSigner, void, Metadata> {
   static type = "serial-port";
 
   async unlock(): Promise<boolean> {

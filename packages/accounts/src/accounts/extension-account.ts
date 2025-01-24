@@ -2,7 +2,7 @@ import { ExtensionSigner } from "applesauce-signer/signers/extension-signer";
 import { BaseAccount } from "../account.js";
 import { SerializedAccount } from "../types.js";
 
-export default class ExtensionAccount<Metadata extends unknown> extends BaseAccount<ExtensionSigner, void, Metadata> {
+export class ExtensionAccount<Metadata extends unknown> extends BaseAccount<ExtensionSigner, void, Metadata> {
   static type = "extension";
 
   constructor(

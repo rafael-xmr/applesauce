@@ -3,7 +3,7 @@ import { BaseAccount } from "../account.js";
 import { SerializedAccount } from "../types.js";
 
 /** An account that cannot sign or encrypt anything */
-export default class ReadonlyAccount<Metadata extends unknown> extends BaseAccount<ReadonlySigner, void, Metadata> {
+export class ReadonlyAccount<Metadata extends unknown> extends BaseAccount<ReadonlySigner, void, Metadata> {
   static type = "readonly";
 
   toJSON() {

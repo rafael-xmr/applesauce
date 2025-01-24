@@ -6,11 +6,7 @@ type SignerData = {
   ncryptsec: string;
 };
 
-export default class PasswordAccount<Metadata extends unknown> extends BaseAccount<
-  PasswordSigner,
-  SignerData,
-  Metadata
-> {
+export class PasswordAccount<Metadata extends unknown> extends BaseAccount<PasswordSigner, SignerData, Metadata> {
   static type = "ncryptsec";
 
   get unlocked() {
