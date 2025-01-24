@@ -123,3 +123,13 @@ export function getMediaAttachments(event: NostrEvent): FileMetadata[] {
 export function getFileMetadata(file: NostrEvent) {
   return parseFileMetadataTags(file.tags);
 }
+
+/** Returns the last 64 length hex string in a URL */
+export function getSha256FromURL(url: string | URL): string | null {
+  if (typeof url === "string") url = new URL(url);
+
+  const hashes = Array.from(url.pathname.matchAll(/[0-9a-f]{64}/gi));
+  if (hashes.length > 0) return hashes[hashes.length - 1][0];
+
+  return null;
+}
