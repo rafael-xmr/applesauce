@@ -25,12 +25,22 @@ export class AccountManager<Metadata extends unknown = any> {
   // Accounts CRUD
 
   /** gets an account in the manager */
-  getAccount<S extends Nip07Interface>(
-    id: string | IAccount<S, any, Metadata>,
-  ): IAccount<S, any, Metadata> | undefined {
+  getAccount<Signer extends Nip07Interface>(
+    id: string | IAccount<Signer, any, Metadata>,
+  ): IAccount<Signer, any, Metadata> | undefined {
     if (typeof id === "string") return this.accounts.value[id];
     else if (this.accounts.value[id.id]) return id;
     else return undefined;
+  }
+
+  /** Return the first account for a pubkey */
+  getAccountForPubkey(pubkey: string): IAccount<any, any, Metadata> | undefined {
+    return Object.values(this.accounts.value).find((account) => account.pubkey === pubkey);
+  }
+
+  /** Returns all accounts for a pubkey */
+  getAccountsForPubkey(pubkey: string): IAccount<any, any, Metadata>[] {
+    return Object.values(this.accounts.value).filter((account) => account.pubkey === pubkey);
   }
 
   /** adds an account to the manager */
