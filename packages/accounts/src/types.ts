@@ -29,6 +29,8 @@ export interface IAccount<Signer extends Nip07Interface, SignerData, Metadata ex
   metadata?: Metadata;
   signer: Signer;
 
+  disableQueue?: boolean;
+
   toJSON(): SerializedAccount<SignerData, Metadata>;
 }
 

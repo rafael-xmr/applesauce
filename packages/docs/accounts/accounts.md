@@ -17,6 +17,9 @@ The [account classes](https://hzrd149.github.io/applesauce/typedoc/modules/apple
 All account classes require the signer to be created and setup first
 
 ```ts
+import { SimpleSigner } from "applesauce-signer/signers";
+import { SimpleAccount } from "applesauce-accounts/accounts";
+
 // create the signer first
 const signer = new SimpleSigner();
 
@@ -30,12 +33,51 @@ const account = new SimpleAccount(pubkey, signer);
 For a nostr connect signer it would look something like
 
 ```ts
+import { NostrConnectSigner } from "applesauce-signer/signers";
+import { NostrConnectAccount } from "applesauce-accounts/accounts";
+
 const signer = await NostrConnectSigner.fromBunkerURI("bunker://....");
 
 const pubkey = await signer.getPublicKey();
 
 const account = new NostrConnectAccount(pubkey, signer);
 ```
+
+## Request queue
+
+By default all accounts use a request queue, so the signer only gets on sign/encrypt/decrypt request at a time. This should make it safe to make a bunch of requests to the account without overloading the user
+
+```ts
+import { ExtensionSigner } from "applesauce-signer/signers";
+import { ExtensionAccount } from "applesauce-accounts/accounts";
+
+const signer = new ExtensionSigner();
+const pubkey = await signer.getPublicKey();
+
+const account = new ExtensionAccount(pubkey, signer);
+
+// make requests
+account.signEvent({ kind: 1, content: "hello world", created_at: 0, tags: [] }).then((signed) => {
+  console.log(signed);
+});
+
+// make another without waiting
+account.signEvent({ kind: 1, content: "creating spam", created_at: 0, tags: [] }).then((signed) => {
+  console.log(signed);
+});
+
+account.nip04
+  .decrypt("3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d", "encrypted-text")
+  .then((plaintext) => {
+    console.log(plaintext);
+  });
+```
+
+All the requests will be made one at a time in order, if any request fails (user rejects, signer timeout) then the queue will continue
+
+The `account.abortQueue(reason?: Error)` method can be used to abort all pending requests. this will cause all promises to throw with `undefined` or `reason` if it was passed to the `abortQueue` method
+
+To disable the request queue set `account.disableQueue = false` directly after creating the account. it can also be disabled on the `AccountManager` before any accounts are added
 
 ## Custom account types
 

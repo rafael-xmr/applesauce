@@ -16,6 +16,9 @@ export class AccountManager<Metadata extends unknown = any> {
     return this.accounts$.value;
   }
 
+  /** Disable request queueing for any accounts added to this manager */
+  disableQueue?: boolean;
+
   // Account type CRUD
 
   /** Add account type class */
@@ -54,6 +57,11 @@ export class AccountManager<Metadata extends unknown = any> {
   /** adds an account to the manager */
   addAccount(account: IAccount<any, any, Metadata>) {
     if (this.getAccount(account.id)) return;
+
+    // copy the disableQueue flag only if its set
+    if (this.disableQueue !== undefined && account.disableQueue !== undefined) {
+      account.disableQueue = this.disableQueue;
+    }
 
     this.accounts$.next({
       ...this.accounts$.value,

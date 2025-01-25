@@ -1,9 +1,33 @@
 import { Nip07Interface } from "applesauce-signer";
 import { nanoid } from "nanoid";
-
-import { EventTemplate, IAccount, SerializedAccount } from "./types.js";
 import { BehaviorSubject } from "rxjs";
 import { NostrEvent } from "nostr-tools";
+
+import { EventTemplate, IAccount, SerializedAccount } from "./types.js";
+
+function wrapInSignal<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  return new Promise((res, rej) => {
+    signal.throwIfAborted();
+    let done = false;
+
+    // reject promise if abort signal is triggered
+    signal.addEventListener("abort", () => {
+      if (!done) rej(signal.reason || undefined);
+      done = true;
+    });
+
+    return promise.then(
+      (v) => {
+        if (!done) res(v);
+        done = true;
+      },
+      (err) => {
+        if (!done) rej(err);
+        done = true;
+      },
+    );
+  });
+}
 
 export class SignerMismatchError extends Error {}
 
@@ -12,8 +36,8 @@ export class BaseAccount<Signer extends Nip07Interface, SignerData, Metadata ext
 {
   id = nanoid(8);
 
-  /** Use a queue for sign and encryption/decryption requests so that there is only one request at a time */
-  queueRequests = true;
+  /** Disable request queueing */
+  disableQueue?: boolean;
 
   metadata$ = new BehaviorSubject<Metadata | undefined>(undefined);
   get metadata(): Metadata | undefined {
@@ -105,33 +129,43 @@ export class BaseAccount<Signer extends Nip07Interface, SignerData, Metadata ext
     });
   }
 
-  /** Resets the request queue */
-  resetQueue() {
-    this.lock = null;
-    this.queueLength = 0;
+  /** Aborts all pending requests in the queue */
+  abortQueue(reason: Error) {
+    if (this.abort) this.abort.abort(reason);
   }
 
   /** internal queue */
   protected queueLength = 0;
   protected lock: Promise<any> | null = null;
+  protected abort: AbortController | null = null;
+  protected reduceQueue() {
+    // shorten the queue
+    this.queueLength--;
+
+    // if this was the last request, remove the lock
+    if (this.queueLength === 0) {
+      this.lock = null;
+      this.abort = null;
+    }
+  }
   protected waitForLock<T>(fn: () => Promise<T> | T): Promise<T> | T {
-    if (!this.queueRequests) return fn();
+    if (this.disableQueue) return fn();
 
     // if there is already a pending request, wait for it
-    if (this.lock) {
+    if (this.lock && this.abort) {
       // create a new promise that runs after the lock
-      const p = this.lock
-        .then(() => fn())
-        .finally(() => {
-          // shorten the queue
-          this.queueLength--;
+      const p = wrapInSignal(
+        this.lock.then(() => {
+          // if the abort signal is triggered, don't call the signer
+          this.abort?.signal.throwIfAborted();
 
-          // if this was the last request, remove the lock
-          if (this.queueLength === 0) this.lock = null;
-        });
+          return fn();
+        }),
+        this.abort.signal,
+      );
 
-      // set the lock the new promise
-      this.lock = p;
+      // set the lock the new promise that ignores errors
+      this.lock = p.catch(() => {}).finally(this.reduceQueue.bind(this));
       this.queueLength++;
 
       return p;
@@ -140,7 +174,12 @@ export class BaseAccount<Signer extends Nip07Interface, SignerData, Metadata ext
 
       // if the result is async, set the new lock
       if (result instanceof Promise) {
-        this.lock = result;
+        this.abort = new AbortController();
+
+        const p = wrapInSignal(result, this.abort.signal);
+
+        // set the lock the new promise that ignores errors
+        this.lock = p.catch(() => {}).finally(this.reduceQueue.bind(this));
         this.queueLength = 1;
       }
 
