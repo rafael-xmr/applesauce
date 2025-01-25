@@ -4,9 +4,17 @@ import { BehaviorSubject } from "rxjs";
 import { IAccount, IAccountConstructor, SerializedAccount } from "./types.js";
 
 export class AccountManager<Metadata extends unknown = any> {
-  active = new BehaviorSubject<IAccount<any, any, Metadata> | null>(null);
-  accounts = new BehaviorSubject<Record<string, IAccount<any, any, Metadata>>>({});
   types = new Map<string, IAccountConstructor<any, any, Metadata>>();
+
+  active$ = new BehaviorSubject<IAccount<any, any, Metadata> | null>(null);
+  get active() {
+    return this.active$.value;
+  }
+
+  accounts$ = new BehaviorSubject<IAccount<any, any, Metadata>[]>([]);
+  get accounts() {
+    return this.accounts$.value;
+  }
 
   // Account type CRUD
 
@@ -28,27 +36,27 @@ export class AccountManager<Metadata extends unknown = any> {
   getAccount<Signer extends Nip07Interface>(
     id: string | IAccount<Signer, any, Metadata>,
   ): IAccount<Signer, any, Metadata> | undefined {
-    if (typeof id === "string") return this.accounts.value[id];
-    else if (this.accounts.value[id.id]) return id;
+    if (typeof id === "string") return this.accounts$.value.find((a) => a.id === id);
+    else if (this.accounts$.value.includes(id)) return id;
     else return undefined;
   }
 
   /** Return the first account for a pubkey */
   getAccountForPubkey(pubkey: string): IAccount<any, any, Metadata> | undefined {
-    return Object.values(this.accounts.value).find((account) => account.pubkey === pubkey);
+    return Object.values(this.accounts$.value).find((account) => account.pubkey === pubkey);
   }
 
   /** Returns all accounts for a pubkey */
   getAccountsForPubkey(pubkey: string): IAccount<any, any, Metadata>[] {
-    return Object.values(this.accounts.value).filter((account) => account.pubkey === pubkey);
+    return Object.values(this.accounts$.value).filter((account) => account.pubkey === pubkey);
   }
 
   /** adds an account to the manager */
   addAccount(account: IAccount<any, any, Metadata>) {
     if (this.getAccount(account.id)) return;
 
-    this.accounts.next({
-      ...this.accounts.value,
+    this.accounts$.next({
+      ...this.accounts$.value,
       [account.id]: account,
     });
   }
@@ -56,9 +64,7 @@ export class AccountManager<Metadata extends unknown = any> {
   /** Removes an account from the manager */
   removeAccount(account: string | IAccount<any, any, Metadata>) {
     const id = typeof account === "string" ? account : account.id;
-    const next = { ...this.accounts.value };
-    delete next[id];
-    this.accounts.next(next);
+    this.accounts$.next(this.accounts$.value.filter((a) => a.id !== id));
   }
 
   /** Replaces an account with another */
@@ -67,7 +73,7 @@ export class AccountManager<Metadata extends unknown = any> {
 
     // if the old account was active, switch to the new one
     const id = typeof account === "string" ? account : account.id;
-    if (this.active.value?.id === id) this.setActive(account);
+    if (this.active$.value?.id === id) this.setActive(account);
 
     this.removeAccount(old);
   }
@@ -76,20 +82,20 @@ export class AccountManager<Metadata extends unknown = any> {
 
   /** Returns the currently active account */
   getActive() {
-    return this.active.value;
+    return this.active$.value;
   }
   /** Sets the currently active account */
   setActive(id: string | IAccount<any, any, Metadata>) {
     const account = this.getAccount(id);
     if (!account) throw new Error("Cant find account with that ID");
 
-    if (this.active.value?.id !== account.id) {
-      this.active.next(account);
+    if (this.active$.value?.id !== account.id) {
+      this.active$.next(account);
     }
   }
   /** Clears the currently active account */
   clearActive() {
-    this.active.next(null);
+    this.active$.next(null);
   }
 
   // Metadata CRUD
@@ -112,7 +118,7 @@ export class AccountManager<Metadata extends unknown = any> {
 
   /** Returns an array of serialized accounts */
   toJSON(): SerializedAccount<any, Metadata>[] {
-    return Array.from(Object.values(this.accounts)).map((account) => account.toJSON());
+    return Array.from(Object.values(this.accounts$)).map((account) => account.toJSON());
   }
 
   /**

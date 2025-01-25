@@ -31,7 +31,7 @@ const manager = new AccountManager();
 registerCommonAccountTypes(manager);
 
 // subscribe to the active account
-manager.active.subscribe((account) => {
+manager.active$.subscribe((account) => {
   if (account) console.log(`${account.id} is now active`);
   else console.log("no account is active");
 
@@ -69,7 +69,7 @@ const json = JSON.parse(localStorage.getItem("accounts") || "[]");
 await manager.fromJSON(json);
 
 // next, subscribe to any accounts added or removed
-manager.accounts.subscribe((accounts) => {
+manager.accounts$.subscribe((accounts) => {
   // save all the accounts into the "accounts" field
   localStorage.setItem("accounts", JSON.stringify(manager.toJSON()));
 });
@@ -80,7 +80,7 @@ if (localStorage.hasItem("active")) {
 }
 
 // subscribe to active changes
-manager.active.subscribe((account) => {
+manager.active$.subscribe((account) => {
   if (account) localStorage.setItem("active", account.id);
   else localStorage.clearItem("active");
 });
