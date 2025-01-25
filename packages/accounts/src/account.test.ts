@@ -50,7 +50,7 @@ describe("BaseAccount", () => {
 
     it("should not use queueing if its disabled", async () => {
       const account = new BaseAccount(await signer.getPublicKey(), signer);
-      account.disableQueue = false;
+      account.disableQueue = true;
 
       let resolve: (() => void)[] = [];
       vi.spyOn(signer, "signEvent").mockImplementation(() => {
