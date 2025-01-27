@@ -2,10 +2,7 @@ import { describe, it, expect } from "vitest";
 import { EventTemplate, kinds } from "nostr-tools";
 import { unixNow } from "applesauce-core/helpers";
 
-import { EventFactory } from "../../event-factory.js";
 import { setListDescription, setListTitle } from "./list.js";
-
-const factory = new EventFactory();
 
 describe("setListTitle", () => {
   it("should override existing title tag", async () => {
@@ -16,9 +13,7 @@ describe("setListTitle", () => {
       created_at: unixNow(),
     };
 
-    expect(await factory.modifyList(list, undefined, setListTitle("quotes"))).toEqual(
-      expect.objectContaining({ tags: [["title", "quotes"]] }),
-    );
+    expect(setListTitle("quotes")(list, {})).toEqual(expect.objectContaining({ tags: [["title", "quotes"]] }));
   });
 
   it("should add title tag", async () => {
@@ -29,9 +24,7 @@ describe("setListTitle", () => {
       created_at: unixNow(),
     };
 
-    expect(await factory.modifyList(list, undefined, setListTitle("quotes"))).toEqual(
-      expect.objectContaining({ tags: [["title", "quotes"]] }),
-    );
+    expect(setListTitle("quotes")(list, {})).toEqual(expect.objectContaining({ tags: [["title", "quotes"]] }));
   });
 });
 
@@ -47,7 +40,7 @@ describe("setListDescription", () => {
       created_at: unixNow(),
     };
 
-    expect(await factory.modifyList(list, undefined, setListDescription("all my favorite quotes"))).toEqual(
+    expect(setListDescription("all my favorite quotes")(list, {})).toEqual(
       expect.objectContaining({
         tags: [
           ["title", "inspirational quotes"],
@@ -65,7 +58,7 @@ describe("setListDescription", () => {
       created_at: unixNow(),
     };
 
-    expect(await factory.modifyList(list, undefined, setListDescription("all my favorite quotes"))).toEqual(
+    expect(setListDescription("all my favorite quotes")(list, {})).toEqual(
       expect.objectContaining({
         tags: [
           ["title", "inspirational quotes"],

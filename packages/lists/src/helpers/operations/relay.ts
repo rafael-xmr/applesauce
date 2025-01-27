@@ -1,4 +1,4 @@
-import { TagOperation } from "applesauce-core/helpers";
+import { TagOperation } from "applesauce-factory/operations";
 
 export function addRelayTag(url: string | URL): TagOperation {
   url = typeof url === "string" ? url : String(url);

@@ -1,6 +1,7 @@
-import { TagOperation } from "applesauce-core/helpers";
 import { GroupPointer } from "applesauce-core/helpers/groups";
+
 import { createGroupTagFromGroupPointer } from "../../helpers/groups.js";
+import { TagOperation } from "./list.js";
 
 /** Adds a "group" tag to a list */
 export function addGroupTag(group: GroupPointer): TagOperation {

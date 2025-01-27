@@ -1,4 +1,4 @@
-import { TagOperation } from "applesauce-core/helpers";
+import { TagOperation } from "./list.js";
 
 /** Adds a relay tag from a list */
 export function addRelayTag(url: string | URL, tagName = "relay"): TagOperation {

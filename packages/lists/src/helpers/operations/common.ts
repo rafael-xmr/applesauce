@@ -1,9 +1,11 @@
 import { AddressPointer, EventPointer, ProfilePointer } from "nostr-tools/nip19";
 import { getCoordinateFromAddressPointer } from "applesauce-core/helpers";
-
-import { createATagFromAddressPointer, createETagFromEventPointer } from "../../helpers/pointer.js";
-import { ensureNamedValueTag } from "../../helpers/tag.js";
-import { TagOperation } from "./list.js";
+import { TagOperation } from "applesauce-factory/operations";
+import {
+  createATagFromAddressPointer,
+  createETagFromEventPointer,
+  ensureNamedValueTag,
+} from "applesauce-factory/helpers";
 
 export function addPubkeyTag(pubkey: string | ProfilePointer): TagOperation {
   pubkey = typeof pubkey !== "string" ? pubkey.pubkey : pubkey;
