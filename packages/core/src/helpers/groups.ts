@@ -1,3 +1,4 @@
+export const GROUPS_LIST_KIND = 10009;
 export const GROUP_MESSAGE_KIND = 9;
 
 /** NIP-29 group pointer */

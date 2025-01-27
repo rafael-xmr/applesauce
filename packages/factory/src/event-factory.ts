@@ -1,5 +1,6 @@
 import { Emoji, unixNow } from "applesauce-core/helpers";
 import { AddressPointer } from "nostr-tools/nip19";
+import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
 import { EventTemplate, NostrEvent } from "nostr-tools";
 
 import { includeClientTag } from "./operations/client.js";
@@ -9,6 +10,7 @@ import { ReactionBlueprint } from "./blueprints/reaction.js";
 import { DeleteBlueprint } from "./blueprints/delete.js";
 import { NoteReplyBlueprint } from "./blueprints/reply.js";
 import { ShareBlueprint } from "./blueprints/share.js";
+import { includeReplaceableIdentifier, modifyHiddenTags, modifyPublicTags, TagOperation } from "./operations/index.js";
 
 export type EventFactoryTemplate = {
   kind: number;
@@ -66,6 +68,9 @@ export class EventFactory {
   ): Promise<EventTemplate> {
     let draft: EventTemplate = { content: "", created_at: unixNow(), tags: [], ...template };
 
+    // make sure parameterized replaceable events have "d" tags
+    if (isParameterizedReplaceableKind(draft.kind)) draft = await includeReplaceableIdentifier()(draft, context);
+
     // run operations
     for (const operation of operations) {
       if (operation) draft = await operation(draft, context);
@@ -93,6 +98,53 @@ export class EventFactory {
     ...args: Args
   ): Promise<EventTemplate> {
     return await blueprint(...args)(this.context);
+  }
+
+  /** Modify an existing event with operations and updated the created_at */
+  async modify(
+    draft: EventFactoryTemplate,
+    ...operations: (EventFactoryOperation | undefined)[]
+  ): Promise<EventTemplate> {
+    return await EventFactory.runProcess({ ...draft, created_at: unixNow() }, this.context, ...operations);
+  }
+
+  /** Modify a lists public and hidden tags and updated the created_at */
+  async modifyList(
+    event: EventFactoryTemplate,
+    tagOperations?:
+      | TagOperation
+      | TagOperation[]
+      | { public?: TagOperation | TagOperation[]; hidden?: TagOperation | TagOperation[] },
+    eventOperations?: EventFactoryOperation | (EventFactoryOperation | undefined)[],
+  ): Promise<EventTemplate> {
+    let publicTagOperations: TagOperation[] = [];
+    let hiddenTagOperations: TagOperation[] = [];
+    let eventOperationsArr: EventFactoryOperation[] = [];
+
+    // normalize tag operation arg
+    if (tagOperations === undefined) publicTagOperations = hiddenTagOperations = [];
+    else if (Array.isArray(tagOperations)) publicTagOperations = tagOperations;
+    else if (typeof tagOperations === "function") publicTagOperations = [tagOperations];
+    else {
+      if (typeof tagOperations.public === "function") publicTagOperations = [tagOperations.public];
+      else if (tagOperations.public) publicTagOperations = tagOperations.public;
+
+      if (typeof tagOperations.hidden === "function") hiddenTagOperations = [tagOperations.hidden];
+      else if (tagOperations.hidden) hiddenTagOperations = tagOperations.hidden;
+    }
+
+    // normalize event operation arg
+    if (eventOperations === undefined) eventOperationsArr = [];
+    else if (typeof eventOperations === "function") eventOperationsArr = [eventOperations];
+    else if (Array.isArray(eventOperations)) eventOperationsArr = eventOperations.filter((e) => !!e);
+
+    // modify event
+    return await this.modify(
+      event,
+      publicTagOperations.length > 0 ? modifyPublicTags(...publicTagOperations) : undefined,
+      hiddenTagOperations.length > 0 ? modifyHiddenTags(...hiddenTagOperations) : undefined,
+      ...eventOperationsArr,
+    );
   }
 
   // Helpers

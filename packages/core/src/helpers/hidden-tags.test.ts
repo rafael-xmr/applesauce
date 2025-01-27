@@ -1,6 +1,8 @@
 import { describe, beforeEach, it, expect } from "vitest";
-import { getHiddenTags, HiddenTagsSigner, unixNow, unlockHiddenTags } from "applesauce-core/helpers";
 import { finalizeEvent, generateSecretKey, getPublicKey, kinds, nip04, NostrEvent } from "nostr-tools";
+
+import { getHiddenTags, HiddenTagsSigner, unlockHiddenTags } from "./hidden-tags.js";
+import { unixNow } from "./time.js";
 
 const key = generateSecretKey();
 const pubkey = getPublicKey(key);

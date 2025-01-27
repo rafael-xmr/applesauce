@@ -64,6 +64,7 @@
   "dependencies": {
     "applesauce-content": "^0.10.0",
     "applesauce-core": "^0.10.0",
+    "nanoid": "^5.0.9",
     "nostr-tools": "^2.10.3"
   },
   "devDependencies": {

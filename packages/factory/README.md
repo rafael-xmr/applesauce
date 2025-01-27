@@ -1,6 +1,6 @@
 # applesauce-factory
 
-applesauce event factory is a package for easily creating nostr events based on the supported [nips](https://github.com/nostr-protocol/nips)
+applesauce event factory is a package for easily creating or modifying nostr events
 
 [Documentation](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_factory.html)
 

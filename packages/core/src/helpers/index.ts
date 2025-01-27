@@ -1,6 +1,8 @@
 export * from "./bolt11.js";
+export * from "./bookmarks.js";
 export * from "./cache.js";
 export * from "./comment.js";
+export * from "./contacts.js";
 export * from "./content.js";
 export * from "./delete.js";
 export * from "./emoji.js";
@@ -15,6 +17,7 @@ export * from "./json.js";
 export * from "./lnurl.js";
 export * from "./lru.js";
 export * from "./mailboxes.js";
+export * from "./mutes.js";
 export * from "./picture-post.js";
 export * from "./pointers.js";
 export * from "./profile.js";

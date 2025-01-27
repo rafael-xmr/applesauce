@@ -227,6 +227,9 @@ importers:
       applesauce-core:
         specifier: ^0.10.0
         version: link:../core
+      nanoid:
+        specifier: ^5.0.9
+        version: 5.0.9
       nostr-tools:
         specifier: ^2.10.3
         version: 2.10.3(typescript@5.6.3)

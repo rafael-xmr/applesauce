@@ -1,8 +1,7 @@
 import { AddressPointer, EventPointer, ProfilePointer } from "nostr-tools/nip19";
 import { getCoordinateFromAddressPointer, TagOperation } from "applesauce-core/helpers";
-
-import { createETagFromEventPointer, createATagFromAddressPointer } from "applesauce-factory/helpers/pointer";
-import { ensureNamedValueTag } from "applesauce-factory/helpers";
+import { createATagFromAddressPointer, createETagFromEventPointer } from "../../helpers/pointer.js";
+import { ensureNamedValueTag } from "../../helpers/tag.js";
 
 export function addPubkeyTag(pubkey: string | ProfilePointer): TagOperation {
   pubkey = typeof pubkey !== "string" ? pubkey.pubkey : pubkey;
@@ -32,9 +31,11 @@ export function removeCoordinateTag(cord: string | AddressPointer): TagOperation
   return (tags) => tags.filter((t) => !(t[0] === "a" && t[1] === cord));
 }
 
+/** Adds a name / value tag from a list */
 export function addNameValueTag(tag: string[]): TagOperation {
   return (tags) => ensureNamedValueTag(tags, tag);
 }
+/** Removes a name / value tag from a list */
 export function removeNameValueTag(tag: string[]): TagOperation {
   return (tags) => tags.filter((t) => !(t[0] === tag[0] && t[1] === tag[1]));
 }

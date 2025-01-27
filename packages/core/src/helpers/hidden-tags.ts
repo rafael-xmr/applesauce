@@ -1,6 +1,8 @@
-import { unixNow } from "applesauce-core/helpers";
-import { EventTemplate, kinds, NostrEvent, UnsignedEvent } from "nostr-tools";
-import { EventStore } from "applesauce-core";
+import { EventTemplate, kinds, NostrEvent } from "nostr-tools";
+
+import { GROUPS_LIST_KIND } from "./groups.js";
+import { EventStore } from "../event-store/event-store.js";
+import { unixNow } from "./time.js";
 
 export type HiddenTagsSigner = {
   nip04?: {
@@ -12,7 +14,6 @@ export type HiddenTagsSigner = {
     decrypt: (pubkey: string, ciphertext: string) => Promise<string> | string;
   };
 };
-export type TagOperation = (tags: string[][]) => string[][];
 
 export const HiddenTagsSymbol = Symbol.for("hidden-tags");
 
@@ -28,6 +29,7 @@ export const EventEncryptionMethod: Record<number, "nip04" | "nip44"> = {
   [kinds.CommunitiesList]: "nip04",
   [kinds.PublicChatsList]: "nip04",
   [kinds.SearchRelaysList]: "nip04",
+  [GROUPS_LIST_KIND]: "nip04",
 
   // NIP-51 sets
   [kinds.Bookmarksets]: "nip04",
@@ -57,7 +59,8 @@ export function isHiddenTagsLocked(event: NostrEvent): boolean {
   return hasHiddenTags(event) && getHiddenTags(event) === undefined;
 }
 
-function getEventEncryption(kind: number, signer: HiddenTagsSigner) {
+/** Returns either nip04 or nip44 encryption method depending on list kind */
+export function getListEncryptionMethods(kind: number, signer: HiddenTagsSigner) {
   const method = EventEncryptionMethod[kind];
   const encryption = signer[method];
   if (!encryption) throw new Error(`Signer does not support ${method} encryption`);
@@ -78,7 +81,7 @@ export async function unlockHiddenTags(
   store?: EventStore,
 ): Promise<NostrEvent> {
   if (!canHaveHiddenTags(event.kind)) throw new Error("Event kind does not support hidden tags");
-  const encryption = getEventEncryption(event.kind, signer);
+  const encryption = getListEncryptionMethods(event.kind, signer);
   const plaintext = await encryption.decrypt(event.pubkey, event.content);
 
   const parsed = JSON.parse(plaintext) as string[][];
@@ -95,57 +98,6 @@ export async function unlockHiddenTags(
 }
 
 /**
- * Modifies tags and returns an EventTemplate
- * @param event Event to modify
- * @param operations Operations for hidden and public tags
- * @param signer A signer to use to decrypt the tags
- * @throws
- */
-export async function modifyEventTags(
-  event: NostrEvent | UnsignedEvent,
-  operations: { public?: TagOperation | TagOperation[]; hidden?: TagOperation | TagOperation[] },
-  signer?: HiddenTagsSigner,
-): Promise<EventTemplate> {
-  const draft: EventTemplate = {
-    content: event.content,
-    tags: Array.from(event.tags),
-    kind: event.kind,
-    created_at: unixNow(),
-  };
-
-  if (operations.public) {
-    if (Array.isArray(operations.public)) {
-      for (const operation of operations.public) {
-        draft.tags = operation(draft.tags);
-      }
-    } else {
-      draft.tags = operations.public(draft.tags);
-    }
-  }
-
-  if (operations.hidden) {
-    if (!signer) throw new Error("Missing signer for hidden tags");
-    if (!canHaveHiddenTags(event.kind)) throw new Error("Event kind does not support hidden tags");
-
-    const hidden = hasHiddenTags(event) ? getHiddenTags(event) : [];
-    if (!hidden) throw new Error("Hidden tags are locked");
-
-    let newHidden = Array.from(hidden);
-    if (Array.isArray(operations.hidden)) {
-      for (const operation of operations.hidden) {
-        newHidden = operation(newHidden);
-      }
-    } else {
-      newHidden = operations.hidden(newHidden);
-    }
-    const encryption = getEventEncryption(event.kind, signer);
-    draft.content = await encryption.encrypt(event.pubkey, JSON.stringify(newHidden));
-  }
-
-  return draft;
-}
-
-/**
  * Override the hidden tags in an event
  * @throws
  */
@@ -155,7 +107,7 @@ export async function overrideHiddenTags(
   signer: HiddenTagsSigner,
 ): Promise<EventTemplate> {
   if (!canHaveHiddenTags(event.kind)) throw new Error("Event kind does not support hidden tags");
-  const encryption = getEventEncryption(event.kind, signer);
+  const encryption = getListEncryptionMethods(event.kind, signer);
   const ciphertext = await encryption.encrypt(event.pubkey, JSON.stringify(hidden));
 
   return {
