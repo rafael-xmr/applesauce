@@ -179,7 +179,10 @@ export default class ApiAccount<Metadata extends unknown> extends BaseAccount<
     const signer = new ApiSigner(json.signer.api);
 
     // create new account class
-    return new ApiAccount(json.pubkey, signer);
+    const account = new ApiAccount(json.pubkey, signer);
+
+    // don't forget to call loadCommonFields, it sets the id and metadata
+    return super.loadCommonFields(account);
   }
 }
 ```

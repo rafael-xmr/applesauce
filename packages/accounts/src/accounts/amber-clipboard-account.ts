@@ -16,7 +16,8 @@ export class AmberClipboardAccount<Metadata extends unknown> extends BaseAccount
     };
   }
 
-  static fromJSON<MD extends unknown>(json: SerializedAccount<void, MD>): AmberClipboardAccount<MD> {
-    return new AmberClipboardAccount(json.pubkey, new AmberClipboardSigner());
+  static fromJSON<Metadata extends unknown>(json: SerializedAccount<void, Metadata>): AmberClipboardAccount<Metadata> {
+    const account = new AmberClipboardAccount<Metadata>(json.pubkey, new AmberClipboardSigner());
+    return super.loadCommonFields(account, json);
   }
 }

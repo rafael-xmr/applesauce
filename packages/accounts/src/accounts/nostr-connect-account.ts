@@ -50,6 +50,7 @@ export class NostrConnectAccount<Metadata extends unknown> extends BaseAccount<
       signer: new SimpleSigner(hexToBytes(json.signer.clientKey)),
     });
 
-    return new NostrConnectAccount(json.pubkey, signer);
+    const account = new NostrConnectAccount<Metadata>(json.pubkey, signer);
+    return super.loadCommonFields(account, json);
   }
 }

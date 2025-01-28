@@ -94,6 +94,13 @@ export class BaseAccount<Signer extends Nip07Interface, SignerData, Metadata ext
     throw new Error("Not implemented");
   }
 
+  /** Sets an accounts id and metadata. NOTE: This should only be used in fromJSON methods */
+  static loadCommonFields<T extends IAccount<any, any, any>>(account: T, json: SerializedAccount<any, any>): T {
+    if (json.id) account.id = json.id;
+    if (json.metadata) account.metadata = json.metadata;
+    return account;
+  }
+
   /** Gets the pubkey from the signer */
   getPublicKey(): string | Promise<string> {
     const result = this.signer.getPublicKey();

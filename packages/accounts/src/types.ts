@@ -12,8 +12,6 @@ export type SerializedAccount<SignerData, Metadata extends unknown> = {
   id: string;
   /** account type */
   type: string;
-  /** local name of the account */
-  name?: string;
   /** pubkey of the account */
   pubkey: string;
   /** Signer data */

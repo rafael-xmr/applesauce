@@ -24,7 +24,8 @@ export class SimpleAccount<Metadata extends unknown> extends BaseAccount<SimpleS
 
   static fromJSON<Metadata extends unknown>(json: SerializedAccount<SignerData, Metadata>): SimpleAccount<Metadata> {
     const key = hexToBytes(json.signer.key);
-    return new SimpleAccount(json.pubkey, new SimpleSigner(key));
+    const account = new SimpleAccount<Metadata>(json.pubkey, new SimpleSigner(key));
+    return super.loadCommonFields(account, json);
   }
 
   static fromKey<Metadata extends unknown>(key: Uint8Array | string): SimpleAccount<Metadata> {

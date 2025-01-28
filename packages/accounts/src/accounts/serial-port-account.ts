@@ -27,6 +27,8 @@ export class SerialPortAccount<Metadata extends unknown> extends BaseAccount<Ser
   }
 
   static fromJSON<Metadata extends unknown>(json: SerializedAccount<void, Metadata>): SerialPortAccount<Metadata> {
-    return new SerialPortAccount(json.pubkey, new SerialPortSigner());
+    const signer = new SerialPortSigner();
+    const account = new SerialPortAccount<Metadata>(json.pubkey, signer);
+    return super.loadCommonFields(account, json);
   }
 }

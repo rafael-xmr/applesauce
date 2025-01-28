@@ -17,6 +17,7 @@ export class ReadonlyAccount<Metadata extends unknown> extends BaseAccount<Reado
   }
 
   static fromJSON<Metadata extends unknown>(json: SerializedAccount<void, Metadata>): ReadonlyAccount<Metadata> {
-    return new ReadonlyAccount(json.pubkey, new ReadonlySigner(json.pubkey));
+    const account = new ReadonlyAccount<Metadata>(json.pubkey, new ReadonlySigner(json.pubkey));
+    return super.loadCommonFields(account, json);
   }
 }

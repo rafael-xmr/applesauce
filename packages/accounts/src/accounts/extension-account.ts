@@ -22,7 +22,8 @@ export class ExtensionAccount<Metadata extends unknown> extends BaseAccount<Exte
     };
   }
 
-  static fromJSON<MD extends unknown>(json: SerializedAccount<void, MD>) {
-    return new ExtensionAccount(json.pubkey, new ExtensionSigner());
+  static fromJSON<Metadata extends unknown>(json: SerializedAccount<void, Metadata>) {
+    const account = new ExtensionAccount<Metadata>(json.pubkey, new ExtensionSigner());
+    return super.loadCommonFields(account, json);
   }
 }
