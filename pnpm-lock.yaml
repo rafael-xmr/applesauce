@@ -283,6 +283,9 @@ importers:
 
   packages/react:
     dependencies:
+      applesauce-accounts:
+        specifier: workspace:^
+        version: link:../accounts
       applesauce-content:
         specifier: ^0.10.0
         version: link:../content

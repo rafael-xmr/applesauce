@@ -54,6 +54,7 @@
     }
   },
   "dependencies": {
+    "applesauce-accounts": "^0.10.0",
     "applesauce-content": "^0.10.0",
     "applesauce-core": "^0.10.0",
     "applesauce-factory": "^0.10.0",
