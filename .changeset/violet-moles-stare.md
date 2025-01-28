@@ -1,7 +1,6 @@
 ---
-"applesauce-user-status": patch
 "applesauce-accounts": patch
-"applesauce-channel": patch
+"applesauce-actions": patch
 "applesauce-content": patch
 "applesauce-factory": patch
 "applesauce-loaders": patch
