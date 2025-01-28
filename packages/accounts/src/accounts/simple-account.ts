@@ -5,14 +5,18 @@ import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 import { BaseAccount } from "../account.js";
 import { SerializedAccount } from "../types.js";
 
-type SignerData = {
+export type SimpleAccountSignerData = {
   key: string;
 };
 
-export class SimpleAccount<Metadata extends unknown> extends BaseAccount<SimpleSigner, SignerData, Metadata> {
+export class SimpleAccount<Metadata extends unknown> extends BaseAccount<
+  SimpleSigner,
+  SimpleAccountSignerData,
+  Metadata
+> {
   static type = "nsec";
 
-  toJSON(): SerializedAccount<SignerData, Metadata> {
+  toJSON(): SerializedAccount<SimpleAccountSignerData, Metadata> {
     return {
       type: SimpleAccount.type,
       id: this.id,
@@ -22,7 +26,9 @@ export class SimpleAccount<Metadata extends unknown> extends BaseAccount<SimpleS
     };
   }
 
-  static fromJSON<Metadata extends unknown>(json: SerializedAccount<SignerData, Metadata>): SimpleAccount<Metadata> {
+  static fromJSON<Metadata extends unknown>(
+    json: SerializedAccount<SimpleAccountSignerData, Metadata>,
+  ): SimpleAccount<Metadata> {
     const key = hexToBytes(json.signer.key);
     const account = new SimpleAccount<Metadata>(json.pubkey, new SimpleSigner(key));
     return super.loadCommonFields(account, json);

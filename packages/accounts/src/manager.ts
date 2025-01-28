@@ -63,10 +63,7 @@ export class AccountManager<Metadata extends unknown = any> {
       account.disableQueue = this.disableQueue;
     }
 
-    this.accounts$.next({
-      ...this.accounts$.value,
-      [account.id]: account,
-    });
+    this.accounts$.next([...this.accounts$.value, account]);
   }
 
   /** Removes an account from the manager */
@@ -115,6 +112,13 @@ export class AccountManager<Metadata extends unknown = any> {
     account.metadata = metadata;
   }
 
+  /** sets the metadata on an account */
+  getAccountMetadata(id: string | IAccount<any, any, Metadata>): Metadata | undefined {
+    const account = this.getAccount(id);
+    if (!account) throw new Error("Cant find account with that ID");
+    return account.metadata;
+  }
+
   /** Removes all metadata on the account */
   clearAccountMetadata(id: string | IAccount<any, any, Metadata>) {
     const account = this.getAccount(id);
@@ -126,7 +130,7 @@ export class AccountManager<Metadata extends unknown = any> {
 
   /** Returns an array of serialized accounts */
   toJSON(): SerializedAccount<any, Metadata>[] {
-    return Array.from(Object.values(this.accounts$)).map((account) => account.toJSON());
+    return Array.from(this.accounts$.value).map((account) => account.toJSON());
   }
 
   /**

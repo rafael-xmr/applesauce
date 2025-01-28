@@ -2,11 +2,15 @@ import { PasswordSigner } from "applesauce-signers/signers/password-signer";
 import { BaseAccount } from "../account.js";
 import { SerializedAccount } from "../types.js";
 
-type SignerData = {
+export type PasswordAccountSignerData = {
   ncryptsec: string;
 };
 
-export class PasswordAccount<Metadata extends unknown> extends BaseAccount<PasswordSigner, SignerData, Metadata> {
+export class PasswordAccount<Metadata extends unknown> extends BaseAccount<
+  PasswordSigner,
+  PasswordAccountSignerData,
+  Metadata
+> {
   static type = "ncryptsec";
 
   get unlocked() {
@@ -29,7 +33,7 @@ export class PasswordAccount<Metadata extends unknown> extends BaseAccount<Passw
     await this.signer.unlock(password);
   }
 
-  toJSON(): SerializedAccount<SignerData, Metadata> {
+  toJSON(): SerializedAccount<PasswordAccountSignerData, Metadata> {
     if (!this.signer.ncryptsec) throw new Error("Cant save account without ncryptsec");
 
     return {
@@ -41,7 +45,9 @@ export class PasswordAccount<Metadata extends unknown> extends BaseAccount<Passw
     };
   }
 
-  static fromJSON<Metadata extends unknown>(json: SerializedAccount<SignerData, Metadata>): PasswordAccount<Metadata> {
+  static fromJSON<Metadata extends unknown>(
+    json: SerializedAccount<PasswordAccountSignerData, Metadata>,
+  ): PasswordAccount<Metadata> {
     const signer = new PasswordSigner();
     signer.ncryptsec = json.signer.ncryptsec;
     const account = new PasswordAccount<Metadata>(json.pubkey, signer);

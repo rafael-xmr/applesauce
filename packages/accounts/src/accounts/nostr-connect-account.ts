@@ -4,7 +4,7 @@ import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 import { BaseAccount } from "../account.js";
 import { SerializedAccount } from "../types.js";
 
-type SignerData = {
+export type NostrConnectAccountSignerData = {
   clientKey: string;
   remote: string;
   relays: string[];
@@ -13,15 +13,15 @@ type SignerData = {
 /** An account type for NIP-46 signers */
 export class NostrConnectAccount<Metadata extends unknown> extends BaseAccount<
   NostrConnectSigner,
-  SignerData,
+  NostrConnectAccountSignerData,
   Metadata
 > {
   static type = "nostr-connect";
 
-  toJSON(): SerializedAccount<SignerData, Metadata> {
+  toJSON(): SerializedAccount<NostrConnectAccountSignerData, Metadata> {
     if (!this.signer.remote) throw new Error("Cant save NostrConnectAccount when not initialized");
 
-    const signer: SignerData = {
+    const signer: NostrConnectAccountSignerData = {
       clientKey: bytesToHex(this.signer.signer.key),
       remote: this.signer.remote,
       relays: this.signer.relays,
@@ -38,7 +38,7 @@ export class NostrConnectAccount<Metadata extends unknown> extends BaseAccount<
   }
 
   static fromJSON<Metadata extends unknown>(
-    json: SerializedAccount<SignerData, Metadata>,
+    json: SerializedAccount<NostrConnectAccountSignerData, Metadata>,
     connection?: NostrConnectConnectionMethods,
   ): NostrConnectAccount<Metadata> {
     connection = connection || NostrConnectAccount.createConnectionMethods();
