@@ -1,7 +1,7 @@
 {
-  "name": "applesauce-lists",
+  "name": "applesauce-signers",
   "version": "0.10.0",
-  "description": "A collection of tools for working with NIP-51 lists",
+  "description": "Signer classes for applesauce",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,7 +17,8 @@
   "author": "hzrd149",
   "license": "MIT",
   "files": [
-    "dist"
+    "dist",
+    "applesauce"
   ],
   "exports": {
     ".": {
@@ -25,39 +26,28 @@
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./helpers": {
-      "import": "./dist/helpers/index.js",
-      "require": "./dist/helpers/index.js",
-      "types": "./dist/helpers/index.d.ts"
+    "./signers": {
+      "import": "./dist/signers/index.js",
+      "require": "./dist/signers/index.js",
+      "types": "./dist/signers/index.d.ts"
     },
-    "./helpers/*": {
-      "import": "./dist/helpers/*.js",
-      "require": "./dist/helpers/*.js",
-      "types": "./dist/helpers/*.d.ts"
-    },
-    "./queries": {
-      "import": "./dist/queries/index.js",
-      "require": "./dist/queries/index.js",
-      "types": "./dist/queries/index.d.ts"
-    },
-    "./queries/*": {
-      "import": "./dist/queries/*.js",
-      "require": "./dist/queries/*.js",
-      "types": "./dist/queries/*.d.ts"
+    "./signers/*": {
+      "import": "./dist/signers/*.js",
+      "require": "./dist/signers/*.js",
+      "types": "./dist/signers/*.d.ts"
     }
   },
   "dependencies": {
     "@noble/hashes": "^1.5.0",
     "@noble/secp256k1": "^1.7.1",
     "@scure/base": "^1.1.9",
-    "@types/dom-serial": "^1.0.6",
     "applesauce-core": "^0.10.0",
-    "applesauce-factory": "^0.10.0",
     "debug": "^4.3.7",
-    "nostr-tools": "^2.10.3",
-    "rxjs": "^7.8.1"
+    "nanoid": "^5.0.7",
+    "nostr-tools": "^2.10.3"
   },
   "devDependencies": {
+    "@types/dom-serial": "^1.0.6",
     "@types/debug": "^4.1.12",
     "typescript": "^5.6.3",
     "vitest": "^2.1.8"

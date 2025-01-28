@@ -1,4 +1,4 @@
-import { NostrConnectConnectionMethods, NostrConnectSigner, SimpleSigner } from "applesauce-signer";
+import { NostrConnectConnectionMethods, NostrConnectSigner, SimpleSigner } from "applesauce-signers";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 
 import { BaseAccount } from "../account.js";

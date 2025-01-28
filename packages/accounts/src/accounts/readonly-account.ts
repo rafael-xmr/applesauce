@@ -1,4 +1,4 @@
-import { ReadonlySigner } from "applesauce-signer/signers/readonly-signer";
+import { ReadonlySigner } from "applesauce-signers/signers/readonly-signer";
 import { BaseAccount } from "../account.js";
 import { SerializedAccount } from "../types.js";
 

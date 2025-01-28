@@ -5,4 +5,4 @@
 ### Patch Changes
 
 - Updated dependencies
-  - applesauce-signer@0.10.0
+  - applesauce-signers@0.10.0

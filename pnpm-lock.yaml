@@ -33,9 +33,9 @@ importers:
       '@noble/hashes':
         specifier: ^1.5.0
         version: 1.5.0
-      applesauce-signer:
+      applesauce-signers:
         specifier: ^0.10.0
-        version: link:../signer
+        version: link:../signers
       nanoid:
         specifier: ^5.0.9
         version: 5.0.9
@@ -46,6 +46,34 @@ importers:
         specifier: ^7.8.1
         version: 7.8.1
     devDependencies:
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.8(@types/node@22.10.1)
+
+  packages/actions:
+    dependencies:
+      applesauce-core:
+        specifier: ^0.10.0
+        version: link:../core
+      applesauce-factory:
+        specifier: ^0.10.0
+        version: link:../factory
+      debug:
+        specifier: ^4.3.7
+        version: 4.3.7
+      nostr-tools:
+        specifier: ^2.10.3
+        version: 2.10.3(typescript@5.6.3)
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+    devDependencies:
+      '@types/debug':
+        specifier: ^4.1.12
+        version: 4.1.12
       typescript:
         specifier: ^5.6.3
         version: 5.6.3
@@ -250,46 +278,6 @@ importers:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.1)
 
-  packages/lists:
-    dependencies:
-      '@noble/hashes':
-        specifier: ^1.5.0
-        version: 1.5.0
-      '@noble/secp256k1':
-        specifier: ^1.7.1
-        version: 1.7.1
-      '@scure/base':
-        specifier: ^1.1.9
-        version: 1.1.9
-      '@types/dom-serial':
-        specifier: ^1.0.6
-        version: 1.0.6
-      applesauce-core:
-        specifier: ^0.10.0
-        version: link:../core
-      applesauce-factory:
-        specifier: ^0.10.0
-        version: link:../factory
-      debug:
-        specifier: ^4.3.7
-        version: 4.3.7
-      nostr-tools:
-        specifier: ^2.10.3
-        version: 2.10.3(typescript@5.6.3)
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-    devDependencies:
-      '@types/debug':
-        specifier: ^4.1.12
-        version: 4.1.12
-      typescript:
-        specifier: ^5.6.3
-        version: 5.6.3
-      vitest:
-        specifier: ^2.1.8
-        version: 2.1.8(@types/node@22.10.1)
-
   packages/loaders:
     dependencies:
       applesauce-core:
@@ -346,7 +334,7 @@ importers:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.1)
 
-  packages/signer:
+  packages/signers:
     dependencies:
       '@noble/hashes':
         specifier: ^1.5.0
@@ -357,9 +345,6 @@ importers:
       '@scure/base':
         specifier: ^1.1.9
         version: 1.1.9
-      '@types/dom-serial':
-        specifier: ^1.0.6
-        version: 1.0.6
       applesauce-core:
         specifier: ^0.10.0
         version: link:../core
@@ -368,7 +353,7 @@ importers:
         version: 4.3.7
       nanoid:
         specifier: ^5.0.7
-        version: 5.0.7
+        version: 5.0.9
       nostr-tools:
         specifier: ^2.10.3
         version: 2.10.3(typescript@5.6.3)
@@ -376,25 +361,9 @@ importers:
       '@types/debug':
         specifier: ^4.1.12
         version: 4.1.12
-      typescript:
-        specifier: ^5.6.3
-        version: 5.6.3
-      vitest:
-        specifier: ^2.1.8
-        version: 2.1.8(@types/node@22.10.1)
-
-  packages/user-status:
-    dependencies:
-      applesauce-core:
-        specifier: ^0.10.0
-        version: link:../core
-      nostr-tools:
-        specifier: ^2.10.3
-        version: 2.10.3(typescript@5.6.3)
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-    devDependencies:
+      '@types/dom-serial':
+        specifier: ^1.0.6
+        version: 1.0.6
       typescript:
         specifier: ^5.6.3
         version: 5.6.3

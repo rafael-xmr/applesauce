@@ -12,7 +12,8 @@
     "watch:test": "vitest"
   },
   "keywords": [
-    "nostr"
+    "nostr",
+    "applesauce"
   ],
   "author": "hzrd149",
   "license": "MIT",
@@ -38,7 +39,7 @@
   },
   "dependencies": {
     "@noble/hashes": "^1.5.0",
-    "applesauce-signer": "^0.10.0",
+    "applesauce-signers": "^0.10.0",
     "nanoid": "^5.0.9",
     "nostr-tools": "^2.10.3",
     "rxjs": "^7.8.1"

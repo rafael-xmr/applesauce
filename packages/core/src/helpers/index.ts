@@ -28,4 +28,5 @@ export * from "./tags.js";
 export * from "./threading.js";
 export * from "./time.js";
 export * from "./url.js";
+export * from "./user-status.js";
 export * from "./zap.js";

@@ -1,21 +1,21 @@
 # Signers
 
-`applesauce-signer` is a packages is pre-built NIP-07 signer classes
+`applesauce-signers` is a packages is pre-built NIP-07 signer classes
 
 ## Installation
 
 :::code-group
 
 ```sh [npm]
-npm install applesauce-signer
+npm install applesauce-signers
 ```
 
 ```sh [yarn]
-yarn install applesauce-signer
+yarn install applesauce-signers
 ```
 
 ```sh [pnpm]
-pnpm install applesauce-signer
+pnpm install applesauce-signers
 ```
 
 :::

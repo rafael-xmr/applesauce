@@ -31,6 +31,7 @@ function getStatusPointer(status: NostrEvent): UserStatusPointer | null {
   return null;
 }
 
+/** Gets the {@link UserStatusPointer} for a status event */
 export function getUserStatusPointer(status: NostrEvent) {
   return getOrComputeCachedValue(status, UserStatusPointerSymbol, () => getStatusPointer(status));
 }

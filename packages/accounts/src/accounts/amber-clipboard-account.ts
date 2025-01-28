@@ -1,4 +1,4 @@
-import { AmberClipboardSigner } from "applesauce-signer/signers/amber-clipboard-signer";
+import { AmberClipboardSigner } from "applesauce-signers/signers/amber-clipboard-signer";
 import { BaseAccount } from "../account.js";
 import { SerializedAccount } from "../types.js";
 

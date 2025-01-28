@@ -1,4 +1,4 @@
-import { SerialPortSigner } from "applesauce-signer/signers/serial-port-signer";
+import { SerialPortSigner } from "applesauce-signers/signers/serial-port-signer";
 import { BaseAccount } from "../account.js";
 import { SerializedAccount } from "../types.js";
 

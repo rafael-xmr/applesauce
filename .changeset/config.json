@@ -6,15 +6,13 @@
   "linked": [
     [
       "applesauce-accounts",
-      "applesauce-channel",
+      "applesauce-actions",
       "applesauce-content",
       "applesauce-core",
       "applesauce-factory",
-      "applesauce-lists",
       "applesauce-loaders",
       "applesauce-react",
-      "applesauce-signer",
-      "applesauce-user-status"
+      "applesauce-signers"
     ]
   ],
   "access": "public",

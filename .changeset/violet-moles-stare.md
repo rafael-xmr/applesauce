@@ -5,8 +5,7 @@
 "applesauce-content": patch
 "applesauce-factory": patch
 "applesauce-loaders": patch
-"applesauce-signer": patch
-"applesauce-lists": patch
+"applesauce-signers": patch
 "applesauce-react": patch
 "applesauce-core": patch
 ---

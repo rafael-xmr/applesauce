@@ -1,9 +1,9 @@
 import { kinds, NostrEvent } from "nostr-tools";
-import { Query } from "applesauce-core/query-store";
-import { getReplaceableIdentifier } from "applesauce-core/helpers/event";
 import { map } from "rxjs";
 
 import { getUserStatusPointer, UserStatusPointer } from "../helpers/user-status.js";
+import { Query } from "../query-store/index.js";
+import { getReplaceableIdentifier } from "../helpers/event.js";
 
 export type UserStatus = UserStatusPointer & {
   event: NostrEvent;

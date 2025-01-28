@@ -1,4 +1,4 @@
-import { Nip07Interface } from "applesauce-signer";
+import { Nip07Interface } from "applesauce-signers";
 import { nanoid } from "nanoid";
 import { BehaviorSubject } from "rxjs";
 import { NostrEvent } from "nostr-tools";

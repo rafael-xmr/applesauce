@@ -1,4 +1,4 @@
-import { PasswordSigner } from "applesauce-signer/signers/password-signer";
+import { PasswordSigner } from "applesauce-signers/signers/password-signer";
 import { BaseAccount } from "../account.js";
 import { SerializedAccount } from "../types.js";
 

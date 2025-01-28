@@ -1,4 +1,4 @@
-import { Nip07Interface } from "applesauce-signer";
+import { Nip07Interface } from "applesauce-signers";
 import { BehaviorSubject } from "rxjs";
 
 import { IAccount, IAccountConstructor, SerializedAccount } from "./types.js";

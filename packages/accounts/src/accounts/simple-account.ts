@@ -1,5 +1,5 @@
 import { getPublicKey } from "nostr-tools";
-import { SimpleSigner } from "applesauce-signer/signers/simple-signer";
+import { SimpleSigner } from "applesauce-signers/signers/simple-signer";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 
 import { BaseAccount } from "../account.js";

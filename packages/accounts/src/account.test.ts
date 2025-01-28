@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { BaseAccount } from "./account.js";
-import { SimpleSigner } from "applesauce-signer";
+import { SimpleSigner } from "applesauce-signers";
 import { finalizeEvent } from "nostr-tools";
 
 describe("BaseAccount", () => {

@@ -1,5 +1,5 @@
 import { EventTemplate, Filter, kinds, NostrEvent, verifyEvent } from "nostr-tools";
-import { Nip07Interface, SimpleSigner } from "applesauce-signer";
+import { Nip07Interface, SimpleSigner } from "applesauce-signers";
 import { Deferred, createDefer } from "applesauce-core/promise";
 import { isHexKey, unixNow } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";

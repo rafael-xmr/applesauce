@@ -1,6 +1,6 @@
 # Applesauce Accounts
 
-A simple account management library built on `applesauce-signer`
+A simple account management library built on `applesauce-signers`
 
 ## Installation
 
