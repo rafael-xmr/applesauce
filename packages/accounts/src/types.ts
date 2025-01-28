@@ -31,7 +31,7 @@ export interface IAccount<
   metadata?: Metadata;
   signer: Signer;
 
-  readonly type: string;
+  type: string;
 
   disableQueue?: boolean;
 

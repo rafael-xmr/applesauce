@@ -16,4 +16,8 @@ export class ReadonlyAccount<Metadata extends unknown> extends BaseAccount<Reado
     const account = new ReadonlyAccount<Metadata>(json.pubkey, new ReadonlySigner(json.pubkey));
     return super.loadCommonFields(account, json);
   }
+
+  static fromPubkey(pubkey: string) {
+    return new ReadonlyAccount(pubkey, new ReadonlySigner(pubkey));
+  }
 }
