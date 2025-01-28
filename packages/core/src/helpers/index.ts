@@ -1,6 +1,7 @@
 export * from "./bolt11.js";
 export * from "./bookmarks.js";
 export * from "./cache.js";
+export * from "./channels.js";
 export * from "./comment.js";
 export * from "./contacts.js";
 export * from "./content.js";

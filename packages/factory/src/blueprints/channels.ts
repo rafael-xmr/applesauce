@@ -1,11 +1,9 @@
-import { EventFactory, EventFactoryBlueprint } from "applesauce-factory";
-import {
-  createTextContentOperations,
-  includeNoteThreadingNotifyTags,
-  includeNoteThreadingTags,
-  TextContentOptions,
-} from "applesauce-factory/operations";
 import { kinds, NostrEvent } from "nostr-tools";
+
+import { createTextContentOperations, TextContentOptions } from "../operations/content.js";
+import { EventFactory, EventFactoryBlueprint } from "../event-factory.js";
+import { includeNoteThreadingNotifyTags, includeNoteThreadingTags } from "../operations/note.js";
+import { includeChannelPointerTag } from "../operations/channels.js";
 
 /** Creates a NIP-28 channel message */
 export function ChannelMessageBlueprint(
@@ -17,8 +15,7 @@ export function ChannelMessageBlueprint(
     EventFactory.runProcess(
       { kind: kinds.ChannelMessage },
       ctx,
-      includeNoteThreadingTags(channel),
-      includeNoteThreadingNotifyTags(channel),
+      includeChannelPointerTag(channel),
       ...createTextContentOperations(message, options),
     );
 }

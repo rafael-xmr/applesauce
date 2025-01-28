@@ -17,24 +17,30 @@ export default defineConfig({
         text: "Introduction",
         items: [
           { text: "Why applesauce", link: "/introduction/why-applesauce" },
-          { text: "Installation", link: "/introduction/installation" },
           { text: "Getting Started", link: "/introduction/getting-started" },
+          { text: "Packages", link: "/introduction/packages" },
         ],
       },
       {
         text: "Core",
         items: [
-          { text: "Helpers", link: "/core/helpers" },
           { text: "EventStore", link: "/core/event-store" },
           { text: "QueryStore", link: "/core/query-store" },
           { text: "Queries", link: "/core/queries" },
           { text: "Custom Queries", link: "/core/custom-queries" },
+          { text: "Helpers", link: "/core/helpers" },
+        ],
+      },
+      {
+        text: "Content",
+        items: [
+          { text: "Text", link: "/content/text" },
+          { text: "Markdown", link: "/content/markdown" },
         ],
       },
       {
         text: "Signers",
         items: [
-          { text: "Installation", link: "/signers/installation" },
           { text: "Signers", link: "/signers/signers" },
           { text: "Nostr Connect", link: "/signers/nostr-connect" },
         ],
@@ -42,7 +48,6 @@ export default defineConfig({
       {
         text: "Accounts",
         items: [
-          { text: "Installation", link: "/accounts/installation" },
           { text: "Accounts", link: "/accounts/accounts" },
           { text: "Manager", link: "/accounts/manager" },
         ],
@@ -50,24 +55,14 @@ export default defineConfig({
       {
         text: "React",
         items: [
-          { text: "Installation", link: "/react/installation" },
           { text: "Provider", link: "/react/provider" },
           { text: "Hooks", link: "/react/hooks" },
           { text: "Content", link: "/react/content" },
         ],
       },
       {
-        text: "Content",
-        items: [
-          { text: "Installation", link: "/content/installation" },
-          { text: "Text Notes", link: "/content/text" },
-          { text: "Markdown", link: "/content/markdown" },
-        ],
-      },
-      {
         text: "Factory",
         items: [
-          { text: "Installation", link: "/factory/installation" },
           { text: "Event Factory", link: "/factory/factory" },
           { text: "Blueprints", link: "/factory/blueprints" },
           { text: "Operations", link: "/factory/operations" },
@@ -77,19 +72,8 @@ export default defineConfig({
       {
         text: "Loaders",
         items: [
-          { text: "Installation", link: "/loaders/installation" },
+          { text: "Loaders", link: "/loaders/loaders" },
           { text: "Replaceable Loader", link: "/loaders/replaceable-loader" },
-        ],
-      },
-      {
-        text: "Lists",
-        items: [{ text: "Installation", link: "/lists/installation" }],
-      },
-      {
-        text: "Channels",
-        items: [
-          { text: "Installation", link: "/channels/installation" },
-          { text: "Queries", link: "/channels/queries" },
         ],
       },
     ],

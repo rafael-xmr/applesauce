@@ -1,3 +1,4 @@
+export * from "./channels.js";
 export * from "./comment.js";
 export * from "./delete.js";
 export * from "./file-metadata.js";

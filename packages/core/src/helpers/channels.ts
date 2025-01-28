@@ -1,12 +1,8 @@
 import { nip19, NostrEvent } from "nostr-tools";
 import { ChannelMetadata } from "nostr-tools/nip28";
+import { getOrComputeCachedValue } from "./cache.js";
 
 export const ChannelMetadataSymbol = Symbol.for("channel-metadata");
-declare module "nostr-tools" {
-  export interface Event {
-    [ChannelMetadataSymbol]?: ChannelMetadataContent;
-  }
-}
 
 export type ChannelMetadataContent = ChannelMetadata & {
   relays?: string[];
@@ -23,10 +19,9 @@ function parseChannelMetadataContent(channel: NostrEvent) {
 
 /** Gets the parsed metadata on a channel creation or channel metadata event */
 export function getChannelMetadataContent(channel: NostrEvent) {
-  let metadata = channel[ChannelMetadataSymbol];
-  if (!metadata) metadata = channel[ChannelMetadataSymbol] = parseChannelMetadataContent(channel);
-
-  return metadata;
+  return getOrComputeCachedValue(channel, ChannelMetadataSymbol, () => {
+    return parseChannelMetadataContent(channel);
+  });
 }
 
 /** gets the EventPointer for a channel message or metadata event */

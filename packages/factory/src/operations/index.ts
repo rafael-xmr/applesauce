@@ -1,3 +1,4 @@
+export * from "./channels.js";
 export * from "./client.js";
 export * from "./comment.js";
 export * from "./common.js";
