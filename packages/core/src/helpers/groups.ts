@@ -1,3 +1,8 @@
+import { NostrEvent } from "nostr-tools";
+import { getOrComputeCachedValue } from "./cache.js";
+import { processTags } from "./tags.js";
+import { getHiddenTags } from "./hidden-tags.js";
+
 export const GROUPS_LIST_KIND = 10009;
 export const GROUP_MESSAGE_KIND = 9;
 
@@ -24,4 +29,37 @@ export function encodeGroupPointer(pointer: GroupPointer) {
   const hostname = URL.canParse(pointer.relay) ? new URL(pointer.relay).hostname : pointer.relay;
 
   return `${hostname}'${pointer.id}`;
+}
+
+export const GroupsPublicSymbol = Symbol.for("groups-public");
+export const GroupsHiddenSymbol = Symbol.for("groups-hidden");
+
+/** gets a {@link GroupPointer} from a "group" tag */
+export function getGroupPointerFromGroupTag(tag: string[]): GroupPointer {
+  const [_, id, relay, name] = tag;
+  return { id, relay, name };
+}
+
+/** Returns all the public groups from a k:10009 list */
+export function getPublicGroups(bookmark: NostrEvent): GroupPointer[] {
+  return getOrComputeCachedValue(bookmark, GroupsPublicSymbol, () =>
+    processTags(
+      bookmark.tags.filter((t) => t[0] === "group"),
+      getGroupPointerFromGroupTag,
+    ),
+  );
+}
+
+/** Returns all the hidden groups from a k:10009 list */
+export function getHiddenGroups(bookmark: NostrEvent): GroupPointer[] | undefined {
+  return getOrComputeCachedValue(bookmark, GroupsHiddenSymbol, () => {
+    const tags = getHiddenTags(bookmark);
+    return (
+      tags &&
+      processTags(
+        bookmark.tags.filter((t) => t[0] === "group"),
+        getGroupPointerFromGroupTag,
+      )
+    );
+  });
 }
