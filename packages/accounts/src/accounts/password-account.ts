@@ -11,7 +11,7 @@ export class PasswordAccount<Metadata extends unknown> extends BaseAccount<
   PasswordAccountSignerData,
   Metadata
 > {
-  static type = "ncryptsec";
+  static readonly type = "ncryptsec";
 
   get unlocked() {
     return this.signer.unlocked;
@@ -36,13 +36,9 @@ export class PasswordAccount<Metadata extends unknown> extends BaseAccount<
   toJSON(): SerializedAccount<PasswordAccountSignerData, Metadata> {
     if (!this.signer.ncryptsec) throw new Error("Cant save account without ncryptsec");
 
-    return {
-      type: PasswordAccount.type,
-      id: this.id,
-      pubkey: this.pubkey,
-      metadata: this.metadata,
+    return super.saveCommonFields({
       signer: { ncryptsec: this.signer.ncryptsec },
-    };
+    });
   }
 
   static fromJSON<Metadata extends unknown>(

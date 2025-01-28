@@ -20,12 +20,18 @@ export type SerializedAccount<SignerData, Metadata extends unknown> = {
   metadata?: Metadata;
 };
 
-export interface IAccount<Signer extends Nip07Interface, SignerData, Metadata extends unknown> extends Nip07Interface {
+export interface IAccount<
+  Signer extends Nip07Interface = Nip07Interface,
+  SignerData = any,
+  Metadata extends unknown = any,
+> extends Nip07Interface {
   id: string;
   name?: string;
   pubkey: string;
   metadata?: Metadata;
   signer: Signer;
+
+  readonly type: string;
 
   disableQueue?: boolean;
 
@@ -33,7 +39,7 @@ export interface IAccount<Signer extends Nip07Interface, SignerData, Metadata ex
 }
 
 export interface IAccountConstructor<Signer extends Nip07Interface, SignerData, Metadata extends unknown> {
-  type: string;
+  readonly type: string;
   new (pubkey: string, signer: Signer): IAccount<Signer, SignerData, Metadata>;
   fromJSON(json: SerializedAccount<SignerData, Metadata>): IAccount<Signer, SignerData, Metadata>;
 }

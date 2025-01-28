@@ -3,7 +3,7 @@ import { BaseAccount } from "../account.js";
 import { SerializedAccount } from "../types.js";
 
 export class ExtensionAccount<Metadata extends unknown> extends BaseAccount<ExtensionSigner, void, Metadata> {
-  static type = "extension";
+  static readonly type = "extension";
 
   constructor(
     pubkey: string,
@@ -13,13 +13,9 @@ export class ExtensionAccount<Metadata extends unknown> extends BaseAccount<Exte
   }
 
   toJSON() {
-    return {
-      type: ExtensionAccount.type,
-      id: this.id,
-      pubkey: this.pubkey,
-      metadata: this.metadata,
+    return super.saveCommonFields({
       signer: undefined,
-    };
+    });
   }
 
   static fromJSON<Metadata extends unknown>(json: SerializedAccount<void, Metadata>) {

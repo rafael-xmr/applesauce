@@ -4,16 +4,12 @@ import { SerializedAccount } from "../types.js";
 
 /** An account for the amber clipboard api */
 export class AmberClipboardAccount<Metadata extends unknown> extends BaseAccount<AmberClipboardSigner, void, Metadata> {
-  static type = "amber-clipboard";
+  static readonly type = "amber-clipboard";
 
   toJSON(): SerializedAccount<void, Metadata> {
-    return {
-      type: AmberClipboardAccount.type,
-      id: this.id,
-      pubkey: this.pubkey,
-      metadata: this.metadata,
+    return super.saveCommonFields({
       signer: undefined,
-    };
+    });
   }
 
   static fromJSON<Metadata extends unknown>(json: SerializedAccount<void, Metadata>): AmberClipboardAccount<Metadata> {

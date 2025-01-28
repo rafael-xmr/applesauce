@@ -4,16 +4,12 @@ import { SerializedAccount } from "../types.js";
 
 /** An account that cannot sign or encrypt anything */
 export class ReadonlyAccount<Metadata extends unknown> extends BaseAccount<ReadonlySigner, void, Metadata> {
-  static type = "readonly";
+  static readonly type = "readonly";
 
   toJSON() {
-    return {
-      type: ReadonlyAccount.type,
-      id: this.id,
-      pubkey: this.pubkey,
-      metadata: this.metadata,
+    return super.saveCommonFields({
       signer: undefined,
-    };
+    });
   }
 
   static fromJSON<Metadata extends unknown>(json: SerializedAccount<void, Metadata>): ReadonlyAccount<Metadata> {

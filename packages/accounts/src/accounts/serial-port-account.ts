@@ -4,7 +4,7 @@ import { SerializedAccount } from "../types.js";
 
 /** An account for SerialPortSigner */
 export class SerialPortAccount<Metadata extends unknown> extends BaseAccount<SerialPortSigner, void, Metadata> {
-  static type = "serial-port";
+  static readonly type = "serial-port";
 
   async unlock(): Promise<boolean> {
     try {
@@ -17,13 +17,7 @@ export class SerialPortAccount<Metadata extends unknown> extends BaseAccount<Ser
   }
 
   toJSON(): SerializedAccount<void, Metadata> {
-    return {
-      type: SerialPortAccount.type,
-      id: this.id,
-      pubkey: this.pubkey,
-      metadata: this.metadata,
-      signer: undefined,
-    };
+    return super.saveCommonFields({ signer: undefined });
   }
 
   static fromJSON<Metadata extends unknown>(json: SerializedAccount<void, Metadata>): SerialPortAccount<Metadata> {

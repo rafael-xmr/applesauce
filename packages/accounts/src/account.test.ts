@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { BaseAccount } from "./account.js";
 import { SimpleSigner } from "applesauce-signers";
-import { finalizeEvent } from "nostr-tools";
+import { finalizeEvent, generateSecretKey } from "nostr-tools";
+import { SimpleAccount } from "./accounts/simple-account.js";
 
 describe("BaseAccount", () => {
   let signer: SimpleSigner;
@@ -71,6 +72,14 @@ describe("BaseAccount", () => {
       // resolve both
       resolve.shift()?.();
       resolve.shift()?.();
+    });
+  });
+
+  describe("type", () => {
+    it("should return static account type", () => {
+      const account = SimpleAccount.fromKey(generateSecretKey());
+
+      expect(account.type).toBe("nsec");
     });
   });
 });

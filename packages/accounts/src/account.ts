@@ -3,7 +3,7 @@ import { nanoid } from "nanoid";
 import { BehaviorSubject } from "rxjs";
 import { NostrEvent } from "nostr-tools";
 
-import { EventTemplate, IAccount, SerializedAccount } from "./types.js";
+import { EventTemplate, IAccount, IAccountConstructor, SerializedAccount } from "./types.js";
 
 function wrapInSignal<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
   return new Promise((res, rej) => {
@@ -35,6 +35,11 @@ export class BaseAccount<Signer extends Nip07Interface, SignerData, Metadata ext
   implements IAccount<Signer, SignerData, Metadata>
 {
   id = nanoid(8);
+
+  get type() {
+    const cls = Reflect.getPrototypeOf(this)!.constructor as IAccountConstructor<Signer, SignerData, Metadata>;
+    return cls.type;
+  }
 
   /** Disable request queueing */
   disableQueue?: boolean;
@@ -94,8 +99,15 @@ export class BaseAccount<Signer extends Nip07Interface, SignerData, Metadata ext
     throw new Error("Not implemented");
   }
 
+  /** Adds the common fields to the serialized output of a toJSON method */
+  protected saveCommonFields(
+    json: Omit<SerializedAccount<SignerData, Metadata>, "id" | "type" | "metadata" | "pubkey">,
+  ): SerializedAccount<SignerData, Metadata> {
+    return { ...json, id: this.id, pubkey: this.pubkey, metadata: this.metadata, type: this.type };
+  }
+
   /** Sets an accounts id and metadata. NOTE: This should only be used in fromJSON methods */
-  static loadCommonFields<T extends IAccount<any, any, any>>(account: T, json: SerializedAccount<any, any>): T {
+  static loadCommonFields<T extends IAccount>(account: T, json: SerializedAccount<any, any>): T {
     if (json.id) account.id = json.id;
     if (json.metadata) account.metadata = json.metadata;
     return account;

@@ -16,18 +16,18 @@ export class NostrConnectAccount<Metadata extends unknown> extends BaseAccount<
   NostrConnectAccountSignerData,
   Metadata
 > {
-  static type = "nostr-connect";
+  static readonly type = "nostr-connect";
 
   toJSON(): SerializedAccount<NostrConnectAccountSignerData, Metadata> {
     if (!this.signer.remote) throw new Error("Cant save NostrConnectAccount when not initialized");
 
-    const signer: NostrConnectAccountSignerData = {
-      clientKey: bytesToHex(this.signer.signer.key),
-      remote: this.signer.remote,
-      relays: this.signer.relays,
-    };
-
-    return { type: NostrConnectAccount.type, id: this.id, pubkey: this.pubkey, metadata: this.metadata, signer };
+    return super.saveCommonFields({
+      signer: {
+        clientKey: bytesToHex(this.signer.signer.key),
+        remote: this.signer.remote,
+        relays: this.signer.relays,
+      },
+    });
   }
 
   /** This is called when NostrConnectAccount.fromJSON needs new connection methods for NostrConnectSigner */

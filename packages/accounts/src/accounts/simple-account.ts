@@ -14,16 +14,12 @@ export class SimpleAccount<Metadata extends unknown> extends BaseAccount<
   SimpleAccountSignerData,
   Metadata
 > {
-  static type = "nsec";
+  static readonly type = "nsec";
 
   toJSON(): SerializedAccount<SimpleAccountSignerData, Metadata> {
-    return {
-      type: SimpleAccount.type,
-      id: this.id,
-      pubkey: this.pubkey,
-      metadata: this.metadata,
+    return super.saveCommonFields({
       signer: { key: bytesToHex(this.signer.key) },
-    };
+    });
   }
 
   static fromJSON<Metadata extends unknown>(
