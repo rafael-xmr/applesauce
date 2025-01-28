@@ -129,8 +129,18 @@ export class AccountManager<Metadata extends unknown = any> {
   // Serialize / Deserialize
 
   /** Returns an array of serialized accounts */
-  toJSON(): SerializedAccount<any, Metadata>[] {
-    return Array.from(this.accounts$.value).map((account) => account.toJSON());
+  toJSON(quite = false): SerializedAccount<any, Metadata>[] {
+    const accounts: SerializedAccount<any, Metadata>[] = [];
+
+    for (const account of this.accounts) {
+      try {
+        accounts.push(account.toJSON());
+      } catch (error) {
+        if (!quite) throw error;
+      }
+    }
+
+    return accounts;
   }
 
   /**
