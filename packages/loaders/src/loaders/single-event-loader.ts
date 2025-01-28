@@ -59,7 +59,7 @@ function* cacheFirstSequence(
       // mark the event as from the cache
       tap((event) => markFromCache(event)),
       // convert to event packets
-      map((e) => ({ event: e, from: "cache", subId: "cache", type: "EVENT" }) as EventPacket),
+      map((e) => ({ event: e, from: "", subId: "single-event-loader", type: "EVENT" }) as EventPacket),
     );
 
     if (results.length > 0) {
