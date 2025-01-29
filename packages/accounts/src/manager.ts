@@ -6,7 +6,7 @@ import { IAccount, IAccountConstructor, SerializedAccount } from "./types.js";
 export class AccountManager<Metadata extends unknown = any> {
   types = new Map<string, IAccountConstructor<any, any, Metadata>>();
 
-  active$ = new BehaviorSubject<IAccount<any, any, Metadata> | null>(null);
+  active$ = new BehaviorSubject<IAccount<any, any, Metadata> | undefined>(undefined);
   get active() {
     return this.active$.value;
   }
@@ -100,7 +100,7 @@ export class AccountManager<Metadata extends unknown = any> {
   }
   /** Clears the currently active account */
   clearActive() {
-    this.active$.next(null);
+    this.active$.next(undefined);
   }
 
   // Metadata CRUD

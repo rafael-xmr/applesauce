@@ -123,7 +123,7 @@ export class EventStore {
     return this.database.getReplaceable(kind, pubkey, d);
   }
 
-  /** Creates an observable that updates a single event */
+  /** Creates an observable that subscribes to a single event */
   event(id: string): Observable<NostrEvent | undefined> {
     return new Observable<NostrEvent | undefined>((observer) => {
       let current = this.database.getEvent(id);
@@ -226,7 +226,7 @@ export class EventStore {
     });
   }
 
-  /** Creates an observable with the latest version of a replaceable event */
+  /** Creates an observable that subscribes to the latest version of a replaceable event */
   replaceable(kind: number, pubkey: string, d?: string): Observable<NostrEvent | undefined> {
     return new Observable<NostrEvent | undefined>((observer) => {
       const uid = getReplaceableUID(kind, pubkey, d);
@@ -278,7 +278,7 @@ export class EventStore {
     });
   }
 
-  /** Creates an observable with the latest versions of replaceable events */
+  /** Creates an observable that subscribes to the latest version of an array of replaceable events*/
   replaceableSet(
     pointers: { kind: number; pubkey: string; identifier?: string }[],
   ): Observable<Record<string, NostrEvent>> {
@@ -327,7 +327,10 @@ export class EventStore {
       const deleted = this.database.deleted.subscribe((event) => {
         const uid = getEventUID(event);
         if (events[uid]) {
+          // clone object and delete event
+          events = { ...events };
           delete events[uid];
+
           this.database.removeClaim(event, observer);
           observer.next(events);
         }

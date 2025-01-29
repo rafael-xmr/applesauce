@@ -1,4 +1,4 @@
-import { kinds, NostrEvent, VerifiedEvent, verifiedSymbol } from "nostr-tools";
+import { EventTemplate, kinds, NostrEvent, VerifiedEvent, verifiedSymbol } from "nostr-tools";
 import { INDEXABLE_TAGS } from "../event-store/common.js";
 import { getHiddenTags } from "./hidden-tags.js";
 import { getOrComputeCachedValue } from "./cache.js";
@@ -91,7 +91,7 @@ export function getIndexableTags(event: NostrEvent) {
  * Returns the second index ( tag[1] ) of the first tag that matches the name
  * If the event has any hidden tags they will be searched first
  */
-export function getTagValue(event: NostrEvent, name: string) {
+export function getTagValue(event: NostrEvent | EventTemplate, name: string) {
   const hidden = getHiddenTags(event);
 
   const hiddenValue = hidden?.find((t) => t[0] === name)?.[1];
