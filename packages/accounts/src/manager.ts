@@ -161,6 +161,7 @@ export class AccountManager<Metadata extends unknown = any> {
         this.addAccount(account);
       } catch (error) {
         if (!quite) throw error;
+        else console.log(`Failed to load account`, error);
       }
     }
   }
