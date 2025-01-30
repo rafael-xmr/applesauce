@@ -5,7 +5,7 @@ import { safeRelayUrl } from "./relays.js";
 export const ContactsRelaysSymbol = Symbol.for("contacts-relays");
 
 type RelayJson = Record<string, { read: boolean; write: boolean }>;
-export function relaysFromContactsEvent(event: NostrEvent) {
+export function getRelaysFromContactsEvent(event: NostrEvent) {
   return getOrComputeCachedValue(event, ContactsRelaysSymbol, () => {
     try {
       const relayJson = JSON.parse(event.content) as RelayJson;

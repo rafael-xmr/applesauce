@@ -38,3 +38,15 @@ export function safeRelayUrl(relayUrl: string | URL) {
 export function safeRelayUrls(urls: Iterable<string>): string[] {
   return Array.from(urls).map(safeRelayUrl).filter(Boolean) as string[];
 }
+
+export function mergeRelaySets(...sources: (Iterable<string> | undefined)[]) {
+  const set = new Set<string>();
+  for (const src of sources) {
+    if (!src) continue;
+    for (const url of src) {
+      const safe = safeRelayUrl(url);
+      if (safe) set.add(safe);
+    }
+  }
+  return Array.from(set);
+}
