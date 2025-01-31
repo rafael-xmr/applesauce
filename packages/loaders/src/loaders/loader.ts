@@ -1,5 +1,5 @@
 import { Filter, NostrEvent } from "nostr-tools";
-import { Observable, OperatorFunction, Subject, Subscribable } from "rxjs";
+import { InteropObservable, Observable, OperatorFunction, Subject, Subscribable } from "rxjs";
 
 export type CacheRequest = (filters: Filter[]) => Observable<NostrEvent>;
 
@@ -9,13 +9,14 @@ export interface ILoader<T, R> extends Subscribable<R> {
 }
 
 /** Base loader class */
-export class Loader<T, R> implements ILoader<T, R> {
-  protected subject = new Subject<T>();
-  protected observable: Observable<R>;
-  pipe: Observable<R>["pipe"];
-  subscribe: Observable<R>["subscribe"];
+export class Loader<Input, Output> implements ILoader<Input, Output>, InteropObservable<Output> {
+  protected subject = new Subject<Input>();
 
-  constructor(transform: OperatorFunction<T, R>) {
+  observable: Observable<Output>;
+  pipe: Observable<Output>["pipe"];
+  subscribe: Observable<Output>["subscribe"];
+
+  constructor(transform: OperatorFunction<Input, Output>) {
     this.observable = this.subject.pipe(transform);
 
     // copy pipe function
@@ -23,7 +24,11 @@ export class Loader<T, R> implements ILoader<T, R> {
     this.subscribe = this.observable.subscribe.bind(this.observable);
   }
 
-  next(value: T) {
+  next(value: Input) {
     this.subject.next(value);
+  }
+
+  [Symbol.observable]() {
+    return this.observable;
   }
 }

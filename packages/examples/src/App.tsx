@@ -22,6 +22,7 @@ function App() {
       }
     };
 
+    listener();
     window.addEventListener("hashchange", listener);
     return () => window.removeEventListener("hashchange", listener);
   }, []);

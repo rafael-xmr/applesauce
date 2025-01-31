@@ -51,12 +51,15 @@
     "applesauce-core": "^0.10.0",
     "nanoid": "^5.0.9",
     "nostr-tools": "^2.10.3",
-    "rx-nostr": "^3.4.1",
+    "rx-nostr": "^3.5.0",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
+    "rx-nostr-crypto": "^3.1.3",
     "typescript": "^5.6.3",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "vitest-nostr": "^0.4.1",
+    "vitest-websocket-mock": "^0.4.0"
   },
   "funding": {
     "type": "lightning",
