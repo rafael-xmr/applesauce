@@ -30,7 +30,12 @@ export class RelayTimelineLoader extends Loader<number | void, EventPacket> {
 
   protected log: typeof logger = logger.extend("RelayTimelineLoader");
 
-  constructor(rxNostr: RxNostr, relay: string, filters: TimelessFilter[], opts?: RelayTimelineLoaderOptions) {
+  constructor(
+    rxNostr: RxNostr,
+    public relay: string,
+    public filters: TimelessFilter[],
+    opts?: RelayTimelineLoaderOptions,
+  ) {
     super((source) =>
       source.pipe(
         filter(() => !this.loading && !this.eose),
@@ -56,16 +61,20 @@ export class RelayTimelineLoader extends Loader<number | void, EventPacket> {
             tap({
               next: (packet) => {
                 // update cursor when event is received
-                this.cursor = Math.min(packet.event.created_at, this.cursor);
+                this.cursor = Math.min(packet.event.created_at - 1, this.cursor);
                 count++;
               },
               complete: () => {
                 // set loading to false when batch completes
                 this.loading$.next(false);
-                this.log(`Finished batch, got ${count} events`);
 
                 // set eose if no events where returned
-                if (count === 0) this.eose = true;
+                if (count === 0) {
+                  this.eose = true;
+                  this.log(`Got ${count} event, Complete`);
+                } else {
+                  this.log(`Finished batch, got ${count} events`);
+                }
               },
             }),
           );
@@ -76,6 +85,6 @@ export class RelayTimelineLoader extends Loader<number | void, EventPacket> {
     );
 
     // create a unique logger for this instance
-    this.log = this.log.extend(this.id);
+    this.log = this.log.extend(relay);
   }
 }

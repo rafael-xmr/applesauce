@@ -41,7 +41,7 @@ export class TimelineLoader extends Loader<number | undefined, EventPacket> {
         tap((cursor) => {
           for (const [_relay, loader] of loaders) {
             // load the next page if cursor is past loader cursor
-            if (!cursor || !Number.isFinite(cursor) || cursor < loader.cursor) {
+            if (!cursor || !Number.isFinite(cursor) || cursor <= loader.cursor) {
               if (!loader.loading && !loader.eose) loader.next();
             }
           }
