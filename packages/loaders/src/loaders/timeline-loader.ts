@@ -22,15 +22,17 @@ export class TimelineLoader extends Loader<number | undefined, EventPacket> {
     return this.loading$.value;
   }
 
+  requests: RelayFilterMap;
+
   protected log: typeof logger = logger.extend("TimelineLoader");
   protected loaders: Map<string, RelayTimelineLoader>;
 
-  constructor(rxNostr: RxNostr, relays: RelayFilterMap, opts?: TimelineLoaderOptions) {
+  constructor(rxNostr: RxNostr, requests: RelayFilterMap, opts?: TimelineLoaderOptions) {
     const loaders = new Map<string, RelayTimelineLoader>();
 
     super((source) => {
       // create loaders
-      for (const [relay, filters] of Object.entries(relays)) {
+      for (const [relay, filters] of Object.entries(requests)) {
         loaders.set(relay, new RelayTimelineLoader(rxNostr, relay, filters, opts));
       }
 
@@ -62,6 +64,7 @@ export class TimelineLoader extends Loader<number | undefined, EventPacket> {
       );
     });
 
+    this.requests = requests;
     this.loaders = loaders;
     this.log = this.log.extend(this.id);
   }
