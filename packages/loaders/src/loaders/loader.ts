@@ -1,6 +1,10 @@
 import { Filter, NostrEvent } from "nostr-tools";
 import { InteropObservable, Observable, OperatorFunction, Subject, Subscribable } from "rxjs";
 
+export type RelayFilterMap<T = Filter> = {
+  [relay: string]: T[];
+};
+
 export type CacheRequest = (filters: Filter[]) => Observable<NostrEvent>;
 
 export interface ILoader<T, R> extends Subscribable<R> {

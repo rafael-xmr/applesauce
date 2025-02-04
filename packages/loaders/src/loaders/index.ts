@@ -6,3 +6,4 @@ export * from "./user-sets-loader.js";
 export * from "./timeline-loader.js";
 export * from "./relay-timeline-loader.js";
 export * from "./cache-timeline-loader.js";
+export * from "./tag-value-loader.js";

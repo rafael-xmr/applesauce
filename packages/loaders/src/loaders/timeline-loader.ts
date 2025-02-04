@@ -5,12 +5,8 @@ import { mergeFilters } from "nostr-tools";
 import { nanoid } from "nanoid";
 
 import { RelayTimelineLoader, TimelessFilter } from "./relay-timeline-loader.js";
-import { CacheRequest, Loader } from "./loader.js";
+import { CacheRequest, Loader, RelayFilterMap } from "./loader.js";
 import { CacheTimelineLoader } from "./cache-timeline-loader.js";
-
-export type RelayFilterMap = {
-  [relay: string]: TimelessFilter[];
-};
 
 export type TimelineLoaderOptions = {
   limit?: number;
@@ -25,13 +21,13 @@ export class TimelineLoader extends Loader<number | undefined, EventPacket> {
     return this.loading$.value;
   }
 
-  requests: RelayFilterMap;
+  requests: RelayFilterMap<TimelessFilter>;
 
   protected log: typeof logger = logger.extend("TimelineLoader");
   protected cache?: CacheTimelineLoader;
   protected loaders: Map<string, RelayTimelineLoader>;
 
-  constructor(rxNostr: RxNostr, requests: RelayFilterMap, opts?: TimelineLoaderOptions) {
+  constructor(rxNostr: RxNostr, requests: RelayFilterMap<TimelessFilter>, opts?: TimelineLoaderOptions) {
     const loaders = new Map<string, RelayTimelineLoader>();
     const cache = opts?.cacheRequest
       ? new CacheTimelineLoader(opts.cacheRequest, [mergeFilters(...Object.values(requests).flat())], opts)
@@ -78,7 +74,7 @@ export class TimelineLoader extends Loader<number | undefined, EventPacket> {
     this.log = this.log.extend(this.id);
   }
 
-  static simpleFilterMap(relays: string[], filters: TimelessFilter[]): RelayFilterMap {
-    return relays.reduce<RelayFilterMap>((map, relay) => ({ ...map, [relay]: filters }), {});
+  static simpleFilterMap(relays: string[], filters: TimelessFilter[]): RelayFilterMap<TimelessFilter> {
+    return relays.reduce<RelayFilterMap<TimelessFilter>>((map, relay) => ({ ...map, [relay]: filters }), {});
   }
 }

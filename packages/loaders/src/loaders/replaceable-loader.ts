@@ -14,6 +14,7 @@ import {
   isLoadableAddressPointer,
 } from "../helpers/address-pointer.js";
 import { unique } from "../helpers/array.js";
+import { getDefaultReadRelays } from "../helpers/rx-nostr.js";
 
 export type LoadableAddressPointer = {
   kind: number;
@@ -81,9 +82,7 @@ function* cacheFirstSequence(
   }
 
   // load from pointer relays and default relays
-  const defaultRelays = Object.entries(rxNostr.getDefaultRelays())
-    .filter(([_relay, config]) => config.read)
-    .map(([relay]) => relay);
+  const defaultRelays = getDefaultReadRelays(rxNostr);
   const remoteRelays = [...pointerRelays, ...defaultRelays];
   if (remoteRelays.length > 0) {
     log(`Requesting`, remoteRelays, remaining);
