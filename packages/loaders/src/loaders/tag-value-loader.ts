@@ -29,6 +29,10 @@ export type TagValueLoaderOptions = {
 
   /** Restrict queries to specific kinds */
   kinds?: number[];
+  /** Restrict queries to specific authors */
+  authors?: string[];
+  /** Restrict queries since */
+  since?: number;
 
   /** Method used to load from the cache */
   cacheRequest?: CacheRequest;
@@ -51,7 +55,10 @@ export class TagValueLoader extends Loader<TabValuePointer, EventPacket> {
         filter((pointers) => pointers.length > 0),
         // batch pointers into requests
         mergeMap((pointers) => {
-          const baseFilter: Filter = opts?.kinds ? { kinds: opts.kinds } : {};
+          const baseFilter: Filter = {};
+          if (opts?.kinds) baseFilter.kinds = opts.kinds;
+          if (opts?.since) baseFilter.since = opts.since;
+          if (opts?.authors) baseFilter.authors = opts.authors;
 
           // build request map for relays
           const requestMap = pointers.reduce<RelayFilterMap>((map, pointer) => {
