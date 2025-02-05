@@ -1,6 +1,6 @@
 # Event Factory
 
-The `EventFactory` is a class is used to provide a [Signer](../signers/signers.md) and relay hints to the [Blueprints](./blueprints.md)
+The `EventFactory` is a class is used to provide a [Signer](../signers/signers.md) and relay hints to the blueprints
 
 ## Creating a factory
 
@@ -47,7 +47,7 @@ const factory = new EventFactory({
 
 ## Using a blueprint
 
-The [`factory.create`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#create) method can be used to create an event from a [Blueprints](./blueprints.md)
+The [`factory.create`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#create) method can be used to create an event from a blueprint
 
 ```ts
 await factory.create(NoteBlueprint, "hello world");

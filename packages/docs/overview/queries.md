@@ -58,9 +58,9 @@ const files = queryStore.createQuery(TimelineQuery, [{ kinds: [1063] }]);
 
 ## Prebuilt queries
 
-Queries are methods that construct complex observable pipelines off of the [`EventStore`](./event-store.md)
+Queries are methods that construct complex observable pipelines off of the `EventStore`
 
-They are run inside the [`QueryStore`](./query-store.md) which ensures there are not duplicate queries
+They are run inside the `QueryStore` which ensures there are not duplicate queries
 
 - The [`SingleEventQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.SingleEventQuery.html) can be used to subscribe to a single event.
 - The [`MultipleEventsQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.MultipleEventsQuery.html) can be used to subscribe to multiple events.
