@@ -1,4 +1,4 @@
-# Provider
+# Providers
 
 The [`QueryStoreProvider`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.QueryStoreProvider.html) can be used to provide a [`QueryStore`](../core/query-store.md) to the app
 

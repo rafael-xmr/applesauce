@@ -22,20 +22,13 @@ export default defineConfig({
         ],
       },
       {
-        text: "Core",
+        text: "Overview",
         items: [
-          { text: "EventStore", link: "/core/event-store" },
-          { text: "QueryStore", link: "/core/query-store" },
-          { text: "Queries", link: "/core/queries" },
-          { text: "Custom Queries", link: "/core/custom-queries" },
-          { text: "Helpers", link: "/core/helpers" },
-        ],
-      },
-      {
-        text: "Content",
-        items: [
-          { text: "Text", link: "/content/text" },
-          { text: "Markdown", link: "/content/markdown" },
+          { text: "Events", link: "/overview/events" },
+          { text: "Queries", link: "/overview/queries" },
+          { text: "Helpers", link: "/overview/helpers" },
+          { text: "Event Factory", link: "/overview/factory" },
+          { text: "Loaders", link: "/overview/loaders" },
         ],
       },
       {
@@ -53,27 +46,28 @@ export default defineConfig({
         ],
       },
       {
+        text: "Social",
+        items: [
+          { text: "Notes", link: "/social/notes" },
+          { text: "Comments", link: "/social/comments" },
+          { text: "Reactions", link: "/social/reactions" },
+          { text: "Zaps", link: "/social/zaps" },
+          { text: "Timelines", link: "/social/timelines" },
+        ],
+      },
+      {
+        text: "Content",
+        items: [
+          { text: "Text", link: "/content/text" },
+          { text: "Markdown", link: "/content/markdown" },
+        ],
+      },
+      {
         text: "React",
         items: [
-          { text: "Provider", link: "/react/provider" },
+          { text: "Providers", link: "/react/providers" },
           { text: "Hooks", link: "/react/hooks" },
           { text: "Content", link: "/react/content" },
-        ],
-      },
-      {
-        text: "Factory",
-        items: [
-          { text: "Event Factory", link: "/factory/factory" },
-          { text: "Blueprints", link: "/factory/blueprints" },
-          { text: "Operations", link: "/factory/operations" },
-          { text: "Helpers", link: "/factory/helpers" },
-        ],
-      },
-      {
-        text: "Loaders",
-        items: [
-          { text: "Loaders", link: "/loaders/loaders" },
-          { text: "Replaceable Loader", link: "/loaders/replaceable-loader" },
         ],
       },
     ],

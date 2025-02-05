@@ -1,8 +1,19 @@
-# EventStore
+# Managing events
 
 The `EventStore` is a reactive in-memory event database
 
 At its core the event store uses the [`Database`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_core.Database.html) class to store and index events
+
+## Creating an event store
+
+```ts
+import { EventStore } from "applesauce-core";
+
+const eventStore = new EventStore();
+```
+
+> [!INFO]
+> Its recommended to only create a single event store for your app
 
 ## Adding events
 
@@ -12,7 +23,7 @@ Adding events to the event store will update any subscriptions that match that e
 
 ```ts
 eventStore.timeline({kinds: [1]}).subscribe(events => {
-	console.log(`timeline updated (${events.length})`)
+  console.log(`timeline updated (${events.length})`)
 })
 
 const event = { kind: 1, ... }
