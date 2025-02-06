@@ -23,7 +23,7 @@ export class EventStore {
 
     this.database.onBeforeInsert = (event) => {
       // reject events that are invalid
-      if (!this.verifyEvent?.(event)) throw new Error("Invalid event");
+      if (this.verifyEvent && this.verifyEvent(event) === false) throw new Error("Invalid event");
     };
   }
 
