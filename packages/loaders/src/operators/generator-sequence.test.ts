@@ -13,16 +13,18 @@ it("should work with normal generator functions", () => {
       yield of(value + 1);
       yield of(value + 2);
       yield of(value + 3);
+      yield value + 4;
     }
 
     const source$ = of(1).pipe(generatorSequence(normalGenerator));
 
     // Define expected marble diagram
-    const expectedMarble = "(abc|)";
+    const expectedMarble = "(abcd|)";
     const expectedValues = {
       a: 2,
       b: 3,
       c: 4,
+      d: 5,
     };
 
     expectObservable(source$).toBe(expectedMarble, expectedValues);
@@ -34,11 +36,12 @@ it("should work with async generator functions", async () => {
     yield of(`${value}-1`);
     yield of(`${value}-2`);
     yield of(`${value}-3`);
+    yield `${value}-4`;
   }
 
   const source$ = of("test").pipe(generatorSequence(asyncGenerator));
 
-  const expectedValues = ["test-1", "test-2", "test-3"];
+  const expectedValues = ["test-1", "test-2", "test-3", "test-4"];
 
   expect(await lastValueFrom(source$.pipe(toArray()))).toEqual(expectedValues);
 });
