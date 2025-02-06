@@ -15,11 +15,22 @@ export class EventStore {
   /** Enable this to keep old versions of replaceable events */
   keepOldVersions = false;
 
+  /** A method used to verify new events before added them */
+  verifyEvent?: (event: NostrEvent) => boolean;
+
   constructor() {
     this.database = new Database();
+
+    this.database.onBeforeInsert = (event) => {
+      // reject events that are invalid
+      if (!this.verifyEvent?.(event)) throw new Error("Invalid event");
+    };
   }
 
-  /** Adds an event to the database and update subscriptions */
+  /**
+   * Adds an event to the database and update subscriptions
+   * @throws
+   */
   add(event: NostrEvent, fromRelay?: string): NostrEvent {
     if (event.kind === kinds.EventDeletion) this.handleDeleteEvent(event);
 

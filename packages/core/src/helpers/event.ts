@@ -101,7 +101,8 @@ export function getTagValue(event: NostrEvent | EventTemplate, name: string) {
 
 /** Sets events verified flag without checking anything */
 export function fakeVerifyEvent(event: NostrEvent): event is VerifiedEvent {
-  return (event[verifiedSymbol] = true);
+  event[verifiedSymbol] = true;
+  return true;
 }
 
 /** Marks an event as being from a cache */

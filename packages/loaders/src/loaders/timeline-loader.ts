@@ -1,7 +1,7 @@
 import { EventPacket, RxNostr } from "rx-nostr";
 import { BehaviorSubject, combineLatest, connect, merge, share, tap } from "rxjs";
 import { logger } from "applesauce-core";
-import { mergeFilters } from "nostr-tools";
+import { mergeFilters } from "applesauce-core/helpers";
 import { nanoid } from "nanoid";
 
 import { RelayTimelineLoader, TimelessFilter } from "./relay-timeline-loader.js";

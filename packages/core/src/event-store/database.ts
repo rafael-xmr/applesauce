@@ -33,6 +33,9 @@ export class Database {
   /** A stream of events removed of the database */
   deleted = new Subject<NostrEvent>();
 
+  /** A method thats called before a new event is inserted */
+  onBeforeInsert?: (event: NostrEvent) => void
+
   get size() {
     return this.events.size;
   }
@@ -97,11 +100,13 @@ export class Database {
 
     const current = this.events.get(id);
     if (current) {
-      // if this is a duplicate event, transfer some import symbols
+      // if this is a duplicate event, transfer some important symbols
       if (event[FromCacheSymbol]) current[FromCacheSymbol] = event[FromCacheSymbol];
 
       return current;
     }
+
+    this.onBeforeInsert?.(event)
 
     this.events.set(id, event);
     this.getKindIndex(event.kind).add(event);
