@@ -46,7 +46,7 @@ export function distinctRelays<T extends Message>(
           } else return null;
         }
       }),
-      filter((message) => message !== null && !!message.relays?.length) as OperatorFunction<T | null, T>,
+      filter((message) => message !== null) as OperatorFunction<T | null, T>,
       share(),
     );
   };
