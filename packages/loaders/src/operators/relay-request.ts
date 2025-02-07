@@ -1,5 +1,5 @@
 import { createRxOneshotReq, EventPacket, LazyFilter, RxNostr } from "rx-nostr";
-import { map, mergeAll, OperatorFunction } from "rxjs";
+import { mergeMap, OperatorFunction } from "rxjs";
 
 /** Makes a request to relays for every set of filters */
 export function relaysRequest(
@@ -9,10 +9,9 @@ export function relaysRequest(
 ): OperatorFunction<LazyFilter | LazyFilter[], EventPacket> {
   return (source) =>
     source.pipe(
-      map((filters) => {
+      mergeMap((filters) => {
         const req = createRxOneshotReq({ filters, rxReqId: id });
         return rxNostr.use(req, { on: { relays } });
       }),
-      mergeAll(),
     );
 }

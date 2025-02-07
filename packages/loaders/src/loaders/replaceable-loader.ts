@@ -42,8 +42,7 @@ function* cacheFirstSequence(
   log: typeof logger,
   opts?: { cacheRequest?: CacheRequest; lookupRelays?: string[] },
 ): Generator<Observable<EventPacket>, undefined, EventPacket[]> {
-  const id = nanoid(8);
-  log = log.extend(id);
+  const id = nanoid(4);
 
   let remaining = Array.from(pointers);
   const pointerRelays = Array.from(getRelaysFromPointers(pointers));
@@ -67,7 +66,7 @@ function* cacheFirstSequence(
 
   // first attempt, load from cache relays
   if (opts?.cacheRequest) {
-    log(`Checking cache`, remaining);
+    log(`[${id}] Checking cache`, remaining);
     const results = yield from([remaining]).pipe(
       // convert pointers to filters
       map(createFiltersFromAddressPointers),
@@ -86,7 +85,7 @@ function* cacheFirstSequence(
   const defaultRelays = getDefaultReadRelays(rxNostr);
   const remoteRelays = [...pointerRelays, ...defaultRelays];
   if (remoteRelays.length > 0) {
-    log(`Requesting`, remoteRelays, remaining);
+    log(`[${id}] Requesting`, remoteRelays, remaining);
     const results = yield from([remaining]).pipe(addressPointersRequest(rxNostr, id, remoteRelays));
 
     if (handleResults(results)) return;
@@ -97,7 +96,7 @@ function* cacheFirstSequence(
     // make sure we aren't asking a relay twice
     const relays = opts.lookupRelays.filter((r) => !pointerRelays.includes(r));
     if (relays.length > 0) {
-      log(`Request from lookup`, relays, remaining);
+      log(`[${id}] Request from lookup`, relays, remaining);
       const results = yield from([remaining]).pipe(addressPointersRequest(rxNostr, id, relays));
 
       if (handleResults(results)) return;
