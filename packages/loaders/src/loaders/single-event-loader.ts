@@ -7,7 +7,7 @@ import { nanoid } from "nanoid";
 
 import { CacheRequest, Loader } from "./loader.js";
 import { generatorSequence } from "../operators/generator-sequence.js";
-import { distinctRelays } from "../operators/distinct-by-relays.js";
+import { distinctRelays } from "../operators/distinct-relays.js";
 import { groupByRelay } from "../helpers/pointer.js";
 import { consolidateEventPointers } from "../helpers/event-pointer.js";
 

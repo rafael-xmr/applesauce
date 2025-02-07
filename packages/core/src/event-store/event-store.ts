@@ -6,7 +6,7 @@ import { Observable } from "rxjs";
 import { Database } from "./database.js";
 import { getEventUID, getReplaceableUID, getTagValue, isReplaceable } from "../helpers/event.js";
 import { matchFilters } from "../helpers/filter.js";
-import { addSeenRelay } from "../helpers/relays.js";
+import { addSeenRelay, getSeenRelays } from "../helpers/relays.js";
 import { getDeleteCoordinates, getDeleteIds } from "../helpers/delete.js";
 
 export class EventStore {
@@ -40,21 +40,28 @@ export class EventStore {
     // insert event into database
     const inserted = this.database.addEvent(event);
 
-    // remove all old version of the replaceable event
-    if (!this.keepOldVersions && isReplaceable(event.kind)) {
-      const current = this.database.getReplaceable(event.kind, event.pubkey, getTagValue(event, "d"));
-
-      if (current) {
-        const older = Array.from(current).filter((e) => e.created_at < event.created_at);
-        for (const old of older) this.database.deleteEvent(old);
-
-        // skip inserting this event because its not the newest
-        if (current.length !== older.length) return current[0];
-      }
+    // copy seen relays to new event
+    const relays = getSeenRelays(event);
+    if (relays) {
+      for (const relay of relays) addSeenRelay(inserted, relay);
     }
 
     // attach relay this event was from
     if (fromRelay) addSeenRelay(inserted, fromRelay);
+
+    // remove all old version of the replaceable event
+    if (!this.keepOldVersions && isReplaceable(event.kind)) {
+      const existing = this.database.getReplaceable(event.kind, event.pubkey, getTagValue(event, "d"));
+
+      if (existing) {
+        const older = Array.from(existing).filter((e) => e.created_at < event.created_at);
+        for (const old of older) this.database.deleteEvent(old);
+
+        // return the newest version of the replaceable event
+        // most of the time this will be === event, but not always
+        if (existing.length !== older.length) return existing[0];
+      }
+    }
 
     return inserted;
   }

@@ -8,7 +8,7 @@ import { CacheRequest, Loader } from "./loader.js";
 import { generatorSequence } from "../operators/generator-sequence.js";
 import { consolidateAddressPointers, createFiltersFromAddressPointers } from "../helpers/address-pointer.js";
 import { groupByRelay } from "../helpers/pointer.js";
-import { distinctRelays } from "../operators/distinct-by-relays.js";
+import { distinctRelays } from "../operators/distinct-relays.js";
 
 export type LoadableSetPointer = {
   /** A replaceable kind >= 30000 & < 40000 */

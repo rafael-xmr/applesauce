@@ -9,7 +9,7 @@ interface Message {
 
 export function distinctRelays<T extends Message>(
   keyFn: (message: T) => string,
-  timeout = 1000,
+  timeout = 10_000,
 ): OperatorFunction<T, T> {
   return (source$) => {
     const cache = new Map<string, number>();

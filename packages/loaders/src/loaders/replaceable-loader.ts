@@ -15,6 +15,7 @@ import {
 } from "../helpers/address-pointer.js";
 import { unique } from "../helpers/array.js";
 import { getDefaultReadRelays } from "../helpers/rx-nostr.js";
+import { distinctRelays } from "../operators/distinct-relays.js";
 
 export type LoadableAddressPointer = {
   kind: number;
@@ -106,9 +107,6 @@ function* cacheFirstSequence(
 
 /** Batches address pointers and consolidates them */
 function multiRelayBatcher(buffer: number): OperatorFunction<LoadableAddressPointer, LoadableAddressPointer[]> {
-  const requestedFrom = new Map<string, Set<string>>();
-  const requestedDefault = new Set<string>();
-
   return (source) =>
     source.pipe(
       // buffer on time
@@ -143,41 +141,6 @@ function multiRelayBatcher(buffer: number): OperatorFunction<LoadableAddressPoin
       }),
       // ignore empty buffer
       filter((buffer) => buffer.length > 0),
-      // ensure pointers are only requested from each relay once
-      map((pointers) => {
-        return pointers.filter((pointer) => {
-          const id = getAddressPointerId(pointer);
-
-          // skip if forced
-          if (pointer.force) return true;
-
-          // skip if already requested from default relays
-          if (!pointer.relays) {
-            if (requestedDefault.has(id)) return false;
-            else {
-              requestedDefault.add(id);
-              return true;
-            }
-          }
-
-          let set = requestedFrom.get(id);
-          if (!set) {
-            set = new Set<string>();
-            requestedFrom.set(id, set);
-          }
-
-          // remove any relays that have already been used
-          pointer.relays = pointer.relays.filter((relay) => !set.has(relay));
-
-          // remember used relays
-          for (const relay of pointer.relays) set.add(relay);
-
-          // if there are no new relays, ignore pointer
-          return pointer.relays.length > 0;
-        });
-      }),
-      // ignore empty buffer
-      filter((buffer) => buffer.length > 0),
     );
 }
 
@@ -201,6 +164,8 @@ export class ReplaceableLoader extends Loader<LoadableAddressPointer, EventPacke
       return source.pipe(
         // filter out invalid pointers
         filter(isLoadableAddressPointer),
+        // only fetch from each relay once
+        distinctRelays((p) => [p.kind, p.pubkey, p.identifier].filter(Boolean).join(":")),
         // batch and filter
         multiRelayBatcher(opts?.bufferTime ?? 1000),
         // check cache, relays, lookup relays in that order

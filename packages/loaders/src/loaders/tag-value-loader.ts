@@ -5,7 +5,7 @@ import { markFromCache } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
 
 import { CacheRequest, Loader, RelayFilterMap } from "./loader.js";
-import { distinctRelays } from "../operators/distinct-by-relays.js";
+import { distinctRelays } from "../operators/distinct-relays.js";
 import { getDefaultReadRelays } from "../helpers/rx-nostr.js";
 import { unique } from "../helpers/array.js";
 
