@@ -1,5 +1,5 @@
 import { EventPacket, RxNostr } from "rx-nostr";
-import { BehaviorSubject, combineLatest, connect, merge, share, tap } from "rxjs";
+import { BehaviorSubject, combineLatest, connect, merge, tap } from "rxjs";
 import { logger } from "applesauce-core";
 import { mergeFilters } from "applesauce-core/helpers";
 import { nanoid } from "nanoid";
@@ -62,10 +62,7 @@ export class TimelineLoader extends Loader<number | undefined, EventPacket> {
       const events$ = merge<EventPacket[]>(...allLoaders.map((l) => l.observable));
 
       // subscribe to all observables but only return the results of events$
-      return merge(trigger$, loading$, events$).pipe(
-        connect((_shared$) => events$),
-        share(),
-      );
+      return merge(trigger$, loading$, events$).pipe(connect((_shared$) => events$));
     });
 
     this.requests = requests;

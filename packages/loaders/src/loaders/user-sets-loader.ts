@@ -1,4 +1,4 @@
-import { share, tap, from, Observable, filter, map, mergeAll, bufferTime } from "rxjs";
+import { tap, from, Observable, filter, map, mergeAll, bufferTime } from "rxjs";
 import { createRxOneshotReq, EventPacket, RxNostr } from "rx-nostr";
 import { markFromCache } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
@@ -105,11 +105,11 @@ export class UserSetsLoader extends Loader<LoadableSetPointer, EventPacket> {
         // deduplicate address pointers
         map(consolidateAddressPointers),
         // check cache, relays, lookup relays in that order
-        generatorSequence<LoadableSetPointer[], EventPacket>((pointers) =>
-          cacheFirstSequence(rxNostr, pointers, this.log, options),
+        generatorSequence<LoadableSetPointer[], EventPacket>(
+          (pointers) => cacheFirstSequence(rxNostr, pointers, this.log, options),
+          // there will always be more events, never complete
+          false,
         ),
-        // share the response with all subscribers
-        share(),
       ),
     );
   }

@@ -1,5 +1,5 @@
 import { EventPacket } from "rx-nostr";
-import { BehaviorSubject, filter, map, mergeMap, share, tap } from "rxjs";
+import { BehaviorSubject, filter, map, mergeMap, tap } from "rxjs";
 import { markFromCache, unixNow } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
 import { Filter } from "nostr-tools";
@@ -46,6 +46,7 @@ export class CacheTimelineLoader extends Loader<number | void, EventPacket> {
             until: Math.min(unixNow(), this.cursor),
           })) satisfies Filter[];
         }),
+        // ignore empty filters
         filter((filters) => filters.length > 0),
         mergeMap((filters) => {
           // make batch request
@@ -80,8 +81,6 @@ export class CacheTimelineLoader extends Loader<number | void, EventPacket> {
             map((event) => ({ event, from: "", subId: "cache-timeline-loader", type: "EVENT" }) as EventPacket),
           );
         }),
-        // share the response with all subscribers
-        share(),
       ),
     );
 

@@ -7,10 +7,11 @@ export function generatorSequence<Input, Result>(
   ) =>
     | Generator<Observable<Result> | Result, void, Result[] | undefined>
     | AsyncGenerator<Observable<Result> | Result, void, Result[] | undefined>,
+  shouldComplete = true,
 ): OperatorFunction<Input, Result> {
   return (source) => {
     return new Observable<Result>((observer) => {
-      const sub = source.subscribe((value) => {
+      return source.subscribe((value) => {
         const generator = createGenerator(value);
 
         const nextSequence = (prevResults?: Result[]) => {
@@ -18,7 +19,10 @@ export function generatorSequence<Input, Result>(
 
           const handleResult = (result: IteratorResult<Observable<Result> | Result>) => {
             // generator complete, exit
-            if (result.done) return observer.complete();
+            if (result.done) {
+              if (shouldComplete) observer.complete();
+              return;
+            }
 
             const results: Result[] = [];
             if (isObservable(result.value)) {
@@ -54,8 +58,6 @@ export function generatorSequence<Input, Result>(
         // start running steps
         nextSequence();
       });
-
-      return () => sub.unsubscribe();
     });
   };
 }

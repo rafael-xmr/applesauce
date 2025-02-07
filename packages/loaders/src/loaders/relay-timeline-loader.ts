@@ -1,5 +1,5 @@
 import { createRxOneshotReq, EventPacket, RxNostr } from "rx-nostr";
-import { BehaviorSubject, filter, map, mergeMap, share, tap } from "rxjs";
+import { BehaviorSubject, filter, map, mergeMap, tap } from "rxjs";
 import { logger } from "applesauce-core";
 import { nanoid } from "nanoid";
 import { unixNow } from "applesauce-core/helpers";
@@ -48,6 +48,7 @@ export class RelayTimelineLoader extends Loader<number | void, EventPacket> {
             until: Math.min(unixNow(), this.cursor),
           })) satisfies Filter[];
         }),
+        // ignore empty filters
         filter((filters) => filters.length > 0),
         mergeMap((filters) => {
           // make batch request
@@ -79,8 +80,6 @@ export class RelayTimelineLoader extends Loader<number | void, EventPacket> {
             }),
           );
         }),
-        // share the response with all subscribers
-        share(),
       ),
     );
 

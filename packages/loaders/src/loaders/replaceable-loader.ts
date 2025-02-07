@@ -1,4 +1,4 @@
-import { share, tap, from, Observable, OperatorFunction, filter, bufferTime, map, mergeMap } from "rxjs";
+import { tap, from, Observable, OperatorFunction, filter, bufferTime, map, mergeMap } from "rxjs";
 import { EventPacket, RxNostr } from "rx-nostr";
 import { getEventUID, getReplaceableUID, markFromCache } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
@@ -6,7 +6,6 @@ import { nanoid } from "nanoid";
 
 import { CacheRequest, Loader } from "./loader.js";
 import { generatorSequence } from "../operators/generator-sequence.js";
-import { addressPointersRequest } from "../operators/address-pointers-request.js";
 import {
   createFiltersFromAddressPointers,
   getAddressPointerId,
@@ -16,6 +15,7 @@ import {
 import { unique } from "../helpers/array.js";
 import { getDefaultReadRelays } from "../helpers/rx-nostr.js";
 import { distinctRelays } from "../operators/distinct-relays.js";
+import { relaysRequest } from "../operators/relay-request.js";
 
 export type LoadableAddressPointer = {
   kind: number;
@@ -86,7 +86,12 @@ function* cacheFirstSequence(
   const remoteRelays = [...pointerRelays, ...defaultRelays];
   if (remoteRelays.length > 0) {
     log(`[${id}] Requesting`, remoteRelays, remaining);
-    const results = yield from([remaining]).pipe(addressPointersRequest(rxNostr, id, remoteRelays));
+    const results = yield from([remaining]).pipe(
+      // convert pointers to filters
+      map(createFiltersFromAddressPointers),
+      // make requests
+      relaysRequest(rxNostr, id, remoteRelays),
+    );
 
     if (handleResults(results)) return;
   }
@@ -97,7 +102,12 @@ function* cacheFirstSequence(
     const relays = opts.lookupRelays.filter((r) => !pointerRelays.includes(r));
     if (relays.length > 0) {
       log(`[${id}] Request from lookup`, relays, remaining);
-      const results = yield from([remaining]).pipe(addressPointersRequest(rxNostr, id, relays));
+      const results = yield from([remaining]).pipe(
+        // convert pointers to filters
+        map(createFiltersFromAddressPointers),
+        // make requests
+        relaysRequest(rxNostr, id, relays),
+      );
 
       if (handleResults(results)) return;
     }
@@ -168,11 +178,11 @@ export class ReplaceableLoader extends Loader<LoadableAddressPointer, EventPacke
         // batch and filter
         multiRelayBatcher(opts?.bufferTime ?? 1000),
         // check cache, relays, lookup relays in that order
-        generatorSequence<LoadableAddressPointer[], EventPacket>((pointers) =>
-          cacheFirstSequence(rxNostr, pointers, this.log, opts),
+        generatorSequence<LoadableAddressPointer[], EventPacket>(
+          (pointers) => cacheFirstSequence(rxNostr, pointers, this.log, opts),
+          // there will always be more events, never complete
+          false,
         ),
-        // share the response with all subscribers
-        share(),
       );
     });
   }

@@ -1,5 +1,5 @@
 import { Filter, NostrEvent } from "nostr-tools";
-import { InteropObservable, Observable, OperatorFunction, Subject, Subscribable } from "rxjs";
+import { InteropObservable, Observable, OperatorFunction, share, Subject, Subscribable } from "rxjs";
 
 export type RelayFilterMap<T = Filter> = {
   [relay: string]: T[];
@@ -21,7 +21,11 @@ export class Loader<Input, Output> implements ILoader<Input, Output>, InteropObs
   subscribe: Observable<Output>["subscribe"];
 
   constructor(transform: OperatorFunction<Input, Output>) {
-    this.observable = this.subject.pipe(transform);
+    this.observable = this.subject.pipe(
+      transform,
+      // only create a single instance of the transformer
+      share(),
+    );
 
     // copy pipe function
     this.pipe = this.observable.pipe.bind(this.observable);

@@ -1,5 +1,5 @@
 import { createRxOneshotReq, EventPacket, RxNostr } from "rx-nostr";
-import { bufferTime, filter, map, merge, mergeMap, share, tap } from "rxjs";
+import { bufferTime, filter, map, merge, mergeMap, tap } from "rxjs";
 import { Filter } from "nostr-tools";
 import { markFromCache } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
@@ -104,8 +104,6 @@ export class TagValueLoader extends Loader<TabValuePointer, EventPacket> {
 
           return cacheRequest ? merge(cacheRequest, ...requests) : merge(...requests);
         }),
-        // share the response with all subscribers
-        share(),
       ),
     );
 
