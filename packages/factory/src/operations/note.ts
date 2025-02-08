@@ -11,8 +11,8 @@ export function includeNoteThreadingTags(parent: NostrEvent): EventFactoryOperat
     let tags = Array.from(draft.tags);
 
     const pointer: EventPointer = { id: parent.id, author: parent.pubkey, kind: parent.kind };
-    if (ctx.getRelayHint) {
-      const hint = await ctx.getRelayHint(parent);
+    if (ctx.getEventRelayHint) {
+      const hint = await ctx.getEventRelayHint(parent.id);
       if (hint) pointer.relays = [hint];
     }
 

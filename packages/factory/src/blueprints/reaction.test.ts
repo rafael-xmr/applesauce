@@ -94,7 +94,7 @@ describe("EventFactory", () => {
 
   it("should include relay hints", async () => {
     const factory = new EventFactory({
-      getRelayHint: () => "wss://relay.example.com",
+      getEventRelayHint: () => "wss://relay.example.com",
       getPubkeyRelayHint: () => "wss://user.example.com",
     });
 

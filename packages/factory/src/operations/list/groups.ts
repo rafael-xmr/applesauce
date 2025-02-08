@@ -6,10 +6,10 @@ import { TagOperation } from "./list.js";
 /** Adds a "group" tag to a list */
 export function addGroupTag(group: GroupPointer): TagOperation {
   return (tags) => {
-    const existing = tags.find((t) => t[0] === "group" && t[1] === group.id && t[2] === group.relay);
+    // remove existing tag
+    tags = tags.filter((t) => !(t[0] === "group" && t[1] === group.id && t[2] === group.relay));
 
-    if (existing) return tags.map((tag) => (tag === existing ? createGroupTagFromGroupPointer(group) : tag));
-    else return [...tags, createGroupTagFromGroupPointer(group)];
+    return [...tags, createGroupTagFromGroupPointer(group)];
   };
 }
 

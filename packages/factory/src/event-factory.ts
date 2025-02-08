@@ -50,7 +50,7 @@ export type EventFactoryClient = {
 export type EventFactoryContext = {
   /** NIP-89 client tag */
   client?: EventFactoryClient;
-  getRelayHint?: (event: NostrEvent) => string | undefined | Promise<string> | Promise<undefined>;
+  getEventRelayHint?: (event: string) => string | undefined | Promise<string> | Promise<undefined>;
   getPubkeyRelayHint?: (pubkey: string) => string | undefined | Promise<string> | Promise<undefined>;
   /** A signer used to encrypt the content of some notes */
   signer?: EventFactorySigner;
@@ -102,10 +102,17 @@ export class EventFactory {
 
   /** Modify an existing event with operations and updated the created_at */
   async modify(
-    draft: EventFactoryTemplate,
+    draft: EventFactoryTemplate | NostrEvent,
     ...operations: (EventFactoryOperation | undefined)[]
   ): Promise<EventTemplate> {
-    return await EventFactory.runProcess({ ...draft, created_at: unixNow() }, this.context, ...operations);
+    draft = { ...draft, created_at: unixNow() };
+
+    // Remove old fields from signed nostr event
+    Reflect.deleteProperty(draft, "id");
+    Reflect.deleteProperty(draft, "sig");
+    Reflect.deleteProperty(draft, "pubkey");
+
+    return await EventFactory.runProcess(draft, this.context, ...operations);
   }
 
   /** Modify a lists public and hidden tags and updated the created_at */

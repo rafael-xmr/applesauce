@@ -15,7 +15,7 @@ export function includeShareTags(event: NostrEvent): EventFactoryOperation {
   return async (draft, ctx) => {
     let tags = Array.from(draft.tags);
 
-    const hint = await ctx.getRelayHint?.(event);
+    const hint = await ctx.getEventRelayHint?.(event.id);
 
     // add "e" tag
     tags = ensureEventPointerTag(tags, getEventPointerForEvent(event, hint ? [hint] : undefined));

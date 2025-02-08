@@ -15,7 +15,7 @@ export function includeReactionTags(event: NostrEvent): EventFactoryOperation {
   return async (draft, ctx) => {
     let tags = Array.from(draft.tags);
 
-    const eventHint = await ctx?.getRelayHint?.(event);
+    const eventHint = await ctx?.getEventRelayHint?.(event.id);
     const pubkeyHint = await ctx?.getPubkeyRelayHint?.(event.pubkey);
 
     // include "e" tag

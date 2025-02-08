@@ -1,17 +1,17 @@
 import { canHaveHiddenTags, getHiddenTags, getListEncryptionMethods, hasHiddenTags } from "applesauce-core/helpers";
-import { EventFactoryOperation } from "../../event-factory.js";
+import { EventFactoryContext, EventFactoryOperation } from "../../event-factory.js";
 import { includeSingletonTag } from "../tags.js";
 
-export type TagOperation = (tags: string[][]) => string[][];
+export type TagOperation = (tags: string[][], ctx: EventFactoryContext) => string[][] | Promise<string[][]>;
 
 /** Creates an operation that modifies the existing array of tags on an event */
 export function modifyPublicTags(...operations: TagOperation[]): EventFactoryOperation {
-  return async (draft) => {
+  return async (draft, ctx) => {
     let tags = Array.from(draft.tags);
 
     // modify the pubic tags
     if (Array.isArray(operations)) {
-      for (const operation of operations) tags = operation(tags);
+      for (const operation of operations) tags = await operation(tags, ctx);
     }
 
     return { ...draft, tags };
@@ -30,7 +30,7 @@ export function modifyHiddenTags(...operations: TagOperation[]): EventFactoryOpe
     if (hidden === undefined) throw new Error("Hidden tags are locked");
 
     let newHidden = Array.from(hidden);
-    for (const operation of operations) newHidden = operation(newHidden);
+    for (const operation of operations) newHidden = await operation(newHidden, ctx);
 
     const encryption = getListEncryptionMethods(draft.kind, ctx.signer);
 

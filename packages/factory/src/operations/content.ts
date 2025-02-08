@@ -74,12 +74,19 @@ export type TextContentOptions = {
 /** Create a set of operations for common text content */
 export function createTextContentOperations(content: string, options?: TextContentOptions): EventFactoryOperation[] {
   return [
+    // set text content
     setContent(content),
+    // fix @ mentions
     repairContentNostrLinks(),
+    // include "p" tags for pubkeys mentioned
     tagPubkeyMentionedInContent(),
+    // include event "q" tags
     includeQuoteTags(),
+    // include "t" tags for hashtags
     includeContentHashtags(),
+    // include "emoji" tags
     options?.emojis && includeContentEmojiTags(options.emojis),
+    // set "content-warning" tag
     options?.contentWarning !== undefined ? setContentWarning(options.contentWarning) : undefined,
   ].filter((o) => !!o);
 }

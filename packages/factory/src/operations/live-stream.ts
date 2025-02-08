@@ -8,7 +8,7 @@ import { ensureMarkedAddressPointerTag } from "../helpers/common-tags.js";
 export function includeLiveStreamTag(stream: NostrEvent): EventFactoryOperation {
   return async (draft, ctx) => {
     let tags = Array.from(draft.tags);
-    const hint = await ctx.getRelayHint?.(stream);
+    const hint = await ctx.getEventRelayHint?.(stream.id);
     tags = ensureMarkedAddressPointerTag(tags, getAddressPointerForEvent(stream, hint ? [hint] : undefined), "root");
     return { ...draft, tags };
   };
