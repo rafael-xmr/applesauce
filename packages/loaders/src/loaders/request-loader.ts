@@ -1,11 +1,11 @@
 import { kinds } from "nostr-tools";
-import { MailboxesQuery, ProfileQuery, UserContactsQuery } from "applesauce-core/queries";
+import { MailboxesQuery, ProfileQuery, ReplaceableQuery, UserContactsQuery } from "applesauce-core/queries";
 import { getObservableValue, simpleTimeout } from "applesauce-core/observable";
 import { EventStore, QueryStore } from "applesauce-core";
 import { ProfilePointer } from "nostr-tools/nip19";
 import { filter, Observable } from "rxjs";
 
-import { ReplaceableLoader } from "./replaceable-loader.js";
+import { LoadableAddressPointer, ReplaceableLoader } from "./replaceable-loader.js";
 
 /** A special Promised based loader built on the {@link QueryStore} */
 export class RequestLoader {
@@ -33,6 +33,12 @@ export class RequestLoader {
   protected checkReplaceable() {
     if (!this.replaceableLoader) throw new Error("Missing ReplaceableLoader");
     return this.replaceableLoader;
+  }
+
+  /** Requests a single replaceable event */
+  replaceable(pointer: LoadableAddressPointer, force?: boolean) {
+    this.checkReplaceable().next({ ...pointer, force });
+    return this.runWithTimeout(ReplaceableQuery, pointer.kind, pointer.pubkey, pointer.identifier);
   }
 
   /** Loads a pubkeys profile */
