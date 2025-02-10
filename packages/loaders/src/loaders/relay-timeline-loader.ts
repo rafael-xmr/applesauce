@@ -1,5 +1,5 @@
 import { createRxOneshotReq, EventPacket, RxNostr } from "rx-nostr";
-import { BehaviorSubject, filter, map, mergeMap, tap } from "rxjs";
+import { BehaviorSubject, filter, map, Observable } from "rxjs";
 import { logger } from "applesauce-core";
 import { nanoid } from "nanoid";
 import { unixNow } from "applesauce-core/helpers";
@@ -25,8 +25,8 @@ export class RelayTimelineLoader extends Loader<number | void, EventPacket> {
   /** current "until" timestamp */
   cursor = Infinity;
 
-  /** set to true when 0 events are returned from last batch */
-  eose = false;
+  /** if the timeline is complete */
+  complete = false;
 
   protected log: typeof logger = logger.extend("RelayTimelineLoader");
 
@@ -36,51 +36,57 @@ export class RelayTimelineLoader extends Loader<number | void, EventPacket> {
     public filters: TimelessFilter[],
     opts?: RelayTimelineLoaderOptions,
   ) {
-    super((source) =>
-      source.pipe(
-        filter(() => !this.loading && !this.eose),
-        map((limit) => {
-          // build next batch filters
-          return filters.map((filter) => ({
-            limit: limit || opts?.limit,
-            ...filter,
-            // limit curser to now
-            until: Math.min(unixNow(), this.cursor),
-          })) satisfies Filter[];
+    super(
+      (source) =>
+        new Observable((observer) => {
+          return source
+            .pipe(
+              filter(() => !this.loading && !this.complete),
+              map((limit) => {
+                // build next batch filters
+                return filters.map((filter) => ({
+                  limit: limit || opts?.limit,
+                  ...filter,
+                  // limit curser to now
+                  until: Math.min(unixNow(), this.cursor),
+                })) satisfies Filter[];
+              }),
+              // ignore empty filters
+              filter((filters) => filters.length > 0),
+            )
+            .subscribe((filters) => {
+              // make batch request
+              let count = 0;
+              const req = createRxOneshotReq({ filters, rxReqId: this.id });
+              this.loading$.next(true);
+
+              this.log(`Next batch starting at ${filters[0].until} limit ${filters[0].limit}`);
+
+              rxNostr.use(req, { on: { relays: [relay] } }).subscribe({
+                next: (packet) => {
+                  // update cursor when event is received
+                  this.cursor = Math.min(packet.event.created_at - 1, this.cursor);
+                  count++;
+
+                  // forward packet
+                  observer.next(packet);
+                },
+                error: (err) => observer.error(err),
+                complete: () => {
+                  // set loading to false when batch completes
+                  this.loading$.next(false);
+
+                  // set complete the observable if 0 events where returned
+                  if (count === 0) {
+                    observer.complete();
+                    this.log(`Got ${count} event, Complete`);
+                  } else {
+                    this.log(`Finished batch, got ${count} events`);
+                  }
+                },
+              });
+            });
         }),
-        // ignore empty filters
-        filter((filters) => filters.length > 0),
-        mergeMap((filters) => {
-          // make batch request
-          let count = 0;
-          const req = createRxOneshotReq({ filters, rxReqId: this.id });
-          this.loading$.next(true);
-
-          this.log(`Next batch starting at ${filters[0].until} limit ${filters[0].limit}`);
-
-          return rxNostr.use(req, { on: { relays: [relay] } }).pipe(
-            tap({
-              next: (packet) => {
-                // update cursor when event is received
-                this.cursor = Math.min(packet.event.created_at - 1, this.cursor);
-                count++;
-              },
-              complete: () => {
-                // set loading to false when batch completes
-                this.loading$.next(false);
-
-                // set eose if no events where returned
-                if (count === 0) {
-                  this.eose = true;
-                  this.log(`Got ${count} event, Complete`);
-                } else {
-                  this.log(`Finished batch, got ${count} events`);
-                }
-              },
-            }),
-          );
-        }),
-      ),
     );
 
     // create a unique logger for this instance

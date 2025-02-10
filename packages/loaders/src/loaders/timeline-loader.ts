@@ -29,25 +29,26 @@ export class TimelineLoader extends Loader<number | undefined, EventPacket> {
 
   constructor(rxNostr: RxNostr, requests: RelayFilterMap<TimelessFilter>, opts?: TimelineLoaderOptions) {
     const loaders = new Map<string, RelayTimelineLoader>();
+
+    // create cache loader
     const cache = opts?.cacheRequest
       ? new CacheTimelineLoader(opts.cacheRequest, [mergeFilters(...Object.values(requests).flat())], opts)
       : undefined;
+
+    // create loaders
+    for (const [relay, filters] of Object.entries(requests)) {
+      loaders.set(relay, new RelayTimelineLoader(rxNostr, relay, filters, opts));
+    }
+
     const allLoaders = cache ? [cache, ...loaders.values()] : Array.from(loaders.values());
 
     super((source) => {
-      // create loaders
-      for (const [relay, filters] of Object.entries(requests)) {
-        loaders.set(relay, new RelayTimelineLoader(rxNostr, relay, filters, opts));
-      }
-
       // observable that triggers the loaders based on cursor
       const trigger$ = source.pipe(
         tap((cursor) => {
           for (const loader of allLoaders) {
             // load the next page if cursor is past loader cursor
-            if (!cursor || !Number.isFinite(cursor) || cursor <= loader.cursor) {
-              if (!loader.loading && !loader.eose) loader.next();
-            }
+            if (!cursor || !Number.isFinite(cursor) || cursor <= loader.cursor) loader.next();
           }
         }),
       );
