@@ -1,5 +1,5 @@
 import { Filter, NostrEvent } from "nostr-tools";
-import { InteropObservable, Observable, OperatorFunction, share, Subject, Subscribable, tap } from "rxjs";
+import { InteropObservable, Observable, OperatorFunction, share, Subject, Subscribable } from "rxjs";
 
 export type RelayFilterMap<T = Filter> = {
   [relay: string]: T[];
