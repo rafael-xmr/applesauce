@@ -51,22 +51,22 @@ export function isReplaceable(kind: number) {
  * For parametrized replaceable events this is ( event.kind + ":" + event.pubkey + ":" + event.tags.d.1 )
  */
 export function getEventUID(event: NostrEvent) {
-  let id = event[EventUIDSymbol];
+  let uid = event[EventUIDSymbol];
 
-  if (!id) {
+  if (!uid) {
     if (isReplaceable(event.kind)) {
-      const d = event.tags.find((t) => t[0] === "d")?.[1];
-      id = getReplaceableUID(event.kind, event.pubkey, d);
-    } else {
-      id = event.id;
-    }
+      let d = event.tags.find((t) => t[0] === "d")?.[1];
+      uid = getReplaceableUID(event.kind, event.pubkey, d);
+    } else uid = event.id;
+
+    event[EventUIDSymbol] = uid;
   }
 
-  return id;
+  return uid;
 }
 
 export function getReplaceableUID(kind: number, pubkey: string, d?: string) {
-  return d ? `${kind}:${pubkey}:${d}` : `${kind}:${pubkey}`;
+  return d ? kind + ":" + pubkey + ":" + d : kind + ":" + pubkey;
 }
 
 /** Returns a Set of tag names and values that are indexable */
@@ -76,7 +76,7 @@ export function getIndexableTags(event: NostrEvent) {
     const tags = new Set<string>();
 
     for (const tag of event.tags) {
-      if (tag[0] && INDEXABLE_TAGS.has(tag[0]) && tag[1]) {
+      if (tag[0] && tag[0].length >= 2 && INDEXABLE_TAGS.has(tag[0])) {
         tags.add(tag[0] + ":" + tag[1]);
       }
     }

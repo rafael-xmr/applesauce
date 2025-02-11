@@ -175,7 +175,7 @@ export function isEventPointer(pointer: DecodeResult["data"]): pointer is EventP
 
 /** Returns the coordinate string for an AddressPointer */
 export function getCoordinateFromAddressPointer(pointer: AddressPointer) {
-  return `${pointer.kind}:${pointer.pubkey}:${pointer.identifier}`;
+  return pointer.kind + ":" + pointer.pubkey + ":" + pointer.identifier;
 }
 
 /**

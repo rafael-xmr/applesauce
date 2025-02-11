@@ -20,7 +20,8 @@ export function matchFilter(filter: Filter, event: NostrEvent): boolean {
   for (let f in filter) {
     if (f[0] === "#") {
       let tagName = f.slice(1);
-      let values = filter[`#${tagName}`];
+      // @ts-expect-error
+      let values = filter[f] as string[][] | undefined;
       if (values) {
         const tags = getIndexableTags(event);
         if (values.some((v) => tags.has(tagName + ":" + v)) === false) return false;

@@ -259,7 +259,11 @@ export class EventStore {
 
       // subscribe to future events
       const inserted = this.database.inserted.subscribe((event) => {
-        if (getEventUID(event) === uid && (!current || event.created_at > current.created_at)) {
+        if (
+          isReplaceable(event.kind) &&
+          getEventUID(event) === uid &&
+          (!current || event.created_at > current.created_at)
+        ) {
           // remove old claim
           if (current) this.database.removeClaim(current, observer);
 
