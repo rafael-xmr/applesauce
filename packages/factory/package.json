@@ -66,13 +66,13 @@
     "applesauce-content": "^0.10.0",
     "applesauce-core": "^0.10.0",
     "nanoid": "^5.0.9",
-    "nostr-tools": "^2.10.3"
+    "nostr-tools": "^2.10.4"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.13",
-    "@types/node": "^22.10.1",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.1",
     "@vitest/coverage-v8": "2.1.8",
-    "typescript": "^5.6.3",
+    "typescript": "^5.7.3",
     "vitest": "^3.0.5"
   },
   "funding": {

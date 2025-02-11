@@ -38,14 +38,14 @@
     }
   },
   "dependencies": {
-    "@noble/hashes": "^1.5.0",
+    "@noble/hashes": "^1.7.1",
     "applesauce-signers": "^0.10.0",
     "nanoid": "^5.0.9",
-    "nostr-tools": "^2.10.3",
+    "nostr-tools": "^2.10.4",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
-    "typescript": "^5.6.3",
+    "typescript": "^5.7.3",
     "vitest": "^3.0.5"
   },
   "funding": {

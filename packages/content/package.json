@@ -58,15 +58,15 @@
     "@types/mdast": "^4.0.4",
     "@types/unist": "^3.0.3",
     "applesauce-core": "^0.10.0",
-    "mdast-util-find-and-replace": "^3.0.1",
-    "nostr-tools": "^2.10.3",
+    "mdast-util-find-and-replace": "^3.0.2",
+    "nostr-tools": "^2.10.4",
     "remark": "^15.0.1",
     "remark-parse": "^11.0.0",
     "unified": "^11.0.5",
     "unist-util-visit-parents": "^6.0.1"
   },
   "devDependencies": {
-    "typescript": "^5.6.3",
+    "typescript": "^5.7.3",
     "vitest": "^3.0.5"
   },
   "funding": {
