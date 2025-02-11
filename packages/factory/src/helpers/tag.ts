@@ -15,7 +15,7 @@ export function fillAndTrimTag(tag: (string | undefined | null)[], minLength = 2
 }
 
 /** Ensures a single named tag exists */
-export function ensureSingletonTag(tags: string[][], tag: string[], replace = true): string[][] {
+export function ensureSingletonTag(tags: string[][], tag: [string, ...string[]], replace = true): string[][] {
   const existing = tags.find((t) => t[0] === tag[0]);
 
   if (existing) {
@@ -27,8 +27,13 @@ export function ensureSingletonTag(tags: string[][], tag: string[], replace = tr
 }
 
 /** Ensures a single named / value tag exists */
-export function ensureNamedValueTag(tags: string[][], tag: string[], replace = true): string[][] {
-  const existing = tags.find((t) => t[0] === tag[0] && t[1] === tag[1]);
+export function ensureNamedValueTag(
+  tags: string[][],
+  tag: [string, string, ...string[]],
+  replace = true,
+  matcher?: (a: string, b: string) => boolean,
+): string[][] {
+  const existing = tags.find((t) => t[0] === tag[0] && t[1] && (matcher ? matcher(t[1], tag[1]) : t[1] === tag[1]));
 
   if (existing) {
     if (replace) return tags.map((t) => (t === existing ? tag : t));

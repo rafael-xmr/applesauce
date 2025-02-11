@@ -1,8 +1,8 @@
-import { FileMetadata } from "applesauce-core/helpers";
+import { FileMetadata, NameValueTag } from "applesauce-core/helpers";
 
 /** Creates tags for {@link FileMetadata} */
-export function createFileMetadataTags(attachment: FileMetadata): string[][] {
-  const tags: string[][] = [];
+export function createFileMetadataTags(attachment: FileMetadata): NameValueTag[] {
+  const tags: NameValueTag[] = [];
 
   const add = (name: string, value: string | number) => tags.push([name, String(value)]);
   if (attachment.url) add("url", attachment.url);

@@ -1,26 +1,34 @@
+/** A tag with at least two indexes, the first being the name, the second the value */
+export type NameValueTag<Name extends string = string> = [Name, string, ...string[]];
+
+/** Tests if a tag has at least two indexes, and optionally the value of the first */
+export function isNameValueTag<Name extends string>(tag: string[], name?: Name): tag is NameValueTag<Name> {
+  return tag[0] !== undefined && tag[1] !== undefined && (name ? tag[0] === name : true);
+}
+
 /** Checks if tag is an "e" tag and has at least one value */
 export function isETag(tag: string[]): tag is ["e", string, ...string[]] {
-  return tag[0] === "e" && tag[1] !== undefined;
+  return isNameValueTag(tag, "e");
 }
 /** Checks if tag is an "p" tag and has at least one value */
 export function isPTag(tag: string[]): tag is ["p", string, ...string[]] {
-  return tag[0] === "p" && tag[1] !== undefined;
+  return isNameValueTag(tag, "p");
 }
 /** Checks if tag is an "r" tag and has at least one value */
 export function isRTag(tag: string[]): tag is ["r", string, ...string[]] {
-  return tag[0] === "r" && tag[1] !== undefined;
+  return isNameValueTag(tag, "r");
 }
 /** Checks if tag is an "d" tag and has at least one value */
 export function isDTag(tag: string[]): tag is ["d", string, ...string[]] {
-  return tag[0] === "d" && tag[1] !== undefined;
+  return isNameValueTag(tag, "d");
 }
 /** Checks if tag is an "a" tag and has at least one value */
 export function isATag(tag: string[]): tag is ["a", string, ...string[]] {
-  return tag[0] === "a" && tag[1] !== undefined;
+  return isNameValueTag(tag, "a");
 }
 /** Checks if tag is an "a" tag and has at least one value */
 export function isTTag(tag: string[]): tag is ["t", string, ...string[]] {
-  return tag[0] === "a" && tag[1] !== undefined;
+  return isNameValueTag(tag, "t");
 }
 
 /** A pipeline that filters and maps each tag */

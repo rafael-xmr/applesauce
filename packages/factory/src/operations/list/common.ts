@@ -88,10 +88,14 @@ export function removeCoordinateTag(cord: string | AddressPointer): TagOperation
 }
 
 /** Adds a name / value tag */
-export function addNameValueTag(tag: string[], replace = true): TagOperation {
+export function addNameValueTag(
+  tag: [string, string, ...string[]],
+  replace = true,
+  matcher?: (a: string, b: string) => boolean,
+): TagOperation {
   return (tags) => {
     // replace or append tag
-    if (replace) return ensureNamedValueTag(tags, tag, true);
+    if (replace) return ensureNamedValueTag(tags, tag, true, matcher);
     else return [...tags, tag];
   };
 }
