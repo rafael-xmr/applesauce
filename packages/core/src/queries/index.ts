@@ -1,3 +1,4 @@
+export * from "./blossom.js";
 export * from "./bookmarks.js";
 export * from "./channels.js";
 export * from "./comments.js";

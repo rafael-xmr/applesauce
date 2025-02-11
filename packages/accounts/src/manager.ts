@@ -16,8 +16,24 @@ export class AccountManager<Metadata extends unknown = any> {
     return this.accounts$.value;
   }
 
+  /** Proxy signer for currently active account */
+  signer: IAccount<any, any, Metadata>;
+
   /** Disable request queueing for any accounts added to this manager */
   disableQueue?: boolean;
+
+  constructor() {
+    this.signer = new Proxy({} as IAccount, {
+      get: (_, p) => {
+        if (!this.active) throw new Error("No active account");
+        return Reflect.get(this.active, p);
+      },
+      has: (_, p) => {
+        if (!this.active) throw new Error("No active account");
+        return Reflect.has(this.active, p);
+      },
+    });
+  }
 
   // Account type CRUD
 

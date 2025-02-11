@@ -52,12 +52,15 @@ export function isSameURL(a: string | URL, b: string | URL) {
  * Does not remove the trailing slash
  */
 export function normalizeURL(url: string | URL): URL {
-  if (typeof url === "string" && url.indexOf("://") === -1) url = "wss://" + url;
   let p = new URL(url);
   // remove any double slashes
   p.pathname = p.pathname.replace(/\/+/g, "/");
   // drop the port if its not needed
-  if ((p.port === "80" && p.protocol === "ws:") || (p.port === "443" && p.protocol === "wss:")) p.port = "";
+  if (
+    (p.port === "80" && (p.protocol === "ws:" || p.protocol === "http:")) ||
+    (p.port === "443" && (p.protocol === "wss:" || p.protocol === "https:"))
+  )
+    p.port = "";
   // sort the query params
   p.searchParams.sort();
   // remove the hash

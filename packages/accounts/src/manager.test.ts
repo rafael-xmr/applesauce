@@ -51,4 +51,20 @@ describe("AccountManager", () => {
       expect(manager.getAccountMetadata("custom-id")).toEqual({ name: "testing" });
     });
   });
+
+  describe("signer", () => {
+    it("should proxy active account", async () => {
+      const account = SimpleAccount.generateNew();
+      manager.addAccount(account);
+      manager.setActive(account);
+
+      expect(await manager.signer.getPublicKey()).toBe(getPublicKey(account.signer.key));
+    });
+
+    it("should throw if there is no active account", () => {
+      expect(() => {
+        manager.signer.getPublicKey();
+      }).toThrow("No active account");
+    });
+  });
 });

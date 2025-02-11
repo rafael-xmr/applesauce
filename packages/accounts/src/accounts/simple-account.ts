@@ -1,4 +1,4 @@
-import { getPublicKey } from "nostr-tools";
+import { generateSecretKey, getPublicKey } from "nostr-tools";
 import { SimpleSigner } from "applesauce-signers/signers/simple-signer";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 
@@ -34,5 +34,10 @@ export class SimpleAccount<Metadata extends unknown> extends BaseAccount<
     if (typeof key === "string") key = hexToBytes(key);
     const pubkey = getPublicKey(key);
     return new SimpleAccount(pubkey, new SimpleSigner(key));
+  }
+
+  static generateNew<Metadata extends unknown>(): SimpleAccount<Metadata> {
+    const key = generateSecretKey();
+    return SimpleAccount.fromKey(key);
   }
 }

@@ -1,3 +1,4 @@
+export * from "./blossom.js";
 export * from "./bolt11.js";
 export * from "./bookmarks.js";
 export * from "./cache.js";
