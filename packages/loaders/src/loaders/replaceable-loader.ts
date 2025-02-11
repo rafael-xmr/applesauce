@@ -168,6 +168,11 @@ export type ReplaceableLoaderOptions = {
 export class ReplaceableLoader extends Loader<LoadableAddressPointer, EventPacket> {
   log: typeof logger = logger.extend("ReplaceableLoader");
 
+  /** A method used to load events from a local cache */
+  cacheRequest?: CacheRequest;
+  /** Fallback lookup relays to check when event cant be found */
+  lookupRelays?: string[];
+
   constructor(rxNostr: RxNostr, opts?: ReplaceableLoaderOptions) {
     super((source) => {
       return source.pipe(
@@ -179,11 +184,19 @@ export class ReplaceableLoader extends Loader<LoadableAddressPointer, EventPacke
         multiRelayBatcher(opts?.bufferTime ?? 1000),
         // check cache, relays, lookup relays in that order
         generatorSequence<LoadableAddressPointer[], EventPacket>(
-          (pointers) => cacheFirstSequence(rxNostr, pointers, this.log, opts),
+          (pointers) =>
+            cacheFirstSequence(rxNostr, pointers, this.log, {
+              cacheRequest: this.cacheRequest,
+              lookupRelays: this.lookupRelays,
+            }),
           // there will always be more events, never complete
           false,
         ),
       );
     });
+
+    // set options
+    this.cacheRequest = opts?.cacheRequest;
+    this.lookupRelays = opts?.lookupRelays;
   }
 }
