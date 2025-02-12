@@ -76,7 +76,7 @@ export function getIndexableTags(event: NostrEvent) {
     const tags = new Set<string>();
 
     for (const tag of event.tags) {
-      if (tag[0] && tag[0].length >= 2 && INDEXABLE_TAGS.has(tag[0])) {
+      if (tag.length >= 2 && tag[0].length === 1 && INDEXABLE_TAGS.has(tag[0])) {
         tags.add(tag[0] + ":" + tag[1]);
       }
     }
