@@ -34,7 +34,7 @@ export class Database {
   deleted = new Subject<NostrEvent>();
 
   /** A method thats called before a new event is inserted */
-  onBeforeInsert?: (event: NostrEvent) => void
+  onBeforeInsert?: (event: NostrEvent) => void;
 
   get size() {
     return this.events.size;
@@ -106,7 +106,7 @@ export class Database {
       return current;
     }
 
-    this.onBeforeInsert?.(event)
+    this.onBeforeInsert?.(event);
 
     this.events.set(id, event);
     this.getKindIndex(event.kind).add(event);
