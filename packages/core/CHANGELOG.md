@@ -1,5 +1,31 @@
 # applesauce-core
 
+## 0.11.0
+
+### Minor Changes
+
+- 39ec450: Support multiple tag operations in `modifyEventTags`
+- 34e8f80: Add `getSha256FromURL` helper
+- 125d24f: Add `getReplaceableIdentifier` helper
+- b4d3ac9: Add `processTags` helper
+- 04902fd: Move applesauce-list helpers into core
+- 39f5f06: Add `parseSharedEvent` helper
+- c732ea0: Add `getPicturePostAttachments` helper
+- 9d59a56: Add `verifyEvent` method to `EventStore`
+- 5923047: Add `UserStatusQuery` and `UserStatusesQuery` queries
+- 5923047: Add `getUserStatusPointer` helper
+- 04902fd: Removed `modifyEventTags` method
+- a05aa94: Add `decodeGroupPointer` and `encodeGroupPointer` helpers
+- 9092aa8: Add `getDisplayName` helper and mark profiles `displayName` as deprecated
+- 4dbb248: Change return type of `eventStore.events`, `eventStore.replaceableSet`, `MultipleEventsQuery`, and `ReplaceableSetQuery` from `Map` to a plain object
+- 96d318d: Add `mergeRelaySets` helper
+- 46fac64: Add handle `fallback` and `thumb` when parsing `imeta` tags
+- d22769e: Add `getBlossomServersFromList` helper method
+
+### Patch Changes
+
+- 1c35f41: Add `require` support in node v22
+
 ## 0.10.0
 
 ### Minor Changes
