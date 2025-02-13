@@ -1,4 +1,4 @@
-import { BehaviorSubject, filter, Observable, shareReplay } from "rxjs";
+import { BehaviorSubject, filter, Observable, ReplaySubject, share, timer } from "rxjs";
 import { Filter, NostrEvent } from "nostr-tools";
 
 import { EventStore } from "../event-store/event-store.js";
@@ -49,7 +49,7 @@ export class QueryStore {
     if (!this.observables.has(query)) {
       const observable = query
         .run(this.store, this)
-        .pipe(shareReplay({ refCount: true, bufferSize: 1 })) as Observable<T>;
+        .pipe(share({ connector: () => new ReplaySubject(1), resetOnComplete: () => timer(60_000) })) as Observable<T>;
       this.observables.set(query, observable);
       return observable;
     }

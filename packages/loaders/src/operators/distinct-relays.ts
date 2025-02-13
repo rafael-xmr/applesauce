@@ -1,4 +1,3 @@
-import { safeRelayUrls } from "applesauce-core/helpers";
 import { filter, map, OperatorFunction, share } from "rxjs";
 
 interface Message {
@@ -24,7 +23,7 @@ export function distinctRelays<T extends Message>(
 
         if (message.relays) {
           // requesting from specific relays
-          let relays = safeRelayUrls(message.relays);
+          let relays = message.relays;
 
           relays = relays.filter((relay) => {
             let relayKey = key + " " + relay;
