@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { isATag, isNameValueTag, processTags } from "./tags.js";
-import { getAddressPointerFromATag } from "./pointers.js";
+import { isATag, isNameValueTag, processTags } from "../tags.js";
+import { getAddressPointerFromATag } from "../pointers.js";
 
 describe("isNameValueTag", () => {
   it("should return true if tag has at least two indexes", () => {

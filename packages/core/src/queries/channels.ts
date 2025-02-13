@@ -13,7 +13,7 @@ export function ChannelHiddenQuery(channel: NostrEvent, authors: string[] = []):
       const hidden = new Map<string, string>();
 
       return events
-        .stream([{ kinds: [kinds.ChannelHideMessage], "#e": [channel.id], authors: [channel.pubkey, ...authors] }])
+        .filters([{ kinds: [kinds.ChannelHideMessage], "#e": [channel.id], authors: [channel.pubkey, ...authors] }])
         .pipe(
           map((event) => {
             const reason = safeParse(event.content)?.reason;
@@ -47,7 +47,7 @@ export function ChannelMetadataQuery(channel: NostrEvent): Query<ChannelMetadata
       ];
 
       let latest = channel;
-      return events.stream(filters).pipe(
+      return events.filters(filters).pipe(
         map((event) => {
           try {
             if (event.pubkey === latest.pubkey && event.created_at > latest.created_at) {
@@ -72,7 +72,7 @@ export function ChannelMutedQuery(channel: NostrEvent, authors: string[] = []): 
       const muted = new Map<string, string>();
 
       return events
-        .stream([{ kinds: [kinds.ChannelMuteUser], "#e": [channel.id], authors: [channel.pubkey, ...authors] }])
+        .filters([{ kinds: [kinds.ChannelMuteUser], "#e": [channel.id], authors: [channel.pubkey, ...authors] }])
         .pipe(
           map((event) => {
             const reason = safeParse(event.content)?.reason;

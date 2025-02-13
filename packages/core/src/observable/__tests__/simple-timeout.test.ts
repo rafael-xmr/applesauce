@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { Observable, Subject, firstValueFrom } from "rxjs";
-import { simpleTimeout, TimeoutError } from "./simple-timeout.js";
+import { simpleTimeout, TimeoutError } from "../simple-timeout.js";
 
 describe("simpleTimeout operator", () => {
   it("should throw TimeoutError after specified timeout period", async () => {

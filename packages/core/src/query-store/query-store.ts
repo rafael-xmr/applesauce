@@ -1,4 +1,4 @@
-import { BehaviorSubject, filter, Observable } from "rxjs";
+import { BehaviorSubject, filter, Observable, shareReplay } from "rxjs";
 import { Filter, NostrEvent } from "nostr-tools";
 
 import { EventStore } from "../event-store/event-store.js";
@@ -6,7 +6,6 @@ import { LRU } from "../helpers/lru.js";
 
 import * as Queries from "../queries/index.js";
 import { AddressPointer, EventPointer } from "nostr-tools/nip19";
-import { shareLatestValue } from "../observable/share-latest-value.js";
 import { getObservableValue } from "../observable/get-observable-value.js";
 
 export type Query<T extends unknown> = {
@@ -14,8 +13,6 @@ export type Query<T extends unknown> = {
    * A unique key for this query. this is used to detect duplicate queries
    */
   key: string;
-  /** The args array this query was created with. This is mostly for debugging */
-  args?: Array<any>;
   /**
    * The meat of the query, this should return an Observables that subscribes to the eventStore in some way
    */
@@ -41,7 +38,7 @@ export class QueryStore {
     ...args: Args
   ): Observable<T> {
     const tempQuery = queryConstructor(...args);
-    const key = `${queryConstructor.name}|${tempQuery.key}`;
+    const key = queryConstructor.name + "|" + tempQuery.key;
 
     let query = this.queries.get(key);
     if (!query) {
@@ -50,8 +47,9 @@ export class QueryStore {
     }
 
     if (!this.observables.has(query)) {
-      query.args = args;
-      const observable = query.run(this.store, this).pipe(shareLatestValue()) as Observable<T>;
+      const observable = query
+        .run(this.store, this)
+        .pipe(shareReplay({ refCount: true, bufferSize: 1 })) as Observable<T>;
       this.observables.set(query, observable);
       return observable;
     }

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TimeoutError } from "applesauce-core/observable";
 import { EventStore, QueryStore } from "applesauce-core";
 
-import { RequestLoader } from "./request-loader.js";
+import { RequestLoader } from "../request-loader.js";
 
 let eventStore: EventStore;
 let queryStore: QueryStore;

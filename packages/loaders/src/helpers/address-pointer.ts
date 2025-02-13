@@ -1,9 +1,20 @@
-import { AddressPointerWithoutD, getReplaceableUID } from "applesauce-core/helpers";
+import { AddressPointerWithoutD, getReplaceableUID, mergeRelaySets } from "applesauce-core/helpers";
 import { Filter } from "nostr-tools";
 import { isParameterizedReplaceableKind, isReplaceableKind } from "nostr-tools/kinds";
 
 import { unique } from "./array.js";
 import { AddressPointer } from "nostr-tools/nip19";
+
+export type LoadableAddressPointer = {
+  kind: number;
+  pubkey: string;
+  /** Optional "d" tag for paramaritized replaceable */
+  identifier?: string;
+  /** Relays to load from */
+  relays?: string[];
+  /** Load this address pointer even if it has already been loaded */
+  force?: boolean;
+};
 
 /** Converts an array of address pointers to a filter */
 export function createFilterFromAddressPointers(pointers: AddressPointerWithoutD[] | AddressPointer[]): Filter {
@@ -95,29 +106,36 @@ export function getAddressPointerId<T extends AddressPointerWithoutD>(pointer: T
   return getReplaceableUID(pointer.kind, pointer.pubkey, pointer.identifier);
 }
 
+/** deep clone a loadable pointer to ensure its safe to modify */
+function cloneLoadablePointer(pointer: LoadableAddressPointer): LoadableAddressPointer {
+  const clone = { ...pointer };
+  if (pointer.relays) clone.relays = [...pointer.relays];
+  return clone;
+}
+
 /** deduplicates an array of address pointers and merges their relays array */
-export function consolidateAddressPointers<
-  T extends { kind: number; pubkey: string; identifier?: string; relays?: string[]; force?: boolean },
->(pointers: T[]): T[] {
-  const byCoordinate = new Map<string, T>();
+export function consolidateAddressPointers(pointers: LoadableAddressPointer[]): LoadableAddressPointer[] {
+  const byId = new Map<string, LoadableAddressPointer>();
 
   for (const pointer of pointers) {
-    let cord = getAddressPointerId(pointer);
-    let existing = byCoordinate.get(cord);
-
-    if (existing) {
-      // override force flag
-      if (pointer.force) existing.force = pointer.force;
+    const id = getAddressPointerId(pointer);
+    if (byId.has(id)) {
+      // duplicate, merge pointers
+      const current = byId.get(id)!;
 
       // merge relays
       if (pointer.relays) {
-        if (!existing.relays) existing.relays = [...pointer.relays];
-        else existing.relays = [...existing.relays, ...pointer.relays.filter((r) => !existing.relays!.includes(r))];
+        if (current.relays) current.relays = mergeRelaySets(current.relays, pointer.relays);
+        else current.relays = pointer.relays;
       }
-    } else {
-      byCoordinate.set(cord, pointer);
-    }
+
+      // merge force flag
+      if (pointer.force !== undefined) {
+        current.force = current.force || pointer.force;
+      }
+    } else byId.set(id, cloneLoadablePointer(pointer));
   }
 
-  return Array.from(byCoordinate.values());
+  // return consolidated pointers
+  return Array.from(byId.values());
 }

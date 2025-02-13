@@ -1,4 +1,4 @@
-import { bufferTime, filter, from, map, mergeAll, Observable, OperatorFunction, tap } from "rxjs";
+import { bufferTime, filter, from, map, mergeAll, Observable, tap } from "rxjs";
 import { createRxOneshotReq, EventPacket, RxNostr } from "rx-nostr";
 import { markFromCache } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
@@ -31,11 +31,6 @@ export type SingleEventLoaderOptions = {
    */
   refreshTimeout?: number;
 };
-
-/** Consolidate a batch of event pointers */
-function consolidateLoadableEventPointers(): OperatorFunction<LoadableEventPointer[], LoadableEventPointer[]> {
-  return (source) => source.pipe(map(consolidateEventPointers));
-}
 
 function* cacheFirstSequence(
   rxNostr: RxNostr,
@@ -122,7 +117,7 @@ export class SingleEventLoader extends Loader<LoadableEventPointer, EventPacket>
         // ignore empty buffers
         filter((buffer) => buffer.length > 0),
         // ensure there is only one of each event pointer
-        consolidateLoadableEventPointers(),
+        map(consolidateEventPointers),
         // run the loader sequence
         generatorSequence<LoadableEventPointer[], EventPacket>(
           (pointers) => cacheFirstSequence(rxNostr, pointers, options, this.log),

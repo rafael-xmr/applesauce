@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createFiltersFromAddressPointers } from "./address-pointer.js";
+import { createFiltersFromAddressPointers } from "../address-pointer.js";
 import { kinds } from "nostr-tools";
 
 describe("address pointer helpers", () => {

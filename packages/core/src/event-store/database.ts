@@ -30,11 +30,11 @@ export class Database {
   /** A stream of events that have been updated */
   updated = new Subject<NostrEvent>();
 
-  /** A stream of events removed of the database */
-  deleted = new Subject<NostrEvent>();
+  /** A stream of events removed from the database */
+  removed = new Subject<NostrEvent>();
 
   /** A method thats called before a new event is inserted */
-  onBeforeInsert?: (event: NostrEvent) => void
+  onBeforeInsert?: (event: NostrEvent) => void;
 
   get size() {
     return this.events.size;
@@ -106,7 +106,7 @@ export class Database {
       return current;
     }
 
-    this.onBeforeInsert?.(event)
+    this.onBeforeInsert?.(event);
 
     this.events.set(id, event);
     this.getKindIndex(event.kind).add(event);
@@ -146,8 +146,8 @@ export class Database {
     return inserted;
   }
 
-  /** Deletes an event from the database and notifies all subscriptions */
-  deleteEvent(eventOrId: string | NostrEvent): boolean {
+  /** Removes an event from the database and notifies all subscriptions */
+  removeEvent(eventOrId: string | NostrEvent): boolean {
     let event = typeof eventOrId === "string" ? this.events.get(eventOrId) : eventOrId;
     if (!event) throw new Error("Missing event");
 
@@ -181,7 +181,11 @@ export class Database {
       }
     }
 
-    this.deleted.next(event);
+    // remove any claims this event has
+    this.claims.delete(event);
+
+    // notify subscribers this event was removed
+    this.removed.next(event);
 
     return true;
   }
@@ -350,7 +354,7 @@ export class Database {
       const event = cursor.value;
 
       if (!this.isClaimed(event)) {
-        this.deleteEvent(event);
+        this.removeEvent(event);
         removed++;
 
         if (removed >= limit) break;

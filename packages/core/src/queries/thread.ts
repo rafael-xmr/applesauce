@@ -63,7 +63,7 @@ export function ThreadQuery(root: string | AddressPointer | EventPointer, opts?:
   return {
     key: `${rootUID}-${kinds.join(",")}`,
     run: (events) =>
-      events.stream([rootFilter, replyFilter]).pipe(
+      events.filters([rootFilter, replyFilter]).pipe(
         map((event) => {
           if (!items.has(getEventUID(event))) {
             const refs = getNip10References(event);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { areBlossomServersEqual } from "./blossom.js";
+import { areBlossomServersEqual } from "../blossom.js";
 
 describe("areBlossomServersEqual", () => {
   it("should ignore path", () => {

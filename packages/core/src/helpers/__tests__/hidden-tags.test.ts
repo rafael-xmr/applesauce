@@ -1,8 +1,8 @@
 import { describe, beforeEach, it, expect } from "vitest";
 import { finalizeEvent, generateSecretKey, getPublicKey, kinds, nip04, NostrEvent } from "nostr-tools";
 
-import { getHiddenTags, HiddenTagsSigner, unlockHiddenTags } from "./hidden-tags.js";
-import { unixNow } from "./time.js";
+import { getHiddenTags, HiddenTagsSigner, unlockHiddenTags } from "../hidden-tags.js";
+import { unixNow } from "../time.js";
 
 const key = generateSecretKey();
 const pubkey = getPublicKey(key);

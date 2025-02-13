@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { interpretThreadTags } from "./threading.js";
+import { interpretThreadTags } from "../threading.js";
 
 describe("threading helpers", () => {
   describe("interpretThreadTags", () => {

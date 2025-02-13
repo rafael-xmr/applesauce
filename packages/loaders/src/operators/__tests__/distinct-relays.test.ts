@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { Subject } from "rxjs";
 
-import { distinctRelays } from "./distinct-relays.js";
+import { distinctRelays } from "../distinct-relays.js";
 
 describe("distinctRelays", () => {
   it("should filter out messages with same relay within timeout window", () => {
