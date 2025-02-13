@@ -1,4 +1,4 @@
-import { BehaviorSubject, filter, Observable, ReplaySubject, share, timer } from "rxjs";
+import { filter, Observable, ReplaySubject, share, startWith, timer } from "rxjs";
 import { Filter, NostrEvent } from "nostr-tools";
 
 import { EventStore } from "../event-store/event-store.js";
@@ -30,31 +30,36 @@ export class QueryStore {
   }
 
   queries = new LRU<Query<any>>();
-  observables = new WeakMap<Query<any>, BehaviorSubject<any> | Observable<any>>();
+  observables = new WeakMap<Query<any>, Observable<any>>();
 
   /** Creates a cached query */
   createQuery<T extends unknown, Args extends Array<any>>(
     queryConstructor: (...args: Args) => { key: string; run: (events: EventStore, store: QueryStore) => Observable<T> },
     ...args: Args
-  ): Observable<T> {
+  ): Observable<T | undefined> {
     const tempQuery = queryConstructor(...args);
     const key = queryConstructor.name + "|" + tempQuery.key;
 
-    let query = this.queries.get(key);
+    let query = this.queries.get(key) as Query<T> | undefined;
     if (!query) {
       query = tempQuery;
       this.queries.set(key, tempQuery);
     }
 
-    if (!this.observables.has(query)) {
+    let observable: Observable<T | undefined> | undefined = this.observables.get(query);
+    if (!observable) {
       const observable = query
         .run(this.store, this)
-        .pipe(share({ connector: () => new ReplaySubject(1), resetOnComplete: () => timer(60_000) })) as Observable<T>;
+        .pipe(
+          startWith(undefined),
+          share({ connector: () => new ReplaySubject(1), resetOnComplete: () => timer(60_000) }),
+        );
+
       this.observables.set(query, observable);
       return observable;
     }
 
-    return this.observables.get(query)! as Observable<T>;
+    return observable;
   }
 
   /** Creates a query and waits for the next value */

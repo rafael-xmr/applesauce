@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import { EMPTY } from "rxjs";
+import { of } from "rxjs";
+import { useObservableEagerState } from "observable-hooks";
 import { QueryConstructor } from "applesauce-core";
 
-import { useObservable } from "./use-observable.js";
 import { useQueryStore } from "./use-query-store.js";
 
 /**
@@ -17,8 +17,8 @@ export function useStoreQuery<T extends unknown, Args extends Array<any>>(
   const store = useQueryStore();
   const observable = useMemo(() => {
     if (args) return store.createQuery(queryConstructor, ...args);
-    else return EMPTY;
+    else return of(undefined);
   }, [args, store]);
 
-  return useObservable(observable);
+  return useObservableEagerState(observable);
 }
