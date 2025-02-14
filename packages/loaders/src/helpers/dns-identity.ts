@@ -11,10 +11,8 @@ export enum IdentityStatus {
   Error = "error",
   /** Identity missing from document */
   Missing = "missing",
-  /** pubkey mismatch */
-  Invalid = "invalid",
-  /** pubkey matches */
-  Valid = "valid",
+  /** Identity was found */
+  Found = "found",
 }
 
 export type BaseIdentity = {
@@ -33,20 +31,15 @@ export type MissingIdentity = BaseIdentity & {
   status: IdentityStatus.Missing;
 };
 
-export type InvalidIdentity = BaseIdentity & {
-  status: IdentityStatus.Invalid;
-  pubkey: string;
-};
-
-export type ValidIdentity = BaseIdentity & {
-  status: IdentityStatus.Valid;
+export type KnownIdentity = BaseIdentity & {
+  status: IdentityStatus.Found;
   pubkey: string;
   relays?: string[];
   hasNip46?: boolean;
   nip46Relays?: string[];
 };
 
-export type Identity = InvalidIdentity | ValidIdentity | ErrorIdentity | MissingIdentity;
+export type Identity = KnownIdentity | ErrorIdentity | MissingIdentity;
 
 /** Gets an Identity from the .well-known/nostr.json document */
 export function getIdentityFromJson(
@@ -54,7 +47,7 @@ export function getIdentityFromJson(
   domain: string,
   json: DomainIdentityJson,
   checked = unixNow(),
-): MissingIdentity | InvalidIdentity | ValidIdentity {
+): MissingIdentity | KnownIdentity {
   const common = { name, domain, checked };
   if (!json.names) return { ...common, status: IdentityStatus.Missing };
 
@@ -65,7 +58,7 @@ export function getIdentityFromJson(
   const hasNip46 = !!json.nip46;
   const nip46Relays = json.nip46?.[pubkey];
 
-  return { ...common, pubkey, relays, nip46Relays, hasNip46, status: IdentityStatus.Valid };
+  return { ...common, pubkey, relays, nip46Relays, hasNip46, status: IdentityStatus.Found };
 }
 
 /** Returns all Identifies in a json document */

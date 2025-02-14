@@ -18,7 +18,7 @@ export class DnsIdentityLoader {
   identities = new Map<string, Identity>();
 
   /** The fetch implementation this class should use */
-  fetch = fetch;
+  fetch: (url: string, init: RequestInit) => Promise<Response> = fetch;
 
   /** How long an identity should be kept until its considered expired (in seconds) defaults to 1 week */
   expiration = 60 * 60 * 24 * 7;
@@ -27,10 +27,11 @@ export class DnsIdentityLoader {
 
   /** Makes an http request to fetch an identity */
   async fetchIdentity(name: string, domain: string): Promise<Identity> {
+    const { fetch } = this;
     const checked = unixNow();
 
     try {
-      const res = await this.fetch(`https://${domain}/.well-known/nostr.json?name=${name}`, { redirect: "manual" });
+      const res = await fetch(`https://${domain}/.well-known/nostr.json?name=${name}`, { redirect: "manual" });
       if (res.status !== 200) throw Error("Wrong response code");
 
       const json = await (res.json() as Promise<DomainIdentityJson>).then(normalizeIdentityJson);
@@ -68,7 +69,7 @@ export class DnsIdentityLoader {
 
     let ongoing = this.requesting.get(key);
     if (!ongoing) {
-      ongoing = this.fetchIdentity(name, domain);
+      ongoing = this.loadIdentity(name, domain);
       this.requesting.set(key, ongoing);
     }
 
