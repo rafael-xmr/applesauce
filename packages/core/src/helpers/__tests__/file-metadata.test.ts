@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FileMetadata, getFileMetadataFromImetaTag, parseFileMetadataTags } from "./file-metadata.js";
+import { FileMetadata, getFileMetadataFromImetaTag, parseFileMetadataTags } from "../file-metadata.js";
 
 describe("file metadata helpers", () => {
   describe("parseFileMetadataTags", () => {

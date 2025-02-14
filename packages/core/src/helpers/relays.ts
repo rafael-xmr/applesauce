@@ -1,4 +1,5 @@
 import { NostrEvent } from "nostr-tools";
+import { normalizeURL } from "./url.js";
 
 export const SeenRelaysSymbol = Symbol.for("seen-relays");
 declare module "nostr-tools" {
@@ -29,7 +30,7 @@ export function validateRelayURL(relay: string | URL) {
 
 export function safeRelayUrl(relayUrl: string | URL) {
   try {
-    return validateRelayURL(relayUrl).toString();
+    return normalizeURL(validateRelayURL(relayUrl)).toString();
   } catch (e) {
     return null;
   }

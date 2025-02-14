@@ -97,6 +97,7 @@ export class UserSetsLoader extends Loader<LoadableSetPointer, EventPacket> {
 
     super((source) =>
       source.pipe(
+        // only load from each relay once
         distinctRelays((p) => p.kind + ":" + p.pubkey, options.refreshTimeout ?? 120_000),
         // load first from cache
         bufferTime(options?.bufferTime ?? 1000),

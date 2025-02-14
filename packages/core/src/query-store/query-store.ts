@@ -1,26 +1,20 @@
-import { BehaviorSubject, filter, Observable } from "rxjs";
+import { filter, finalize, Observable, ReplaySubject, share, startWith, timer } from "rxjs";
 import { Filter, NostrEvent } from "nostr-tools";
+import hash_sum from "hash-sum";
 
 import { EventStore } from "../event-store/event-store.js";
-import { LRU } from "../helpers/lru.js";
 
 import * as Queries from "../queries/index.js";
 import { AddressPointer, EventPointer } from "nostr-tools/nip19";
-import { shareLatestValue } from "../observable/share-latest-value.js";
 import { getObservableValue } from "../observable/get-observable-value.js";
 
 export type Query<T extends unknown> = {
-  /**
-   * A unique key for this query. this is used to detect duplicate queries
-   */
+  /** A unique key for this query. this is used to detect duplicate queries */
   key: string;
-  /** The args array this query was created with. This is mostly for debugging */
-  args?: Array<any>;
-  /**
-   * The meat of the query, this should return an Observables that subscribes to the eventStore in some way
-   */
+  /** The meat of the query, this should return an Observables that subscribes to the eventStore in some way */
   run: (events: EventStore, store: QueryStore) => Observable<T>;
 };
+
 export type QueryConstructor<T extends unknown, Args extends Array<any>> = (...args: Args) => Query<T>;
 
 export class QueryStore {
@@ -32,36 +26,49 @@ export class QueryStore {
     this.store = store;
   }
 
-  queries = new LRU<Query<any>>();
-  observables = new WeakMap<Query<any>, BehaviorSubject<any> | Observable<any>>();
+  queries = new Map<QueryConstructor<any, any[]>, Map<string, Observable<any>>>();
 
   /** Creates a cached query */
   createQuery<T extends unknown, Args extends Array<any>>(
-    queryConstructor: (...args: Args) => { key: string; run: (events: EventStore, store: QueryStore) => Observable<T> },
+    queryConstructor: QueryConstructor<T, Args>,
     ...args: Args
-  ): Observable<T> {
-    const tempQuery = queryConstructor(...args);
-    const key = `${queryConstructor.name}|${tempQuery.key}`;
-
-    let query = this.queries.get(key);
-    if (!query) {
-      query = tempQuery;
-      this.queries.set(key, tempQuery);
+  ): Observable<T | undefined> {
+    let observables = this.queries.get(queryConstructor);
+    if (!observables) {
+      observables = new Map();
+      this.queries.set(queryConstructor, observables);
     }
 
-    if (!this.observables.has(query)) {
-      query.args = args;
-      const observable = query.run(this.store, this).pipe(shareLatestValue()) as Observable<T>;
-      this.observables.set(query, observable);
-      return observable;
+    const key = hash_sum(args);
+    let observable: Observable<T | undefined> | undefined = observables.get(key);
+    if (!observable) {
+      const cleanup = () => {
+        if (observables.get(key) === observable) observables.delete(key);
+      };
+
+      observable = queryConstructor(...args)
+        .run(this.store, this)
+        .pipe(
+          // always emit undefined so the observable is sync
+          startWith(undefined),
+          // remove the observable when its subscribed
+          finalize(cleanup),
+          // only create a single observable for all components
+          share({ connector: () => new ReplaySubject(1), resetOnComplete: () => timer(60_000) }),
+        );
+
+      // set debug fields
+      Reflect.set(observable, "queryArgs", args);
+
+      observables.set(key, observable);
     }
 
-    return this.observables.get(query)! as Observable<T>;
+    return observable;
   }
 
   /** Creates a query and waits for the next value */
   async executeQuery<T extends unknown, Args extends Array<any>>(
-    queryConstructor: (...args: Args) => { key: string; run: (events: EventStore, store: QueryStore) => Observable<T> },
+    queryConstructor: QueryConstructor<T, Args>,
     ...args: Args
   ): Promise<T> {
     const query = this.createQuery(queryConstructor, ...args).pipe(filter((v) => v !== undefined));

@@ -5,7 +5,8 @@ import { EventStore, QueryStore } from "applesauce-core";
 import { ProfilePointer } from "nostr-tools/nip19";
 import { filter, Observable } from "rxjs";
 
-import { LoadableAddressPointer, ReplaceableLoader } from "./replaceable-loader.js";
+import { ReplaceableLoader } from "./replaceable-loader.js";
+import { LoadableAddressPointer } from "../helpers/address-pointer.js";
 
 /** A special Promised based loader built on the {@link QueryStore} */
 export class RequestLoader {

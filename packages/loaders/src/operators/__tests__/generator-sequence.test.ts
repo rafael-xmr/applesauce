@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import { lastValueFrom, of, toArray } from "rxjs";
 import { TestScheduler } from "rxjs/testing";
-import { generatorSequence } from "./generator-sequence.js";
+import { generatorSequence } from "../generator-sequence.js";
 
 let testScheduler = new TestScheduler((actual, expected) => {
   expect(actual).toEqual(expected);

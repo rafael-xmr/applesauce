@@ -11,7 +11,7 @@ export function UserContactsQuery(pubkey: string): Query<ProfilePointer[] | unde
     key: pubkey,
     run: (store) =>
       store
-        .replaceable(kinds.Mutelist, pubkey)
+        .replaceable(kinds.Contacts, pubkey)
         .pipe(map((event) => event && processTags(event.tags.filter(isPTag), getProfilePointerFromPTag))),
   };
 }
