@@ -293,7 +293,7 @@ export class EventStore {
       ),
     ).pipe(
       // only update if event is newer
-      distinctUntilKeyChanged("created_at"),
+      distinctUntilChanged((prev, event) => prev.created_at >= event.created_at),
       // Hacky way to extract the current event so takeUntil can access it
       tap((event) => (current = event)),
       // complete when event is removed
@@ -339,7 +339,7 @@ export class EventStore {
 
           if (action === "add") {
             // add event to dir if its newer
-            if (!dir[uid] || event.created_at > dir[uid].created_at) return { ...dir, [uid]: event };
+            if (!dir[uid] || dir[uid].created_at < event.created_at) return { ...dir, [uid]: event };
           } else if (action === "remove" && dir[uid] === event) {
             // remove event from dir
             let newDir = { ...dir };
@@ -351,7 +351,7 @@ export class EventStore {
         },
         {} as Record<string, NostrEvent>,
       ),
-      // ignore changes that do not modify the dir
+      // ignore changes that do not modify the directory
       distinctUntilChanged(),
     );
   }
@@ -384,21 +384,27 @@ export class EventStore {
         // filter out removed events from timeline
         if (typeof event === "string") return timeline.filter((e) => e.id !== event);
 
-        // add event into timeline
-        const arr = insertEventIntoDescendingList([...timeline], event);
+        let newTimeline = [...timeline];
 
         // remove old replaceable events if enabled
-        if (keepOldVersions && isReplaceable(event.kind)) {
+        if (!keepOldVersions && isReplaceable(event.kind)) {
           const uid = getEventUID(event);
-          const old = seen.get(uid);
-          // remove old event from timeline
-          if (old) arr.slice(arr.indexOf(old), 1);
+          const existing = seen.get(uid);
+          // if this is an older replaceable event, exit
+          if (existing && event.created_at < existing.created_at) return timeline;
           // update latest version
           seen.set(uid, event);
+          // remove old event from timeline
+          if (existing) newTimeline.slice(newTimeline.indexOf(existing), 1);
         }
 
-        return arr;
+        // add event into timeline
+        insertEventIntoDescendingList(newTimeline, event);
+
+        return newTimeline;
       }, [] as NostrEvent[]),
+      // ignore changes that do not modify the timeline instance
+      distinctUntilChanged(),
       // hacky hack to clear seen on unsubscribe
       finalize(() => seen.clear()),
     );
