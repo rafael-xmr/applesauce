@@ -3,7 +3,7 @@ import { NostrEvent } from "nostr-tools";
 import { ExternalPointer, ExternalIdentifiers, getExternalPointerFromTag } from "./external-id.js";
 import { getOrComputeCachedValue } from "./cache.js";
 import { getAddressPointerFromATag } from "./pointers.js";
-import { safeRelayUrl } from "./relays.js";
+import { isSafeRelayURL } from "./relays.js";
 
 export const COMMENT_KIND = 1111;
 
@@ -44,7 +44,7 @@ export function getCommentEventPointer(tags: string[][], root = false): CommentE
       id: tag[1],
       kind: parseInt(kind),
       pubkey: tag[3] || undefined,
-      relay: tag[2] && (safeRelayUrl(tag[2]) ?? undefined),
+      relay: tag[2] && isSafeRelayURL(tag[2]) ? tag[2] : undefined,
     };
 
     return pointer;

@@ -13,8 +13,8 @@ import {
 import { getPublicKey, kinds, NostrEvent } from "nostr-tools";
 
 import { getReplaceableIdentifier } from "./event.js";
-import { safeRelayUrls } from "./relays.js";
 import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
+import { isSafeRelayURL } from "./relays.js";
 
 export type AddressPointerWithoutD = Omit<AddressPointer, "identifier"> & {
   identifier?: string;
@@ -97,7 +97,7 @@ export function encodeDecodeResult(result: DecodeResult) {
 export function getEventPointerFromETag(tag: string[]): EventPointer {
   if (!tag[1]) throw new Error("Missing event id in tag");
   let pointer: EventPointer = { id: tag[1] };
-  if (tag[2]) pointer.relays = safeRelayUrls([tag[2]]);
+  if (tag[2] && isSafeRelayURL(tag[2])) pointer.relays = [tag[2]];
   return pointer;
 }
 
@@ -108,7 +108,7 @@ export function getEventPointerFromETag(tag: string[]): EventPointer {
 export function getEventPointerFromQTag(tag: string[]): EventPointer {
   if (!tag[1]) throw new Error("Missing event id in tag");
   let pointer: EventPointer = { id: tag[1] };
-  if (tag[2]) pointer.relays = safeRelayUrls([tag[2]]);
+  if (tag[2] && isSafeRelayURL(tag[2])) pointer.relays = [tag[2]];
   if (tag[3] && tag[3].length === 64) pointer.author = tag[3];
 
   return pointer;
@@ -121,7 +121,7 @@ export function getEventPointerFromQTag(tag: string[]): EventPointer {
 export function getAddressPointerFromATag(tag: string[]): AddressPointer {
   if (!tag[1]) throw new Error("Missing coordinate in tag");
   const pointer = parseCoordinate(tag[1], true, false);
-  if (tag[2]) pointer.relays = safeRelayUrls([tag[2]]);
+  if (tag[2] && isSafeRelayURL(tag[2])) pointer.relays = [tag[2]];
   return pointer;
 }
 
@@ -132,7 +132,7 @@ export function getAddressPointerFromATag(tag: string[]): AddressPointer {
 export function getProfilePointerFromPTag(tag: string[]): ProfilePointer {
   if (!tag[1]) throw new Error("Missing pubkey in tag");
   const pointer: ProfilePointer = { pubkey: tag[1] };
-  if (tag[2]) pointer.relays = safeRelayUrls([tag[2]]);
+  if (tag[2] && isSafeRelayURL(tag[2])) pointer.relays = [tag[2]];
   return pointer;
 }
 

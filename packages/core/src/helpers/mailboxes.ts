@@ -1,6 +1,6 @@
 import { NostrEvent } from "nostr-tools";
-import { safeRelayUrl } from "./relays.js";
 import { getOrComputeCachedValue } from "./cache.js";
+import { isSafeRelayURL } from "./relays.js";
 
 export const MailboxesInboxesSymbol = Symbol.for("mailboxes-inboxes");
 export const MailboxesOutboxesSymbol = Symbol.for("mailboxes-outboxes");
@@ -13,9 +13,16 @@ export function getInboxes(event: NostrEvent) {
     const inboxes: string[] = [];
 
     for (const tag of event.tags) {
-      if (tag[0] === "r" && tag[1] && (tag[2] === "read" || tag[2] === undefined)) {
-        const url = safeRelayUrl(tag[1]);
-        if (url && !inboxes.includes(url)) inboxes.push(url);
+      const [name, url, mode] = tag;
+
+      if (
+        name === "r" &&
+        url &&
+        isSafeRelayURL(url) &&
+        !inboxes.includes(url) &&
+        (mode === "read" || mode === undefined)
+      ) {
+        inboxes.push(url);
       }
     }
 
@@ -31,9 +38,16 @@ export function getOutboxes(event: NostrEvent) {
     const outboxes: string[] = [];
 
     for (const tag of event.tags) {
-      if (tag[0] === "r" && tag[1] && (tag[2] === "write" || tag[2] === undefined)) {
-        const url = safeRelayUrl(tag[1]);
-        if (url && !outboxes.includes(url)) outboxes.push(url);
+      const [name, url, mode] = tag;
+
+      if (
+        name === "r" &&
+        url &&
+        isSafeRelayURL(url) &&
+        !outboxes.includes(url) &&
+        (mode === "write" || mode === undefined)
+      ) {
+        outboxes.push(url);
       }
     }
 

@@ -8,7 +8,7 @@ declare module "nostr-tools" {
   }
 }
 
-// Seen relays
+/** Marks an event as being seen on a relay */
 export function addSeenRelay(event: NostrEvent, relay: string) {
   if (!event[SeenRelaysSymbol]) event[SeenRelaysSymbol] = new Set();
 
@@ -16,38 +16,36 @@ export function addSeenRelay(event: NostrEvent, relay: string) {
 
   return event[SeenRelaysSymbol];
 }
+
+/** Returns the set of relays this event was seen on */
 export function getSeenRelays(event: NostrEvent) {
   return event[SeenRelaysSymbol];
 }
 
-// Relay URLs
-export function validateRelayURL(relay: string | URL) {
-  if (typeof relay === "string" && relay.includes(",ws")) throw new Error("Can not have multiple relays in one string");
-  const url = typeof relay === "string" ? new URL(relay) : relay;
-  if (url.protocol !== "wss:" && url.protocol !== "ws:") throw new Error("Incorrect protocol");
-  return url;
+const WEBSOCKET_URL_CHECK =
+  /^wss?:\/\/([-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}|localhost)\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)$/;
+
+/** A fast check to make sure relay hints are safe to connect to */
+export function isSafeRelayURL(relay: string) {
+  // anything smaller than 8 is not a URL
+  return relay.length >= 8 && WEBSOCKET_URL_CHECK.test(relay);
 }
 
-export function safeRelayUrl(relayUrl: string | URL) {
-  try {
-    return normalizeURL(validateRelayURL(relayUrl)).toString();
-  } catch (e) {
-    return null;
-  }
-}
-
-export function safeRelayUrls(urls: Iterable<string>): string[] {
-  return Array.from(urls).map(safeRelayUrl).filter(Boolean) as string[];
-}
-
+/** Merge multiple sets of relays and remove duplicates (ignores invalid URLs) */
 export function mergeRelaySets(...sources: (Iterable<string> | undefined)[]) {
   const set = new Set<string>();
+
   for (const src of sources) {
     if (!src) continue;
     for (const url of src) {
-      const safe = safeRelayUrl(url);
-      if (safe) set.add(safe);
+      try {
+        const safe = normalizeURL(url).toString();
+        if (safe) set.add(safe);
+      } catch (error) {
+        // failed to parse URL, ignore
+      }
     }
   }
+
   return Array.from(set);
 }

@@ -2,7 +2,7 @@ import { EventTemplate, NostrEvent } from "nostr-tools";
 import { AddressPointer, EventPointer } from "nostr-tools/nip19";
 import { getAddressPointerFromATag } from "./pointers.js";
 import { getOrComputeCachedValue } from "./cache.js";
-import { safeRelayUrls } from "./relays.js";
+import { isSafeRelayURL } from "./relays.js";
 
 export type ThreadReferences = {
   root?:
@@ -24,7 +24,7 @@ export const Nip10ThreadRefsSymbol = Symbol.for("nip10-thread-refs");
 export function getEventPointerFromThreadTag(tag: string[]): EventPointer {
   if (!tag[1]) throw new Error("Missing event id in tag");
   let pointer: EventPointer = { id: tag[1] };
-  if (tag[2]) pointer.relays = safeRelayUrls([tag[2]]);
+  if (tag[2] && isSafeRelayURL(tag[2])) pointer.relays = [tag[2]];
 
   // get author from NIP-18 quote tags, nip-22 comments tags, or nip-10 thread tags
   if (

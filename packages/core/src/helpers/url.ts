@@ -38,8 +38,8 @@ export function isAudioURL(url: string | URL) {
 /** Tests if two URLs are the same */
 export function isSameURL(a: string | URL, b: string | URL) {
   try {
-    a = normalizeURL(a).toString();
-    b = normalizeURL(b).toString();
+    a = normalizeURL(a);
+    b = normalizeURL(b);
 
     return a === b;
   } catch (error) {
@@ -51,7 +51,7 @@ export function isSameURL(a: string | URL, b: string | URL) {
  * Normalizes a string into a relay URL
  * Does not remove the trailing slash
  */
-export function normalizeURL(url: string | URL): URL {
+export function normalizeURL<T extends string | URL>(url: T): T {
   let p = new URL(url);
   // remove any double slashes
   p.pathname = p.pathname.replace(/\/+/g, "/");
@@ -61,9 +61,8 @@ export function normalizeURL(url: string | URL): URL {
     (p.port === "443" && (p.protocol === "wss:" || p.protocol === "https:"))
   )
     p.port = "";
-  // sort the query params
-  p.searchParams.sort();
-  // remove the hash
-  p.hash = "";
-  return p;
+
+  // return a string if a string was passed in
+  // @ts-expect-error
+  return typeof url === "string" ? p.toString() : p;
 }
