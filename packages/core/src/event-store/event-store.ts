@@ -4,7 +4,6 @@ import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
 import {
   defer,
   distinctUntilChanged,
-  distinctUntilKeyChanged,
   EMPTY,
   endWith,
   filter,
@@ -36,6 +35,10 @@ import { addSeenRelay, getSeenRelays } from "../helpers/relays.js";
 import { getDeleteCoordinates, getDeleteIds } from "../helpers/delete.js";
 import { claimEvents } from "../observable/claim-events.js";
 import { claimLatest } from "../observable/claim-latest.js";
+
+function sortDesc(a: NostrEvent, b: NostrEvent) {
+  return b.created_at - a.created_at;
+}
 
 export class EventStore {
   database: Database;
@@ -362,16 +365,18 @@ export class EventStore {
 
     const seen = new Map<string, NostrEvent>();
 
-    return merge(
-      // get current events
-      defer(() => from(this.getAll(filters))),
-      // subscribe to newer events
-      this.database.inserted.pipe(filter((e) => matchFilters(filters, e))),
-    ).pipe(
-      // remove duplicate events
-      distinctUntilKeyChanged("id"),
-      // claim all seen events
+    // get current events
+    return defer(() => of(Array.from(this.database.getForFilters(filters)).sort(sortDesc))).pipe(
+      // claim existing events
       claimEvents(this.database),
+      // subscribe to newer events
+      mergeWith(
+        this.database.inserted.pipe(
+          filter((e) => matchFilters(filters, e)),
+          // claim all new events
+          claimEvents(this.database),
+        ),
+      ),
       // subscribe to delete events
       mergeWith(
         this.database.removed.pipe(
@@ -384,6 +389,15 @@ export class EventStore {
         // filter out removed events from timeline
         if (typeof event === "string") return timeline.filter((e) => e.id !== event);
 
+        // initial timeline array
+        if (Array.isArray(event)) {
+          if (!keepOldVersions) {
+            for (const e of event) if (isReplaceable(e.kind)) seen.set(getEventUID(e), e);
+          }
+          return event;
+        }
+
+        // create a new timeline and insert the event into it
         let newTimeline = [...timeline];
 
         // remove old replaceable events if enabled

@@ -229,9 +229,9 @@ describe("replaceable", () => {
 });
 
 describe("timeline", () => {
-  it("should not emit if there are not events", () => {
+  it("should emit an empty array if there are not events", () => {
     const spy = subscribeSpyTo(eventStore.timeline({ kinds: [1] }));
-    expect(spy.receivedNext()).toBe(false);
+    expect(spy.getValues()).toEqual([[]]);
   });
 
   it("should emit existing events", () => {
@@ -244,7 +244,7 @@ describe("timeline", () => {
     const spy = subscribeSpyTo(eventStore.timeline({ kinds: [0, 1] }));
     eventStore.add(profile);
     eventStore.add(note);
-    expect(spy.getValues()).toEqual([[profile], [note, profile]]);
+    expect(spy.getValues()).toEqual([[], [profile], [note, profile]]);
   });
 
   it("should remove event when its removed", () => {

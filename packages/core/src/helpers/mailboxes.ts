@@ -1,6 +1,7 @@
 import { NostrEvent } from "nostr-tools";
 import { getOrComputeCachedValue } from "./cache.js";
 import { isSafeRelayURL } from "./relays.js";
+import { normalizeURL } from "./url.js";
 
 export const MailboxesInboxesSymbol = Symbol.for("mailboxes-inboxes");
 export const MailboxesOutboxesSymbol = Symbol.for("mailboxes-outboxes");
@@ -22,7 +23,7 @@ export function getInboxes(event: NostrEvent) {
         !inboxes.includes(url) &&
         (mode === "read" || mode === undefined)
       ) {
-        inboxes.push(url);
+        inboxes.push(normalizeURL(url));
       }
     }
 
@@ -47,7 +48,7 @@ export function getOutboxes(event: NostrEvent) {
         !outboxes.includes(url) &&
         (mode === "write" || mode === undefined)
       ) {
-        outboxes.push(url);
+        outboxes.push(normalizeURL(url));
       }
     }
 
