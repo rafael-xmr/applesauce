@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { unixNow } from "applesauce-core/helpers";
 
-import { includeReplaceableIdentifier } from "./common.js";
+import { includeReplaceableIdentifier } from "../common.js";
 
 describe("includeReplaceableIdentifier", () => {
   it("should not override existing identifier", () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { EventFactory } from "../event-factory.js";
-import { NoteReplyBlueprint } from "./reply.js";
+import { EventFactory } from "../../event-factory.js";
+import { NoteReplyBlueprint } from "../reply.js";
 import { NostrEvent } from "nostr-tools";
 
 describe("NoteReplyBlueprint", () => {

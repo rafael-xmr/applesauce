@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { EventFactory } from "../event-factory.js";
+import { EventFactory } from "../../event-factory.js";
 import { NostrEvent } from "nostr-tools";
-import { ShareBlueprint } from "./share.js";
+import { ShareBlueprint } from "../share.js";
 
 describe("ShareBlueprint", () => {
   const factory = new EventFactory();

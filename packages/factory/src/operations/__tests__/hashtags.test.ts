@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { includeContentHashtags, includeHashtags } from "./hashtags.js";
+import { includeContentHashtags, includeHashtags } from "../hashtags.js";
 import { unixNow } from "applesauce-core/helpers";
 
 describe("hashtags helpers", () => {

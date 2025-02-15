@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { EventPointer } from "nostr-tools/nip19";
 
-import { createQTagFromEventPointer } from "./quote.js";
+import { createQTagFromEventPointer } from "../quote.js";
 
 describe("quote helpers", () => {
   describe("createQTagFromEventPointer", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addInboxRelay, addOutboxRelay, removeInboxRelay, removeOutboxRelay } from "./mailboxes.js";
+import { addInboxRelay, addOutboxRelay, removeInboxRelay, removeOutboxRelay } from "../mailboxes.js";
 
 describe("addOutboxRelay", () => {
   it('should add a new "r" tag', () => {

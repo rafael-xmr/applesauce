@@ -1,4 +1,8 @@
+/** Replaces null and undefined with "" in tags and trims them down to a set length if they ends with "" */
 export function fillAndTrimTag(tag: (string | undefined | null)[], minLength = 2): string[] {
+  // clone array
+  tag = tag.slice();
+
   for (let i = tag.length - 1; i >= 0; i--) {
     if (tag[i] === undefined || tag[i] === null || tag[i] === "") {
       if (i + 1 === tag.length && i >= minLength) {

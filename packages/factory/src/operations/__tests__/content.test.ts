@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { repairContentNostrLinks } from "./content.js";
+import { repairContentNostrLinks } from "../content.js";
 
 describe("content operations", () => {
   describe("repairContentNostrLinks", () => {

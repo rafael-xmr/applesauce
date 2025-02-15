@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { unixNow } from "applesauce-core/helpers";
 
-import { includeGroupHTag, includeGroupPreviousTags } from "./groups.js";
+import { includeGroupHTag, includeGroupPreviousTags } from "../groups.js";
 import { finalizeEvent, generateSecretKey, NostrEvent } from "nostr-tools";
 
 describe("includeGroupHTag", () => {
