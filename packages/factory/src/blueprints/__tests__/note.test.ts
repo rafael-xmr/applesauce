@@ -22,4 +22,27 @@ describe("NoteBlueprint", () => {
       }),
     );
   });
+
+  it("should fix nostr mentions", async () => {
+    expect(
+      await factory.create(
+        NoteBlueprint,
+        "cool nevent1qvzqqqqqqypzqwlsccluhy6xxsr6l9a9uhhxf75g85g8a709tprjcn4e42h053vaqyd8wumn8ghj7mr0vd4kymmc9enxjct5dfskvtnrdakj7qgmwaehxw309aex2mrp0yh8wetnw3jhymnzw33jucm0d5hsqgqqqr52tv55e4ndqjumlcp7lvvk76lmnac2zcyj37lq4c9n0p0sd5fcvsgq",
+      ),
+    ).toEqual(
+      expect.objectContaining({
+        content:
+          "cool nostr:nevent1qvzqqqqqqypzqwlsccluhy6xxsr6l9a9uhhxf75g85g8a709tprjcn4e42h053vaqyd8wumn8ghj7mr0vd4kymmc9enxjct5dfskvtnrdakj7qgmwaehxw309aex2mrp0yh8wetnw3jhymnzw33jucm0d5hsqgqqqr52tv55e4ndqjumlcp7lvvk76lmnac2zcyj37lq4c9n0p0sd5fcvsgq",
+        tags: [
+          [
+            "q",
+            "0000e8a5b294cd66d04b9bfe03efb196f6bfb9f70a160928fbe0ae0b3785f06d",
+            "wss://lockbox.fiatjaf.com/",
+            "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d",
+          ],
+        ],
+        kind: 1,
+      }),
+    );
+  });
 });

@@ -1,7 +1,7 @@
 import { Emoji, unixNow } from "applesauce-core/helpers";
 import { AddressPointer } from "nostr-tools/nip19";
 import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
-import { EventTemplate, NostrEvent } from "nostr-tools";
+import { EventTemplate, NostrEvent, UnsignedEvent } from "nostr-tools";
 
 import { includeClientTag } from "./operations/client.js";
 import { CommentBlueprint } from "./blueprints/comment.js";
@@ -152,6 +152,17 @@ export class EventFactory {
       hiddenTagOperations.length > 0 ? modifyHiddenTags(...hiddenTagOperations) : undefined,
       ...eventOperationsArr,
     );
+  }
+
+  /** Attaches the signers pubkey to an event template */
+  async stamp(draft: EventTemplate): Promise<UnsignedEvent> {
+    if (!this.context.signer) throw new Error("Missing signer");
+
+    // Remove old fields from signed nostr event
+    Reflect.deleteProperty(draft, "id");
+    Reflect.deleteProperty(draft, "sig");
+
+    return { ...draft, pubkey: await this.context.signer.getPublicKey() };
   }
 
   // Helpers

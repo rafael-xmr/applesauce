@@ -1,6 +1,12 @@
 # applesauce-react
 
-React hooks for applesauce
+React hooks and providers for applesauce
+
+## Installation
+
+```bash
+npm install applesauce-react
+```
 
 ## Example
 
@@ -9,8 +15,8 @@ import { EventStore, QueryStore, Queries } from "applesauce-core";
 import { QueryStoreProvider } from "applesauce-react/providers";
 import { useStoreQuery } from "applesauce-react/hooks";
 
-const events = new EventStore();
-const store = new QueryStore(events);
+const eventStore = new EventStore();
+const queryStore = new QueryStore(eventStore);
 
 function UserName({ pubkey }) {
   const profile = useStoreQuery(Queries.ProfileQuery, [pubkey]);
@@ -20,7 +26,7 @@ function UserName({ pubkey }) {
 
 function App() {
   return (
-    <QueryStoreProvider store={store}>
+    <QueryStoreProvider queryStore={queryStore}>
       <h1>App</h1>
 
       <UserName pubkey="82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2" />

@@ -1,5 +1,5 @@
-import { EventStore, QueryStore } from "applesauce-core";
 import { createContext, PropsWithChildren } from "react";
+import { EventStore, QueryStore } from "applesauce-core";
 
 export const QueryStoreContext = createContext<QueryStore | null>(null);
 export const EventStoreContext = createContext<EventStore | null>(null);

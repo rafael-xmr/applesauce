@@ -1,7 +1,0 @@
-# Zaps
-
-## Parsing
-
-## Queries
-
-## Factory

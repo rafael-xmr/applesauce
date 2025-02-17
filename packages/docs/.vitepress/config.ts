@@ -32,13 +32,6 @@ export default defineConfig({
         ],
       },
       {
-        text: "Signers",
-        items: [
-          { text: "Signers", link: "/signers/signers" },
-          { text: "Nostr Connect", link: "/signers/nostr-connect" },
-        ],
-      },
-      {
         text: "Accounts",
         items: [
           { text: "Accounts", link: "/accounts/accounts" },
@@ -51,8 +44,23 @@ export default defineConfig({
           { text: "Notes", link: "/social/notes" },
           { text: "Comments", link: "/social/comments" },
           { text: "Reactions", link: "/social/reactions" },
-          { text: "Zaps", link: "/social/zaps" },
           { text: "Timelines", link: "/social/timelines" },
+        ],
+      },
+      {
+        text: "React",
+        items: [
+          { text: "Getting Started", link: "/react/getting-started" },
+          { text: "Providers", link: "/react/providers" },
+          { text: "Hooks", link: "/react/hooks" },
+          { text: "Content", link: "/react/content" },
+        ],
+      },
+      {
+        text: "Signers",
+        items: [
+          { text: "Signers", link: "/signers/signers" },
+          { text: "Nostr Connect", link: "/signers/nostr-connect" },
         ],
       },
       {
@@ -60,14 +68,6 @@ export default defineConfig({
         items: [
           { text: "Text", link: "/content/text" },
           { text: "Markdown", link: "/content/markdown" },
-        ],
-      },
-      {
-        text: "React",
-        items: [
-          { text: "Providers", link: "/react/providers" },
-          { text: "Hooks", link: "/react/hooks" },
-          { text: "Content", link: "/react/content" },
         ],
       },
     ],

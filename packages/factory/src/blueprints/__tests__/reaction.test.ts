@@ -70,7 +70,7 @@ describe("EventFactory", () => {
           id: "event-id",
         },
         {
-          name: "nostrudel",
+          shortcode: "nostrudel",
           url: "https://cdn.hzrd149.com/303f018e613f29e3e43264529903b7c8c84debbd475f89368cb293ec23938981.png",
         },
       ),

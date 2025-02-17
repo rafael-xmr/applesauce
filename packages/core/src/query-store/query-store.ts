@@ -1,11 +1,11 @@
 import { filter, finalize, Observable, ReplaySubject, share, startWith, timer } from "rxjs";
 import { Filter, NostrEvent } from "nostr-tools";
 import hash_sum from "hash-sum";
+import type { AddressPointer, EventPointer } from "nostr-tools/nip19";
 
 import { EventStore } from "../event-store/event-store.js";
 
 import * as Queries from "../queries/index.js";
-import { AddressPointer, EventPointer } from "nostr-tools/nip19";
 import { getObservableValue } from "../observable/get-observable-value.js";
 
 export type Query<T extends unknown> = {
@@ -26,7 +26,11 @@ export class QueryStore {
     this.store = store;
   }
 
+  /** A directory of all active queries */
   queries = new Map<QueryConstructor<any, any[]>, Map<string, Observable<any>>>();
+
+  /** How long a query should be kept "warm" while nothing is subscribed to it */
+  queryKeepWarmTimeout = 60_000;
 
   /** Creates a cached query */
   createQuery<T extends unknown, Args extends Array<any>>(
@@ -54,7 +58,7 @@ export class QueryStore {
           // remove the observable when its subscribed
           finalize(cleanup),
           // only create a single observable for all components
-          share({ connector: () => new ReplaySubject(1), resetOnComplete: () => timer(60_000) }),
+          share({ connector: () => new ReplaySubject(1), resetOnComplete: () => timer(this.queryKeepWarmTimeout) }),
         );
 
       // set debug fields
