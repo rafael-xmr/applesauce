@@ -7,6 +7,7 @@ export * from "./comment.js";
 export * from "./contacts.js";
 export * from "./content.js";
 export * from "./delete.js";
+export * from "./dns-identity.js";
 export * from "./emoji.js";
 export * from "./event.js";
 export * from "./external-id.js";

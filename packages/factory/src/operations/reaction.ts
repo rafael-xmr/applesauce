@@ -3,7 +3,12 @@ import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
 import { Emoji, getTagValue } from "applesauce-core/helpers";
 
 import { EventFactoryOperation } from "../event-factory.js";
-import { ensureAddressPointerTag, ensureEventPointerTag, ensureKTag, ensureProfilePointerTag } from "./common-tags.js";
+import {
+  ensureAddressPointerTag,
+  ensureEventPointerTag,
+  ensureKTag,
+  ensureProfilePointerTag,
+} from "../helpers/common-tags.js";
 
 /** Sets the content for a reaction event */
 export function setReactionContent(emoji: string | Emoji = "+"): EventFactoryOperation {

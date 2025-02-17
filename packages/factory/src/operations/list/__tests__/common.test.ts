@@ -6,7 +6,7 @@ import {
   addPubkeyTag,
   removeCoordinateTag,
   removeEventTag,
-} from "./common.js";
+} from "../common.js";
 
 describe("addEventTag", () => {
   describe("pubkey as string", () => {

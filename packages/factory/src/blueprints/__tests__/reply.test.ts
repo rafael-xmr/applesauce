@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { EventFactory } from "../event-factory.js";
-import { NoteReplyBlueprint } from "./reply.js";
+import { EventFactory } from "../../event-factory.js";
+import { NoteReplyBlueprint } from "../reply.js";
 import { NostrEvent } from "nostr-tools";
 
 describe("NoteReplyBlueprint", () => {
@@ -47,7 +47,7 @@ describe("NoteReplyBlueprint", () => {
       expect.objectContaining({
         content: "yes",
         tags: [
-          ["e", "aa74e8488cbc80e2958e86108b76fd15e349095590071d573c168f0265b025d7", "wss://a.nos.lol/", "root"],
+          ["e", "aa74e8488cbc80e2958e86108b76fd15e349095590071d573c168f0265b025d7", "wss://a.nos.lol", "root"],
           [
             "e",
             "cf8f8e0ba1b4d56883cf6efd8f57ee1676c29d3dd19ca3eb463795a581bae057",

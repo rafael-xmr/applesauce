@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createCommentTagsFromCommentPointer } from "./comment.js";
+import { createCommentTagsFromCommentPointer } from "../comment.js";
 
 describe("comment helpers", () => {
   describe("createCommentTagsFromCommentPointer", () => {

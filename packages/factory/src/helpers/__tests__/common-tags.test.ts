@@ -1,8 +1,8 @@
 import { describe, test, it, expect } from "vitest";
 
 import { EventPointer } from "nostr-tools/nip19";
-import { ensureAddressPointerTag, ensureMarkedEventPointerTag, ensureProfilePointerTag } from "./common-tags.js";
-import { Nip10TagMarker } from "./pointer.js";
+import { ensureAddressPointerTag, ensureMarkedEventPointerTag, ensureProfilePointerTag } from "../common-tags.js";
+import { Nip10TagMarker } from "../pointer.js";
 
 describe("common tags helpers", () => {
   describe("ensureEventPointerTag", () => {

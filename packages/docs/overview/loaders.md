@@ -2,9 +2,9 @@
 
 The `applesauce-loaders` package contains a bunch of loader classes built on top of [rx-nostr](https://github.com/penpenpng/rx-nostr)
 
-## Loader pattern
+## Event Loader pattern
 
-All the loader classes generally follow the same pattern, you create them use `new` and pass a `rxNostr` instance into them along with options
+All the event loader classes generally follow the same pattern, you create a `new` instance and pass a `rxNostr` instance into them along with options
 
 ```ts
 // create a loader for loading a timeline of events

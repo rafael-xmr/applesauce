@@ -1,6 +1,6 @@
 import { NostrEvent } from "nostr-tools";
 import { getOrComputeCachedValue } from "./cache.js";
-import { safeRelayUrl } from "./relays.js";
+import { isSafeRelayURL } from "./relays.js";
 
 export const ContactsRelaysSymbol = Symbol.for("contacts-relays");
 
@@ -12,12 +12,11 @@ export function getRelaysFromContactsEvent(event: NostrEvent) {
 
       const relays = new Map<string, "inbox" | "outbox" | "all">();
       for (const [url, opts] of Object.entries(relayJson)) {
-        const safeUrl = safeRelayUrl(url);
-        if (!safeUrl) continue;
+        if (!isSafeRelayURL(url)) continue;
 
-        if (opts.write && opts.read) relays.set(safeUrl, "all");
-        else if (opts.read) relays.set(safeUrl, "inbox");
-        else if (opts.write) relays.set(safeUrl, "outbox");
+        if (opts.write && opts.read) relays.set(url, "all");
+        else if (opts.read) relays.set(url, "inbox");
+        else if (opts.write) relays.set(url, "outbox");
       }
 
       return relays;

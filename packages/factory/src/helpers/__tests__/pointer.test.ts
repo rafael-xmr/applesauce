@@ -5,7 +5,7 @@ import {
   createATagFromAddressPointer,
   createETagWithMarkerFromEventPointer,
   createPTagFromProfilePointer,
-} from "./pointer.js";
+} from "../pointer.js";
 
 describe(`pointer helpers`, () => {
   describe("createATagFromAddressPointer", () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { EventFactory } from "../event-factory.js";
-import { ReactionBlueprint } from "./reaction.js";
+import { EventFactory } from "../../event-factory.js";
+import { ReactionBlueprint } from "../reaction.js";
 
 describe("EventFactory", () => {
   const factory = new EventFactory();

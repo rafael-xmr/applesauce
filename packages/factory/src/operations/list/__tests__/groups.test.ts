@@ -1,6 +1,6 @@
 import { GroupPointer } from "applesauce-core/helpers";
 import { describe, expect, it } from "vitest";
-import { addGroupTag } from "./groups.js";
+import { addGroupTag } from "../groups.js";
 
 describe("addGroupTag", () => {
   it("should replace existing tag", () => {

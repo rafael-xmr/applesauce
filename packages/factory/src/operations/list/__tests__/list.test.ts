@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { EventTemplate, kinds } from "nostr-tools";
 import { unixNow } from "applesauce-core/helpers";
 
-import { setListDescription, setListTitle } from "./list.js";
+import { setListDescription, setListTitle } from "../list.js";
 
 describe("setListTitle", () => {
   it("should override existing title tag", async () => {

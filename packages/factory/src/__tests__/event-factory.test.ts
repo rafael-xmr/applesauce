@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { EventFactory } from "./event-factory.js";
+import { EventFactory } from "../event-factory.js";
 import { kinds } from "nostr-tools";
-import { setListTitle } from "./operations/index.js";
+import { setListTitle } from "../operations/index.js";
 
 const factory = new EventFactory();
 

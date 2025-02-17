@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addRelayTag } from "./relay.js";
+import { addRelayTag } from "../relay.js";
 
 describe("addRelayTag", () => {
   it("should replace existing relay tag", () => {
