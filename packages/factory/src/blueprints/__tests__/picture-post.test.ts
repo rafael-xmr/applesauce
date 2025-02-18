@@ -18,12 +18,12 @@ describe("PicturePostBlueprint", () => {
             blurhash: "g9FPKJ00O@$eo#xtRj_M4oM|j[oft6RjR#-=8xtlDjt7jG9ZIWMxx]IVRkV[Di?bEKnm-:M{%M",
           },
         ],
-        "Orange Chicken",
+        "Orange Chicken #grownostr",
         { hashtags: ["Foodstr"] },
       ),
     ).toEqual(
       expect.objectContaining({
-        content: "Orange Chicken",
+        content: "Orange Chicken #grownostr",
         kind: 20,
         tags: expect.arrayContaining([
           [
@@ -36,6 +36,7 @@ describe("PicturePostBlueprint", () => {
           ],
           ["x", "d4c2ecade68b793caf20f9189eb9ede5eacb5f2ccee0ed30ade24696f4981573"],
           ["m", "image/jpeg"],
+          ["t", "grownostr"],
           ["t", "foodstr"],
         ]),
       }),

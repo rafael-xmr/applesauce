@@ -1,8 +1,6 @@
 # Notes
 
-## Helpers
-
-## Content
+## Parsing Content
 
 The [applesauce-content](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_content.html) package provides a set of utilities for parsing note content.
 
@@ -32,7 +30,7 @@ console.log(ats);
 
 ## Loading
 
-Generally the best way to load notes is to use a [TimelineLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_loaders.TimelineLoader.html) class
+Generally the best way to load bulk notes is to use a [TimelineLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_loaders.TimelineLoader.html) class
 
 ```ts
 const pubkeys = ["<pubkey1>", "<pubkey2>"];
@@ -49,6 +47,23 @@ loader.subscribe((packet) => {
 
 // load first page
 loader.next();
+```
+
+The `SingleEventLoader` can be used to load single notes
+
+```ts
+const loader = new SingleEventLoader(rxNostr);
+
+// start the loader
+loader.subscribe((packet) => {
+  console.log(packet.event);
+});
+
+// load the single event from the relays
+loader.next({
+  id: "70ef7dc9cbd406e779547fe912dbdc4de7170744c3be4e00c04ae11679f21977",
+  relays: ["wss://pyramid.fiatjaf.com/"],
+});
 ```
 
 ## Factory

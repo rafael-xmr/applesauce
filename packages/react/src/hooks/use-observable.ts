@@ -1,7 +1,7 @@
 import { useObservableState } from "observable-hooks";
 import { EMPTY, type BehaviorSubject, type Observable } from "rxjs";
 
-/** Subscribe to the value of an observable */
+/** A thing wrapper around useObservableState that allows undefined */
 export function useObservable<T extends unknown>(observable?: BehaviorSubject<T>): T;
 export function useObservable<T extends unknown>(observable?: Observable<T>): T | undefined;
 export function useObservable<T extends unknown>(observable?: Observable<T>): T | undefined {

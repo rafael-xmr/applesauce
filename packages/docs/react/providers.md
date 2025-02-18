@@ -1,6 +1,8 @@
 # Providers
 
-The [`QueryStoreProvider`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.QueryStoreProvider.html) can be used to provide a `QueryStore` to the app
+## QueryStoreProvider
+
+The [`QueryStoreProvider`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.QueryStoreProvider.html) can be used to provide a `QueryStore` and `EventStore` to the app
 
 ```tsx{5,7}
 const eventStore = new EventStore();
@@ -30,3 +32,11 @@ function UserName({ pubkey }: { pubkey: string }) {
   return <span>{profile?.display_name}</span>;
 }
 ```
+
+## FactoryProvider
+
+The [FactoryProvider](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.FactoryProvider.html) can be used to provide an [EventFactory](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html) to components
+
+## AccountsProvider
+
+The [AccountsProvider](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.AccountsProvider.html) can be used to provide an [AccountManager](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_accounts.AccountManager.html) to components and allows them to use the [useActiveAccount](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.Hooks.useActiveAccount.html) and [useAccountManager](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.Hooks.useAccountManager.html) hooks

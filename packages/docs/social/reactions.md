@@ -4,7 +4,7 @@
 
 ## Loading
 
-The [TagValueLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_loaders.TagValueLoader.html) class can be used to load reactions from an event.
+The [TagValueLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_loaders.TagValueLoader.html) class can be used to load reactions in batches for an event.
 
 ```ts
 import { TagValueLoader } from "applesauce-loaders";
@@ -33,4 +33,32 @@ The [ReactionBlueprint](https://hzrd149.github.io/applesauce/typedoc/functions/a
 
 ```ts
 import { ReactionBlueprint } from "applesauce-factory/blueprints";
+
+const event = {
+  content:
+    "I just realized nostr:npub1dergggklka99wwrs92yz8wdjs952h2ux2ha2ed598ngwu9w7a6fsh9xzpc doesn't like anything.",
+  created_at: 1739716293,
+  id: "000075e40142753d4daacd971d7f024140daad4fb6cccd49dfa758c8546f75f6",
+  kind: 1,
+  pubkey: "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d",
+  sig: "48e1e90319a9f486fc1920253f180ad2b36be1acd61be77b07e32f344046cd5f62838b1a86dccaa8c6ccb959d06842b943df5b092cee11420793f64793cf337c",
+  tags: [
+    ["p", "6e468422dfb74a5738702a8823b9b28168abab8655faacb6853cd0ee15deee93"],
+    ["nonce", "13980", "16"],
+  ],
+};
+
+// create a like reaction
+let like = await eventFactory.create(ReactionBlueprint, event, "+");
+
+// create an emoji reaction
+let like = await eventFactory.create(ReactionBlueprint, event, "🧡");
+
+// create a custom emoji reaction
+let like = await eventFactory.create(ReactionBlueprint, event, {
+  // the shortcode of the emoji without the ::
+  name: "shakingeyes",
+  // the URL of the emoji image
+  url: "https://i.nostr.build/nWZ7a.gif",
+});
 ```

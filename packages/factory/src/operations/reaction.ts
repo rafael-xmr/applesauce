@@ -12,7 +12,7 @@ import {
 
 /** Sets the content for a reaction event */
 export function setReactionContent(emoji: string | Emoji = "+"): EventFactoryOperation {
-  return (draft) => ({ ...draft, content: typeof emoji === "string" ? emoji : `:${emoji.name}:` });
+  return (draft) => ({ ...draft, content: typeof emoji === "string" ? emoji : `:${emoji.shortcode}:` });
 }
 
 /** Includes NIP-25 "e", "p", "k", and "a" tags for a reaction event */

@@ -5,7 +5,7 @@ import { getTagValue } from "./event.js";
 export function getEmojiTag(event: NostrEvent | EventTemplate, code: string): ["emoji", string, string] | undefined {
   code = code.replace(/^:|:$/g, "").toLocaleLowerCase();
 
-  return event.tags.filter((t) => t[0] === "emoji" && t[1] && t[2]).find((t) => t[1].toLowerCase() === code) as
+  return event.tags.find((t) => t[0] === "emoji" && t.length >= 3 && t[1].toLowerCase() === code) as
     | ["emoji", string, string]
     | undefined;
 }
@@ -16,7 +16,9 @@ export function getPackName(pack: NostrEvent): string | undefined {
 }
 
 export type Emoji = {
-  name: string;
+  /** The emoji shortcode (without the ::) */
+  shortcode: string;
+  /** The URL to the emoji image */
   url: string;
 };
 
@@ -24,5 +26,5 @@ export type Emoji = {
 export function getEmojis(pack: NostrEvent): Emoji[] {
   return pack.tags
     .filter((t) => t[0] === "emoji" && t[1] && t[2])
-    .map((t) => ({ name: t[1] as string, url: t[2] as string }));
+    .map((t) => ({ shortcode: t[1] as string, url: t[2] as string }));
 }

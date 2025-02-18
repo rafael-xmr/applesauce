@@ -12,10 +12,10 @@ export function includeContentEmojiTags(emojis?: Emoji[]): EventFactoryOperation
     // create tags for all occurrences of #hashtag
     const matches = draft.content.matchAll(Expressions.emoji);
     for (const [_, name] of matches) {
-      const emoji = all.find((e) => e.name === name);
+      const emoji = all.find((e) => e.shortcode === name);
 
       if (emoji?.url) {
-        tags.push(["emoji", emoji.name, emoji.url]);
+        tags.push(["emoji", emoji.shortcode, emoji.url]);
       }
     }
 
