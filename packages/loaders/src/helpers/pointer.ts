@@ -10,3 +10,48 @@ export function groupByRelay<T extends { relays?: string[] }>(pointers: T[], def
 
   return byRelay;
 }
+
+export interface MessageWithRelay {
+  relays?: string[];
+  /** Ignore timeout and force message through */
+  force?: boolean;
+  [key: string]: any;
+}
+
+/** Ensures that a message only is requested from each relay once in timeout */
+export function removePreviouslyUsedRelays<T extends MessageWithRelay>(
+  message: T,
+  keyFn: (message: T) => string,
+  cache: Map<string, number>,
+  timeout = 60_000,
+): T | null {
+  if (message.force) return message;
+
+  let key = keyFn(message);
+  let now = Date.now();
+
+  if (message.relays) {
+    // requesting from specific relays
+    let relays = message.relays;
+
+    relays = relays.filter((relay) => {
+      let relayKey = key + " " + relay;
+      let last = cache.get(relayKey);
+      if (!last || now >= last + timeout) {
+        cache.set(relayKey, now);
+        return true;
+      } else return false;
+    });
+
+    if (relays.length === 0) return null;
+
+    return { ...message, relays };
+  } else {
+    // requesting from default relays
+    let last = cache.get(key);
+    if (!last || now >= last + timeout) {
+      cache.set(key, now);
+      return message;
+    } else return null;
+  }
+}

@@ -15,7 +15,7 @@ import {
   LoadableAddressPointer,
 } from "../helpers/address-pointer.js";
 import { getDefaultReadRelays } from "../helpers/rx-nostr.js";
-import { distinctRelays } from "../operators/distinct-relays.js";
+import { distinctRelaysBatch } from "../operators/distinct-relays.js";
 
 /** A generator that tries to load the address pointers from the cache first, then tries the relays */
 function* cacheFirstSequence(
@@ -120,12 +120,12 @@ export class ReplaceableLoader extends Loader<LoadableAddressPointer, EventPacke
       return source.pipe(
         // filter out invalid pointers
         filter(isLoadableAddressPointer),
-        // only fetch from each relay once
-        distinctRelays(getAddressPointerId),
         // buffer on time
         bufferTime(opts?.bufferTime ?? 1000),
         // ignore empty buffers
         filter((buffer) => buffer.length > 0),
+        // only fetch from each relay once
+        distinctRelaysBatch(getAddressPointerId),
         // consolidate buffered pointers
         map(consolidateAddressPointers),
         // ignore empty buffer

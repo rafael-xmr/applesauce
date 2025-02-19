@@ -1,13 +1,7 @@
-import { filter, map, OperatorFunction, share } from "rxjs";
+import { filter, map, OperatorFunction } from "rxjs";
+import { MessageWithRelay, removePreviouslyUsedRelays } from "../helpers/pointer.js";
 
-interface Message {
-  relays?: string[];
-  /** Ignore timeout and force message through */
-  force?: boolean;
-  [key: string]: any;
-}
-
-export function distinctRelays<T extends Message>(
+export function distinctRelays<T extends MessageWithRelay>(
   keyFn: (message: T) => string,
   timeout = 60_000,
 ): OperatorFunction<T, T> {
@@ -15,39 +9,21 @@ export function distinctRelays<T extends Message>(
     const cache = new Map<string, number>();
 
     return source$.pipe(
-      map((message) => {
-        if (message.force) return message;
-
-        let key = keyFn(message);
-        let now = Date.now();
-
-        if (message.relays) {
-          // requesting from specific relays
-          let relays = message.relays;
-
-          relays = relays.filter((relay) => {
-            let relayKey = key + " " + relay;
-            let last = cache.get(relayKey);
-            if (!last || now >= last + timeout) {
-              cache.set(relayKey, now);
-              return true;
-            } else return false;
-          });
-
-          if (relays.length === 0) return null;
-
-          return { ...message, relays };
-        } else {
-          // requesting from default relays
-          let last = cache.get(key);
-          if (!last || now >= last + timeout) {
-            cache.set(key, now);
-            return message;
-          } else return null;
-        }
-      }),
+      map((message) => removePreviouslyUsedRelays(message, keyFn, cache, timeout)),
       filter((message) => message !== null) as OperatorFunction<T | null, T>,
-      share(),
+    );
+  };
+}
+
+export function distinctRelaysBatch<T extends MessageWithRelay>(
+  keyFn: (message: T) => string,
+  timeout = 60_000,
+): OperatorFunction<T[], T[]> {
+  return (source$) => {
+    const cache = new Map<string, number>();
+
+    return source$.pipe(
+      map((batch) => batch.map((m) => removePreviouslyUsedRelays(m, keyFn, cache, timeout)).filter((m) => m !== null)),
     );
   };
 }
