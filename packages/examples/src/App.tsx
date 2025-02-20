@@ -37,10 +37,10 @@ function App() {
           </Typography>
 
           <Box sx={{ display: { xs: "none", sm: "block" } }}>
-            <Button sx={{ color: "#fff" }} href="/">
+            <Button sx={{ color: "#fff" }} href="https://hzrd149.github.io/applesauce">
               Documentation
             </Button>
-            <Button sx={{ color: "#fff" }} href="/typedoc/">
+            <Button sx={{ color: "#fff" }} href="https://hzrd149.github.io/applesauce/typedoc/">
               Reference
             </Button>
           </Box>

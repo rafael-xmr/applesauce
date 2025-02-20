@@ -152,7 +152,7 @@ replaceableLoader.next({
 
 ### Batching
 
-The replaceable loader class batches and deduplicates requests under the hood, so there is no need to worry about spamming or requesting an event multiple times
+The replaceable loader class batches deduplicates requests under the hood, so there is no need to worry about spamming or requesting an event multiple times
 
 ```js
 const replaceableLoader = new ReplaceableLoader(rxNostr);
@@ -169,4 +169,75 @@ for(let i = 0; i < 100: i++){
 
 ## Timeline loader
 
+The [TimelineLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_loaders.TimelineLoader.html) class should be used to load any more than 500 events
+
+```js
+import { TimelineLoader } from "applesauce-loaders";
+
+const repliesTimeline = new TimelineLoader(
+  rxNostr,
+  // create a simple request map. use the same filter for both relays
+  TimelineLoader.simpleFilterMap(
+    ["wss://pyramid.fiatjaf.com/", "wss://relay.example.com/"],
+    [{ kinds: [1], "#e": ["0000d5f3364a65771487f2c0705e35e70d215a7c6d204a1ccb859011803d8010"] }],
+  ),
+);
+
+// start the loader by subscribing to it
+repliesTimeline.subscribe((packet) => {
+  eventStore.add(packet.event, packet.from);
+});
+
+// load the first page
+repliesTimeline.next();
+
+setTimeout(() => {
+  // load next page after 10s
+  repliesTimeline.next();
+}, 10_000);
+```
+
+## Single event loader
+
+The [SingleEventLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_loaders.SingleEventLoader.html) class can be used to batch load individual events. its useful for loading parent replies and quoted events
+
+```js
+import { SingleEventLoader } from "applesauce-loaders";
+
+const eventLoader = new SingleEventLoader(rxNostr);
+
+// start the loader by subscribing to it
+eventLoader.subscribe((packet) => {
+  eventStore.add(packet.event, packet.from);
+});
+
+// request an event
+eventLoader.next({
+  id: "0000d5f3364a65771487f2c0705e35e70d215a7c6d204a1ccb859011803d8010",
+  relays: ["wss://pyramid.fiatjaf.com/", "wss://nostr.wine/", "wss://nos.lol/"],
+});
+```
+
 ## Tag value loader
+
+The [TagValueLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_loaders.TagValueLoader.html) class can be used to load batches of events with an indexable set to a certain value
+
+This can be used to load zaps, reactions, wiki pages, etc
+
+```js
+import { TagValueLoader } from "applesauce-loaders";
+
+// Create a loader that loads all zap kinds with an #e tag
+const zapsLoader = new TagValueLoader(rxNostr, "e", { name: "zaps", kinds: [kinds.Zap] });
+
+// start the loader
+zapsLoader.subscribe((packet) => {
+  eventStore.add(packet.event, packet.from);
+});
+
+// request all zap events with #e tag === 0000d5f3364a65771487f2c0705e35e70d215a7c6d204a1ccb859011803d8010 from relays
+eventLoader.next({
+  value: "0000d5f3364a65771487f2c0705e35e70d215a7c6d204a1ccb859011803d8010",
+  relays: ["wss://pyramid.fiatjaf.com/", "wss://nostr.wine/", "wss://nos.lol/"],
+});
+```
