@@ -1,10 +1,10 @@
 import { GroupPointer } from "applesauce-core/helpers";
-import { EventFactoryOperation } from "../event-factory.js";
-import { ensureNamedValueTag } from "../helpers/tag.js";
+import { EventOperation } from "../../event-factory.js";
+import { ensureNamedValueTag } from "../../helpers/tag.js";
 import { NostrEvent } from "nostr-tools";
 
 /** Includes a "h" tag for NIP-29 group messages */
-export function includeGroupHTag(group: GroupPointer): EventFactoryOperation {
+export function includeGroupHTag(group: GroupPointer): EventOperation {
   return (draft) => {
     let tags = Array.from(draft.tags);
     tags = ensureNamedValueTag(tags, ["h", group.id]);
@@ -13,7 +13,7 @@ export function includeGroupHTag(group: GroupPointer): EventFactoryOperation {
 }
 
 /** Includes "previous" tags for group messages */
-export function includeGroupPreviousTags(previous: NostrEvent[], count = 6): EventFactoryOperation {
+export function includeGroupPreviousTags(previous: NostrEvent[], count = 6): EventOperation {
   return (draft) => {
     let tags = Array.from(draft.tags);
 

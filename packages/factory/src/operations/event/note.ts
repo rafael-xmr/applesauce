@@ -2,11 +2,11 @@ import { NostrEvent } from "nostr-tools";
 import { getNip10References, isPTag } from "applesauce-core/helpers";
 import { EventPointer } from "nostr-tools/nip19";
 
-import { EventFactoryOperation } from "../event-factory.js";
-import { ensureMarkedEventPointerTag, ensureProfilePointerTag } from "../helpers/common-tags.js";
+import { EventOperation } from "../../event-factory.js";
+import { ensureMarkedEventPointerTag, ensureProfilePointerTag } from "../../helpers/common-tags.js";
 
 /** Includes NIP-10 reply tags */
-export function includeNoteThreadingTags(parent: NostrEvent): EventFactoryOperation {
+export function includeNoteThreadingTags(parent: NostrEvent): EventOperation {
   return async (draft, ctx) => {
     let tags = Array.from(draft.tags);
 
@@ -29,7 +29,7 @@ export function includeNoteThreadingTags(parent: NostrEvent): EventFactoryOperat
 }
 
 /** Copies "p" tags from parent event and adds new pubkey */
-export function includeNoteThreadingNotifyTags(parent: NostrEvent): EventFactoryOperation {
+export function includeNoteThreadingNotifyTags(parent: NostrEvent): EventOperation {
   return async (draft, ctx) => {
     let tags = Array.from(draft.tags);
 

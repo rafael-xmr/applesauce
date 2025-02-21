@@ -1,9 +1,9 @@
 import { kinds, NostrEvent } from "nostr-tools";
-import { EventFactory, EventFactoryBlueprint } from "../event-factory.js";
-import { includeShareTags, setShareContent, setShareKind } from "../operations/share.js";
+import { EventFactory, EventBlueprint } from "../event-factory.js";
+import { includeShareTags, setShareContent, setShareKind } from "../operations/event/share.js";
 
 /** Blueprint for a NIP-18 repost event */
-export function ShareBlueprint(event: NostrEvent): EventFactoryBlueprint {
+export function ShareBlueprint(event: NostrEvent): EventBlueprint {
   return (ctx) =>
     EventFactory.runProcess(
       { kind: kinds.Repost },

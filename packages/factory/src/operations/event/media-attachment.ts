@@ -1,10 +1,10 @@
 import { FileMetadata } from "applesauce-core/helpers";
 
-import { EventFactoryOperation } from "../event-factory.js";
-import { createImetaTagForAttachment } from "../helpers/file-metadata.js";
+import { EventOperation } from "../../event-factory.js";
+import { createImetaTagForAttachment } from "../../helpers/file-metadata.js";
 
 /** Adds imeta tags onto the draft for attachments */
-export function includeMediaAttachmentTags(attachments: FileMetadata[]): EventFactoryOperation {
+export function includeMediaAttachmentTags(attachments: FileMetadata[]): EventOperation {
   return (draft) => {
     const tags = Array.from(draft.tags);
 

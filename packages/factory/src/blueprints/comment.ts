@@ -1,16 +1,12 @@
 import { NostrEvent } from "nostr-tools";
 import { COMMENT_KIND } from "applesauce-core/helpers";
 
-import { EventFactory, EventFactoryBlueprint } from "../event-factory.js";
-import { createTextContentOperations, TextContentOptions } from "../operations/content.js";
-import { includeCommentTags } from "../operations/comment.js";
+import { EventFactory, EventBlueprint } from "../event-factory.js";
+import { createTextContentOperations, TextContentOptions } from "../operations/event/content.js";
+import { includeCommentTags } from "../operations/event/comment.js";
 
 /** A blueprint to create a NIP-22 comment event */
-export function CommentBlueprint(
-  parent: NostrEvent,
-  content: string,
-  options?: TextContentOptions,
-): EventFactoryBlueprint {
+export function CommentBlueprint(parent: NostrEvent, content: string, options?: TextContentOptions): EventBlueprint {
   return (ctx) =>
     EventFactory.runProcess(
       { kind: COMMENT_KIND },

@@ -1,11 +1,11 @@
 import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
 import { nanoid } from "nanoid";
 
-import { EventFactoryOperation } from "../event-factory.js";
-import { ensureSingletonTag } from "../helpers/tag.js";
+import { EventOperation } from "../../event-factory.js";
+import { ensureSingletonTag } from "../../helpers/tag.js";
 
 /** Ensures parameterized replaceable kinds have "d" tags */
-export function includeReplaceableIdentifier(identifier: string | (() => string) = nanoid): EventFactoryOperation {
+export function includeReplaceableIdentifier(identifier: string | (() => string) = nanoid): EventOperation {
   return (draft) => {
     if (!isParameterizedReplaceableKind(draft.kind)) return draft;
 

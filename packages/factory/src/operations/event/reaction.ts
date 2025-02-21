@@ -2,21 +2,21 @@ import { NostrEvent } from "nostr-tools";
 import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
 import { Emoji, getTagValue } from "applesauce-core/helpers";
 
-import { EventFactoryOperation } from "../event-factory.js";
+import { EventOperation } from "../../event-factory.js";
 import {
   ensureAddressPointerTag,
   ensureEventPointerTag,
   ensureKTag,
   ensureProfilePointerTag,
-} from "../helpers/common-tags.js";
+} from "../../helpers/common-tags.js";
 
 /** Sets the content for a reaction event */
-export function setReactionContent(emoji: string | Emoji = "+"): EventFactoryOperation {
+export function setReactionContent(emoji: string | Emoji = "+"): EventOperation {
   return (draft) => ({ ...draft, content: typeof emoji === "string" ? emoji : `:${emoji.shortcode}:` });
 }
 
 /** Includes NIP-25 "e", "p", "k", and "a" tags for a reaction event */
-export function includeReactionTags(event: NostrEvent): EventFactoryOperation {
+export function includeReactionTags(event: NostrEvent): EventOperation {
   return async (draft, ctx) => {
     let tags = Array.from(draft.tags);
 

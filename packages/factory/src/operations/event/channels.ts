@@ -1,11 +1,11 @@
 import { getEventPointerForEvent } from "applesauce-core/helpers";
 import { NostrEvent } from "nostr-tools";
 
-import { EventFactoryOperation } from "../event-factory.js";
-import { ensureMarkedEventPointerTag } from "../helpers/common-tags.js";
+import { EventOperation } from "../../event-factory.js";
+import { ensureMarkedEventPointerTag } from "../../helpers/common-tags.js";
 
 /** Includes the "e" tag referencing the channel creating event */
-export function includeChannelPointerTag(channel: NostrEvent): EventFactoryOperation {
+export function includeChannelPointerTag(channel: NostrEvent): EventOperation {
   return (draft) => {
     let tags = Array.from(draft.tags);
     tags = ensureMarkedEventPointerTag(tags, getEventPointerForEvent(channel), "root");

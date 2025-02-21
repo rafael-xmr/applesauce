@@ -1,10 +1,10 @@
 import { ZapSplit } from "applesauce-core/helpers";
 
-import { EventFactoryOperation } from "../event-factory.js";
-import { fillAndTrimTag } from "../helpers/tag.js";
+import { EventOperation } from "../../event-factory.js";
+import { fillAndTrimTag } from "../../helpers/tag.js";
 
 /** Override the zap splits on an event */
-export function setZapSplit(splits: Omit<ZapSplit, "percent" | "relay">[]): EventFactoryOperation {
+export function setZapSplit(splits: Omit<ZapSplit, "percent" | "relay">[]): EventOperation {
   return async (draft, ctx) => {
     let tags = Array.from(draft.tags);
 

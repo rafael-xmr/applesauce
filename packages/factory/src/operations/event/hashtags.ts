@@ -1,9 +1,9 @@
 import { Expressions } from "applesauce-content/helpers";
-import { EventFactoryOperation } from "../event-factory.js";
-import { ensureNamedValueTag } from "../helpers/tag.js";
+import { EventOperation } from "../../event-factory.js";
+import { ensureNamedValueTag } from "../../helpers/tag.js";
 
 /** Adds "t" tags for every #hashtag in the content */
-export function includeContentHashtags(): EventFactoryOperation {
+export function includeContentHashtags(): EventOperation {
   return (draft) => {
     let tags = Array.from(draft.tags);
 
@@ -19,7 +19,7 @@ export function includeContentHashtags(): EventFactoryOperation {
 }
 
 /** Adds "t" tags for an array of hashtags */
-export function includeHashtags(hashtags: string[]): EventFactoryOperation {
+export function includeHashtags(hashtags: string[]): EventOperation {
   return (draft) => {
     let tags = Array.from(draft.tags);
 

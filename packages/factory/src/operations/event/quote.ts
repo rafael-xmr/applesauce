@@ -1,9 +1,9 @@
-import { EventFactoryOperation } from "../event-factory.js";
-import { ensureQuoteEventPointerTag } from "../helpers/quote.js";
-import { getContentPointers } from "../helpers/content.js";
+import { EventOperation } from "../../event-factory.js";
+import { ensureQuoteEventPointerTag } from "../../helpers/quote.js";
+import { getContentPointers } from "../../helpers/content.js";
 
 /** Include "q" quote tags for any nostr event mentioned in the content */
-export function includeQuoteTags(): EventFactoryOperation {
+export function includeQuoteTags(): EventOperation {
   return (draft) => {
     let tags = Array.from(draft.tags);
     const mentions = getContentPointers(draft.content);

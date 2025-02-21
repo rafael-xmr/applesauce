@@ -1,10 +1,10 @@
 import { kinds } from "nostr-tools";
 import { FileMetadata } from "applesauce-core/helpers";
 
-import { createTextContentOperations, TextContentOptions } from "../operations/content.js";
-import { EventFactory, EventFactoryBlueprint } from "../event-factory.js";
-import { includeFileMetadataTags } from "../operations/file-metadata.js";
-import { includeHashtags } from "../operations/hashtags.js";
+import { createTextContentOperations, TextContentOptions } from "../operations/event/content.js";
+import { EventFactory, EventBlueprint } from "../event-factory.js";
+import { includeFileMetadataTags } from "../operations/event/file-metadata.js";
+import { includeHashtags } from "../operations/event/hashtags.js";
 
 export type FileMetadataBlueprintOptions = TextContentOptions & { hashtags?: string[] };
 
@@ -13,7 +13,7 @@ export function FileMetadataBlueprint(
   metadata: FileMetadata,
   description?: string,
   options?: FileMetadataBlueprintOptions,
-): EventFactoryBlueprint {
+): EventBlueprint {
   return (ctx) =>
     EventFactory.runProcess(
       { kind: kinds.FileMetadata },

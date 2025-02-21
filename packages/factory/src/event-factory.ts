@@ -3,14 +3,14 @@ import { AddressPointer } from "nostr-tools/nip19";
 import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
 import { EventTemplate, NostrEvent, UnsignedEvent } from "nostr-tools";
 
-import { includeClientTag } from "./operations/client.js";
+import { includeClientTag } from "./operations/event/client.js";
 import { CommentBlueprint } from "./blueprints/comment.js";
 import { NoteBlueprint } from "./blueprints/note.js";
 import { ReactionBlueprint } from "./blueprints/reaction.js";
 import { DeleteBlueprint } from "./blueprints/delete.js";
 import { NoteReplyBlueprint } from "./blueprints/reply.js";
 import { ShareBlueprint } from "./blueprints/share.js";
-import { includeReplaceableIdentifier, modifyHiddenTags, modifyPublicTags, TagOperation } from "./operations/index.js";
+import { includeReplaceableIdentifier, modifyHiddenTags, modifyPublicTags } from "./operations/event/index.js";
 
 export type EventFactoryTemplate = {
   kind: number;
@@ -21,13 +21,16 @@ export type EventFactoryTemplate = {
 };
 
 /** A single operation in the factory process */
-export type EventFactoryOperation = (
+export type EventOperation = (
   draft: EventTemplate,
   context: EventFactoryContext,
 ) => EventTemplate | Promise<EventTemplate>;
 
+/** A single operation that modifies an events public or hidden tags array */
+export type TagOperation = (tags: string[][], ctx: EventFactoryContext) => string[][] | Promise<string[][]>;
+
 /** A prebuilt event template */
-export type EventFactoryBlueprint = (context: EventFactoryContext) => EventTemplate | Promise<EventTemplate>;
+export type EventBlueprint = (context: EventFactoryContext) => EventTemplate | Promise<EventTemplate>;
 
 export type EventFactorySigner = {
   getPublicKey: () => Promise<string> | string;
@@ -64,7 +67,7 @@ export class EventFactory {
   static async runProcess(
     template: EventFactoryTemplate,
     context: EventFactoryContext,
-    ...operations: (EventFactoryOperation | undefined)[]
+    ...operations: (EventOperation | undefined)[]
   ): Promise<EventTemplate> {
     let draft: EventTemplate = { content: "", created_at: unixNow(), tags: [], ...template };
 
@@ -85,16 +88,13 @@ export class EventFactory {
   }
 
   /** Process an event template with operations */
-  async process(
-    template: EventFactoryTemplate,
-    ...operations: (EventFactoryOperation | undefined)[]
-  ): Promise<EventTemplate> {
+  async process(template: EventFactoryTemplate, ...operations: (EventOperation | undefined)[]): Promise<EventTemplate> {
     return await EventFactory.runProcess(template, this.context, ...operations);
   }
 
   /** Create an event from a blueprint */
   async create<Args extends Array<any>>(
-    blueprint: (...args: Args) => EventFactoryBlueprint,
+    blueprint: (...args: Args) => EventBlueprint,
     ...args: Args
   ): Promise<EventTemplate> {
     return await blueprint(...args)(this.context);
@@ -103,7 +103,7 @@ export class EventFactory {
   /** Modify an existing event with operations and updated the created_at */
   async modify(
     draft: EventFactoryTemplate | NostrEvent,
-    ...operations: (EventFactoryOperation | undefined)[]
+    ...operations: (EventOperation | undefined)[]
   ): Promise<EventTemplate> {
     draft = { ...draft, created_at: unixNow() };
 
@@ -116,17 +116,17 @@ export class EventFactory {
   }
 
   /** Modify a lists public and hidden tags and updated the created_at */
-  async modifyList(
+  async modifyTags(
     event: EventFactoryTemplate,
     tagOperations?:
       | TagOperation
       | TagOperation[]
       | { public?: TagOperation | TagOperation[]; hidden?: TagOperation | TagOperation[] },
-    eventOperations?: EventFactoryOperation | (EventFactoryOperation | undefined)[],
+    eventOperations?: EventOperation | (EventOperation | undefined)[],
   ): Promise<EventTemplate> {
     let publicTagOperations: TagOperation[] = [];
     let hiddenTagOperations: TagOperation[] = [];
-    let eventOperationsArr: EventFactoryOperation[] = [];
+    let eventOperationsArr: EventOperation[] = [];
 
     // normalize tag operation arg
     if (tagOperations === undefined) publicTagOperations = hiddenTagOperations = [];

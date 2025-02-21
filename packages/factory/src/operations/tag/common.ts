@@ -7,7 +7,7 @@ import {
   createPTagFromProfilePointer,
 } from "../../helpers/pointer.js";
 import { ensureNamedValueTag } from "../../helpers/tag.js";
-import { TagOperation } from "./list.js";
+import { TagOperation } from "../../event-factory.js";
 
 /** Adds a single "p" tag for a ProfilePointer */
 export function addPubkeyTag(pubkey: string | ProfilePointer, replace = true): TagOperation {

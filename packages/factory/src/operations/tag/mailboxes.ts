@@ -1,6 +1,6 @@
 import { isRTag, isSameURL, normalizeURL } from "applesauce-core/helpers";
 import { addRelayTag, removeRelayTag } from "./relay.js";
-import { TagOperation } from "./list.js";
+import { TagOperation } from "../../event-factory.js";
 
 function findMatchingRTag(tags: string[][], url: string | URL) {
   return tags.filter(isRTag).find((t) => isSameURL(t[1], url));
