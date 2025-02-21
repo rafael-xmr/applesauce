@@ -9,10 +9,7 @@
 ### Patch Changes
 
 - 1c35f41: Add `require` support in node v22
-- Updated dependencies [e21a7b1]
-- Updated dependencies [7ff73b8]
-- Updated dependencies [e21a7b1]
-- Updated dependencies [1c35f41]
+- Updated dependencies
   - applesauce-signers@0.11.0
 
 ## 0.10.0
