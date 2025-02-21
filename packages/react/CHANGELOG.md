@@ -1,5 +1,21 @@
 # applesauce-react
 
+## 0.11.0
+
+### Minor Changes
+
+- be28870: Add `AccountsProvider` provider
+- be28870: Add account manager hooks
+
+### Patch Changes
+
+- 1c35f41: Add `require` support in node v22
+- Updated dependencies
+  - applesauce-factory@0.11.0
+  - applesauce-core@0.11.0
+  - applesauce-accounts@0.11.0
+  - applesauce-content@0.11.0
+
 ## 0.10.0
 
 ### Minor Changes

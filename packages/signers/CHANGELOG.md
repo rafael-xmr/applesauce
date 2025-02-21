@@ -1,5 +1,19 @@
 # applesauce-signer
 
+## 0.11.0
+
+### Minor Changes
+
+- e21a7b1: Switch Nostr Connect signer to use NIP-44 encryption by default
+- 7ff73b8: Add `restore` method to `SerialPortSigner`
+- e21a7b1: Remove dependency on `applesauce-net`
+
+### Patch Changes
+
+- 1c35f41: Add `require` support in node v22
+- Updated dependencies
+  - applesauce-core@0.11.0
+
 ## 0.10.0
 
 ### Minor Changes
