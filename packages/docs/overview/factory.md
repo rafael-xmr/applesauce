@@ -107,7 +107,7 @@ const mailboxes = {
 };
 
 const modified = await factory.modifyTags(
-  list,
+  mailboxes,
   // will change the existing "r" tag to ["r, "wss://relay.io/"] (both read and write)
   addOutboxRelay("wss://relay.io/"),
   // will add a new ["r", "wss://nostr.wine/", "write"] tag
