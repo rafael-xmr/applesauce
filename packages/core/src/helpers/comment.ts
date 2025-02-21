@@ -34,17 +34,20 @@ export const CommentReplyPointerSymbol = Symbol.for("comment-reply-pointer");
  * @throws
  */
 export function getCommentEventPointer(tags: string[][], root = false): CommentEventPointer | null {
-  const tag = tags.find((t) => t[0] === (root ? "E" : "e"));
+  const eTag = tags.find((t) => t[0] === (root ? "E" : "e"));
   const kind = tags.find((t) => t[0] === (root ? "K" : "k"))?.[1];
 
-  if (tag) {
+  if (eTag) {
     if (!kind) throw new Error("Missing kind tag");
 
+    // only the root pubkey can be gotten from the tags, since due to quotes and mentions there will be many "p" tags for replies
+    const rootPubkey = root ? tags.find((t) => t[0] === "P")?.[1] : undefined;
+
     const pointer: CommentPointer = {
-      id: tag[1],
+      id: eTag[1],
       kind: parseInt(kind),
-      pubkey: tag[3] || undefined,
-      relay: tag[2] && isSafeRelayURL(tag[2]) ? tag[2] : undefined,
+      pubkey: eTag[3] || rootPubkey || undefined,
+      relay: eTag[2] && isSafeRelayURL(eTag[2]) ? eTag[2] : undefined,
     };
 
     return pointer;
@@ -57,17 +60,20 @@ export function getCommentEventPointer(tags: string[][], root = false): CommentE
  * @throws
  */
 export function getCommentAddressPointer(tags: string[][], root = false): CommentAddressPointer | null {
-  const tag = tags.find((t) => t[0] === (root ? "A" : "a"));
-  const id = tags.find((t) => t[0] === (root ? "E" : "e"))?.[1];
+  const aTag = tags.find((t) => t[0] === (root ? "A" : "a"));
+  const eTag = tags.find((t) => t[0] === (root ? "E" : "e"));
   const kind = tags.find((t) => t[0] === (root ? "K" : "k"))?.[1];
 
-  if (tag) {
+  if (aTag) {
     if (!kind) throw new Error("Missing kind tag");
 
+    const addressPointer = getAddressPointerFromATag(aTag);
     const pointer: CommentAddressPointer = {
-      id,
-      ...getAddressPointerFromATag(tag),
-      kind: parseInt(kind),
+      id: eTag?.[1],
+      pubkey: addressPointer.pubkey,
+      identifier: addressPointer.identifier,
+      kind: addressPointer.kind || parseInt(kind),
+      relay: addressPointer.relays?.[0] || eTag?.[2],
     };
 
     return pointer;
@@ -80,14 +86,13 @@ export function getCommentAddressPointer(tags: string[][], root = false): Commen
  * @throws
  */
 export function getCommentExternalPointer(tags: string[][], root = false): CommentExternalPointer | null {
-  const tag = tags.find((t) => t[0] === (root ? "I" : "i"));
+  const iTag = tags.find((t) => t[0] === (root ? "I" : "i"));
   const kind = tags.find((t) => t[0] === (root ? "K" : "k"))?.[1];
 
-  if (tag) {
+  if (iTag) {
     if (!kind) throw new Error("Missing kind tag");
 
-    const pointer = getExternalPointerFromTag(tag);
-    return pointer;
+    return getExternalPointerFromTag(iTag);
   }
   return null;
 }

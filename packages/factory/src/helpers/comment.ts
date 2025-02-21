@@ -18,7 +18,8 @@ export function createCommentTagsFromCommentPointer(pointer: CommentPointer, roo
     return [
       fillAndTrimTag([root ? "E" : "e", pointer.id, pointer.relay, pointer.pubkey]),
       [root ? "K" : "k", String(pointer.kind)],
-    ];
+      pointer.pubkey ? fillAndTrimTag([root ? "P" : "p", pointer.pubkey]) : undefined,
+    ].filter((t) => !!t);
   } else if (isCommentAddressPointer(pointer)) {
     // Address pointer
     return [
@@ -29,6 +30,7 @@ export function createCommentTagsFromCommentPointer(pointer: CommentPointer, roo
       ]),
       pointer.id ? fillAndTrimTag([root ? "E" : "e", pointer.id, pointer.relay, pointer.pubkey]) : undefined,
       [root ? "K" : "k", String(pointer.kind)],
+      pointer.pubkey ? fillAndTrimTag([root ? "P" : "p", pointer.pubkey]) : undefined,
     ].filter((t) => !!t);
   } else {
     // External pointer
@@ -41,8 +43,8 @@ export function createCommentTagsFromCommentPointer(pointer: CommentPointer, roo
   throw new Error("Unknown comment pointer kind");
 }
 
-/** Returns an array of NIP-22 tags for a kind 1111 reply event */
-export function createCommentTagsForReply(parent: NostrEvent, relayHint?: string) {
+/** Returns an array of NIP-22 tags for a kind 1111 comment event */
+export function createCommentTagsForEvent(parent: NostrEvent, relayHint?: string) {
   const tags: string[][] = [];
 
   let parentPointer: CommentPointer;
@@ -54,16 +56,16 @@ export function createCommentTagsForReply(parent: NostrEvent, relayHint?: string
     parentPointer = { id: parent.id, pubkey: parent.pubkey, kind: parent.kind, relay: relayHint };
   }
 
-  // add root tags
+  // check if parent event is a comment
   if (parent.kind === COMMENT_KIND) {
-    // replying to a comment
+    // comment is a reply to another comment
     const pointer = getCommentRootPointer(parent);
     if (!pointer) throw new Error("Comment missing root pointer");
 
     // recreate the root tags
     tags.push(...createCommentTagsFromCommentPointer(pointer, true));
   } else {
-    // replying directly to root
+    // comment is root comment
     tags.push(...createCommentTagsFromCommentPointer(parentPointer, true));
   }
 
