@@ -1,6 +1,6 @@
 {
   "name": "applesauce-factory",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "",
   "type": "module",
   "main": "dist/index.js",
@@ -41,10 +41,25 @@
       "require": "./dist/operations/index.js",
       "types": "./dist/operations/index.d.ts"
     },
-    "./operations/*": {
-      "import": "./dist/operations/*.js",
-      "require": "./dist/operations/*.js",
-      "types": "./dist/operations/*.d.ts"
+    "./operations/tag": {
+      "import": "./dist/operations/tag/index.js",
+      "require": "./dist/operations/tag/index.js",
+      "types": "./dist/operations/tag/index.d.ts"
+    },
+    "./operations/tag/*": {
+      "import": "./dist/operations/tag/*.js",
+      "require": "./dist/operations/tag/*.js",
+      "types": "./dist/operations/tag/*.d.ts"
+    },
+    "./operations/event": {
+      "import": "./dist/operations/event/index.js",
+      "require": "./dist/operations/event/index.js",
+      "types": "./dist/operations/event/index.d.ts"
+    },
+    "./operations/event/*": {
+      "import": "./dist/operations/event/*.js",
+      "require": "./dist/operations/event/*.js",
+      "types": "./dist/operations/event/*.d.ts"
     },
     "./helpers": {
       "import": "./dist/helpers/index.js",
@@ -63,8 +78,8 @@
     }
   },
   "dependencies": {
-    "applesauce-content": "^0.10.0",
-    "applesauce-core": "^0.10.0",
+    "applesauce-content": "^0.11.0",
+    "applesauce-core": "^0.11.0",
     "nanoid": "^5.0.9",
     "nostr-tools": "^2.10.4"
   },

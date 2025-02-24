@@ -3,6 +3,7 @@ import { EventTemplate, kinds, NostrEvent } from "nostr-tools";
 import { GROUPS_LIST_KIND } from "./groups.js";
 import { EventStore } from "../event-store/event-store.js";
 import { unixNow } from "./time.js";
+import { isEvent } from "./event.js";
 
 export type HiddenTagsSigner = {
   nip04?: {
@@ -75,11 +76,11 @@ export function getListEncryptionMethods(kind: number, signer: HiddenTagsSigner)
  * @param store An optional EventStore to notify about the update
  * @throws
  */
-export async function unlockHiddenTags(
-  event: NostrEvent,
+export async function unlockHiddenTags<T extends { kind: number; pubkey: string; content: string }>(
+  event: T,
   signer: HiddenTagsSigner,
   store?: EventStore,
-): Promise<NostrEvent> {
+): Promise<T> {
   if (!canHaveHiddenTags(event.kind)) throw new Error("Event kind does not support hidden tags");
   const encryption = getListEncryptionMethods(event.kind, signer);
   const plaintext = await encryption.decrypt(event.pubkey, event.content);
@@ -92,7 +93,7 @@ export async function unlockHiddenTags(
 
   Reflect.set(event, HiddenTagsSymbol, tags);
 
-  if (store) store.update(event);
+  if (store && isEvent(event)) store.update(event);
 
   return event;
 }

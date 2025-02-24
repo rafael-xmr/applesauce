@@ -53,7 +53,6 @@ export default defineConfig({
           { text: "Getting Started", link: "/react/getting-started" },
           { text: "Providers", link: "/react/providers" },
           { text: "Hooks", link: "/react/hooks" },
-          { text: "Content", link: "/react/content" },
         ],
       },
       {

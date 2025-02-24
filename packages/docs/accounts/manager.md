@@ -51,6 +51,14 @@ manager.setActive(account);
 manager.removeAccount(account.id);
 ```
 
+## Active account
+
+The `AccountManager` class exposes a set of methods to track which account is active and switch the active account
+
+- `AccountManager.active` gets the currently active account
+- `AccountManager.active$` an observable of the active account, can be used to subscribe to changes
+- `AccountManager.setActive(id: string | Account)` set the active account
+
 ## Persisting accounts
 
 The account manager exposes two methods that can be used to persist accounts between app reloads. `toJSON` and `fromJSON`

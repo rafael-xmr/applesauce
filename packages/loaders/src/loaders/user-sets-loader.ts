@@ -8,7 +8,7 @@ import { CacheRequest, Loader } from "./loader.js";
 import { generatorSequence } from "../operators/generator-sequence.js";
 import { consolidateAddressPointers, createFiltersFromAddressPointers } from "../helpers/address-pointer.js";
 import { groupByRelay } from "../helpers/pointer.js";
-import { distinctRelays } from "../operators/distinct-relays.js";
+import { distinctRelaysBatch } from "../operators/distinct-relays.js";
 
 export type LoadableSetPointer = {
   /** A replaceable kind >= 30000 & < 40000 */
@@ -97,12 +97,12 @@ export class UserSetsLoader extends Loader<LoadableSetPointer, EventPacket> {
 
     super((source) =>
       source.pipe(
-        // only load from each relay once
-        distinctRelays((p) => p.kind + ":" + p.pubkey, options.refreshTimeout ?? 120_000),
         // load first from cache
         bufferTime(options?.bufferTime ?? 1000),
         // ignore empty buffers
         filter((buffer) => buffer.length > 0),
+        // only load from each relay once
+        distinctRelaysBatch((p) => p.kind + ":" + p.pubkey, options.refreshTimeout ?? 120_000),
         // deduplicate address pointers
         map(consolidateAddressPointers),
         // check cache, relays, lookup relays in that order

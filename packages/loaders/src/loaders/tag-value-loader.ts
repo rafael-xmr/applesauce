@@ -5,7 +5,7 @@ import { markFromCache } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
 
 import { CacheRequest, Loader, RelayFilterMap } from "./loader.js";
-import { distinctRelays } from "../operators/distinct-relays.js";
+import { distinctRelaysBatch } from "../operators/distinct-relays.js";
 import { getDefaultReadRelays } from "../helpers/rx-nostr.js";
 import { unique } from "../helpers/array.js";
 
@@ -47,12 +47,12 @@ export class TagValueLoader extends Loader<TabValuePointer, EventPacket> {
 
     super((source) =>
       source.pipe(
-        // don't request the same
-        distinctRelays((m) => m.value),
         // batch the pointers
         bufferTime(opts?.bufferTime ?? 1000),
         // filter out empty batches
         filter((pointers) => pointers.length > 0),
+        // only request from each relay once
+        distinctRelaysBatch((m) => m.value),
         // batch pointers into requests
         mergeMap((pointers) => {
           const baseFilter: Filter = {};

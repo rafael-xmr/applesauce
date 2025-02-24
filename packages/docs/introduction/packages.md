@@ -100,10 +100,6 @@ pnpm install applesauce-factory
 
 :::
 
-## Actions
-
-WIP
-
 ## Loaders
 
 The `applesauce-loaders` package is built on top of [rx-nostr](https://penpenpng.github.io/rx-nostr/) and contains some loaders that can be used to easily fetch nostr events from multiple relays. [see more](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_loaders.html)

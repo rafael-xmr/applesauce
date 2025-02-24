@@ -7,7 +7,7 @@ import { nanoid } from "nanoid";
 
 import { CacheRequest, Loader } from "./loader.js";
 import { generatorSequence } from "../operators/generator-sequence.js";
-import { distinctRelays } from "../operators/distinct-relays.js";
+import { distinctRelaysBatch } from "../operators/distinct-relays.js";
 import { groupByRelay } from "../helpers/pointer.js";
 import { consolidateEventPointers } from "../helpers/event-pointer.js";
 
@@ -111,11 +111,12 @@ export class SingleEventLoader extends Loader<LoadableEventPointer, EventPacket>
 
     super((source) =>
       source.pipe(
-        distinctRelays((p) => p.id, options.refreshTimeout ?? 60_000),
         // load first from cache
         bufferTime(opts?.bufferTime ?? 1000),
         // ignore empty buffers
         filter((buffer) => buffer.length > 0),
+        // only request events from relays once
+        distinctRelaysBatch((p) => p.id, options.refreshTimeout ?? 60_000),
         // ensure there is only one of each event pointer
         map(consolidateEventPointers),
         // run the loader sequence

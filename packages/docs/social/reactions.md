@@ -1,6 +1,21 @@
 # Reactions
 
-## Parsing
+## Queries
+
+The [ReactionsQuery](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.ReactionsQuery.html) is a simple query that can be used to get all reaction events for an event
+
+```js
+// kind 1 short text note event
+const note = {...}
+
+// subscribe to the query to get the replies
+queryStore.createQuery(ReactionsQuery, note).subscribe(replies => {
+  if(replies) console.log(replies)
+})
+
+// adding events to the store will update the query
+eventStore.add({kind: 7, ...})
+```
 
 ## Loading
 
@@ -50,6 +65,9 @@ const event = {
 
 // create a like reaction
 let like = await eventFactory.create(ReactionBlueprint, event, "+");
+
+// create down vote
+let dislike = await eventFactory.create(ReactionBlueprint, event, "-");
 
 // create an emoji reaction
 let like = await eventFactory.create(ReactionBlueprint, event, "🧡");

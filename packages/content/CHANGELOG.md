@@ -1,5 +1,17 @@
 # applesauce-content
 
+## 0.11.0
+
+### Minor Changes
+
+- 34e8f80: Add `getMediaAttachmentURLsFromContent` helper
+
+### Patch Changes
+
+- 1c35f41: Add `require` support in node v22
+- Updated dependencies
+  - applesauce-core@0.11.0
+
 ## 0.10.0
 
 ### Patch Changes
