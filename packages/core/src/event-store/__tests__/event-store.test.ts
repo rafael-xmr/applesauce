@@ -89,7 +89,7 @@ describe("verifyEvent", () => {
   });
 });
 
-describe("deleted", () => {
+describe("removed", () => {
   it("should complete when event is removed", () => {
     eventStore.add(profile);
     const spy = subscribeSpyTo(eventStore.removed(profile.id));
@@ -267,6 +267,21 @@ describe("timeline", () => {
     const spy = subscribeSpyTo(eventStore.timeline({ kinds: [0] }));
     eventStore.add(user.profile({ name: "old-name" }, { created_at: profile.created_at - 1000 }));
     expect(spy.getValues()).toEqual([[profile]]);
+  });
+
+  it("should return new array for every value", () => {
+    const first = user.note("first note");
+    const second = user.note("second note");
+    const third = user.note("third note");
+    eventStore.add(first);
+    const spy = subscribeSpyTo(eventStore.timeline({ kinds: [0] }));
+    eventStore.add(second);
+    eventStore.add(third);
+    const hasDuplicates = (arr: any[]) => {
+      return new Set(arr).size !== arr.length;
+    };
+
+    expect(hasDuplicates(spy.getValues())).toBe(false);
   });
 });
 
