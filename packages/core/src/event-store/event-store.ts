@@ -157,7 +157,7 @@ export class EventStore {
 
   /** Get all events matching a filter */
   getAll(filters: Filter[]): Set<NostrEvent> {
-    return this.database.getForFilters(filters);
+    return this.database.getEventsForFilters(filters);
   }
 
   /** Check if the store has an event */
@@ -181,6 +181,11 @@ export class EventStore {
   /** Returns all versions of a replaceable event */
   getReplaceableHistory(kind: number, pubkey: string, d?: string): NostrEvent[] | undefined {
     return this.database.getReplaceable(kind, pubkey, d);
+  }
+
+  /** Returns a timeline of events that match filters */
+  getTimeline(filters: Filter | Filter[]): NostrEvent[] {
+    return Array.from(this.database.getEventsForFilters(Array.isArray(filters) ? filters : [filters])).sort(sortDesc);
   }
 
   /**
@@ -366,7 +371,7 @@ export class EventStore {
     const seen = new Map<string, NostrEvent>();
 
     // get current events
-    return defer(() => of(Array.from(this.database.getForFilters(filters)).sort(sortDesc))).pipe(
+    return defer(() => of(Array.from(this.database.getEventsForFilters(filters)).sort(sortDesc))).pipe(
       // claim existing events
       claimEvents(this.database),
       // subscribe to newer events

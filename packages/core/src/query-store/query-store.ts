@@ -120,6 +120,11 @@ export class QueryStore {
     return this.createQuery(Queries.MailboxesQuery, pubkey);
   }
 
+  /** Creates a query for a users blossom servers */
+  blossomServers(pubkey: string) {
+    return this.createQuery(Queries.UserBlossomServersQuery, pubkey);
+  }
+
   /** Creates a ThreadQuery */
   thread(root: string | EventPointer | AddressPointer) {
     return this.createQuery(Queries.ThreadQuery, root);

@@ -1,5 +1,11 @@
 import { kinds } from "nostr-tools";
-import { MailboxesQuery, ProfileQuery, ReplaceableQuery, UserContactsQuery } from "applesauce-core/queries";
+import {
+  MailboxesQuery,
+  ProfileQuery,
+  ReplaceableQuery,
+  UserBlossomServersQuery,
+  UserContactsQuery,
+} from "applesauce-core/queries";
 import { getObservableValue, simpleTimeout } from "applesauce-core/observable";
 import { EventStore, QueryStore } from "applesauce-core";
 import { ProfilePointer } from "nostr-tools/nip19";
@@ -7,6 +13,7 @@ import { filter, Observable } from "rxjs";
 
 import { ReplaceableLoader } from "./replaceable-loader.js";
 import { LoadableAddressPointer } from "../helpers/address-pointer.js";
+import { BLOSSOM_SERVER_LIST_KIND } from "applesauce-core/helpers";
 
 /** A special Promised based loader built on the {@link QueryStore} */
 export class RequestLoader {
@@ -25,7 +32,9 @@ export class RequestLoader {
   ): Promise<NonNullable<T>> {
     return getObservableValue(
       this.store.createQuery(queryConstructor, ...args).pipe(
+        // ignore undefined and null values
         filter((v) => v !== undefined && v !== null),
+        // timeout with an error is not values
         simpleTimeout(this.requestTimeout),
       ),
     );
@@ -58,5 +67,16 @@ export class RequestLoader {
   contacts(pointer: ProfilePointer, force?: boolean) {
     this.checkReplaceable().next({ kind: kinds.Contacts, pubkey: pointer.pubkey, relays: pointer.relays, force });
     return this.runWithTimeout(UserContactsQuery, pointer.pubkey);
+  }
+
+  /** Loads a pubkeys blossom servers */
+  blossomServers(pointer: ProfilePointer, force?: boolean) {
+    this.checkReplaceable().next({
+      kind: BLOSSOM_SERVER_LIST_KIND,
+      pubkey: pointer.pubkey,
+      relays: pointer.relays,
+      force,
+    });
+    return this.runWithTimeout(UserBlossomServersQuery, pointer.pubkey);
   }
 }

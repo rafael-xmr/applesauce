@@ -21,7 +21,7 @@ export const HiddenTagsSymbol = Symbol.for("hidden-tags");
 /** Various event kinds that can have encrypted tags in their content and which encryption method they use */
 export const EventEncryptionMethod: Record<number, "nip04" | "nip44"> = {
   // NIP-60 wallet
-  37375: "nip44",
+  17375: "nip44",
 
   // NIP-51 lists
   [kinds.BookmarkList]: "nip04",
