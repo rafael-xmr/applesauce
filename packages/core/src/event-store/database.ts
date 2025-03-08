@@ -332,7 +332,7 @@ export class Database {
     return events;
   }
 
-  getForFilters(filters: Filter[]): Set<NostrEvent> {
+  getEventsForFilters(filters: Filter[]): Set<NostrEvent> {
     if (filters.length === 0) throw new Error("No Filters");
 
     let events = new Set<NostrEvent>();
