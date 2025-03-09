@@ -48,7 +48,7 @@ export async function unlockHiddenTags<T extends { kind: number; pubkey: string;
   event: T,
   signer: HiddenContentSigner,
   store?: EventStore,
-): Promise<T> {
+): Promise<string[][]> {
   if (!canHaveHiddenTags(event.kind)) throw new Error("Event kind does not support hidden tags");
   const plaintext = await unlockHiddenContent(event, signer);
 
@@ -62,7 +62,7 @@ export async function unlockHiddenTags<T extends { kind: number; pubkey: string;
 
   if (store && isEvent(event)) store.update(event);
 
-  return event;
+  return tags;
 }
 
 /**

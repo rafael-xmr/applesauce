@@ -58,9 +58,7 @@ export function modifyHiddenTags(...operations: TagOperation[]): EventOperation 
         if (hasHiddenTags(draft)) {
           // draft is an existing event, attempt to unlock tags
           const pubkey = await ctx.signer.getPublicKey();
-          const unlocked = await unlockHiddenTags({ ...draft, pubkey }, ctx.signer);
-          // try again
-          hidden = getHiddenTags(unlocked);
+          hidden = await unlockHiddenTags({ ...draft, pubkey }, ctx.signer);
         } else {
           // create a new array of hidden tags
           hidden = [];

@@ -379,6 +379,31 @@ importers:
         specifier: ^3.0.5
         version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(yaml@2.7.0)
 
+  packages/wallet:
+    dependencies:
+      applesauce-core:
+        specifier: ^0.11.0
+        version: link:../core
+      nostr-tools:
+        specifier: ^2.10.4
+        version: 2.10.4(typescript@5.7.3)
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+    devDependencies:
+      '@hirez_io/observer-spy':
+        specifier: ^2.2.0
+        version: 2.2.0(rxjs@7.8.1)(typescript@5.7.3)
+      '@types/debug':
+        specifier: ^4.1.12
+        version: 4.1.12
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+      vitest:
+        specifier: ^3.0.5
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(yaml@2.7.0)
+
 packages:
 
   '@algolia/autocomplete-core@1.17.7':
