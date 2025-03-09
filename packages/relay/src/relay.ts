@@ -8,7 +8,6 @@ import {
   NEVER,
   Observable,
   of,
-  retry,
   shareReplay,
   switchMap,
   take,
@@ -74,8 +73,6 @@ export class Relay {
 
     // create an observable for listening for AUTH
     this.challenge$ = this.socket$.pipe(
-      // trying connection on error
-      retry({ count: 20, delay: 5_000, resetOnSuccess: true }),
       // listen for AUTH messages
       filter((message) => message[0] === "AUTH"),
       // pick the challenge string out
@@ -115,8 +112,6 @@ export class Relay {
           (message) => (message[0] === "EVENT" || message[0] === "CLOSE" || message[0] === "EOSE") && message[1] === id,
         )
         .pipe(
-          // trying connection on error
-          retry({ count: 20, delay: 5_000, resetOnSuccess: true }),
           // listen for CLOSE auth-required
           tap((m) => {
             if (m[0] === "CLOSE" && m[1].startsWith("auth-required") && !this.authRequiredForReq.value) {
@@ -150,8 +145,6 @@ export class Relay {
         (m) => m[0] === "OK" && m[1] === event.id,
       )
       .pipe(
-        // trying connection on error
-        retry({ count: 20, delay: 5_000, resetOnSuccess: true }),
         // format OK message
         map((m) => ({ ok: m[2], message: m[3], from: this.url })),
         // complete on first value

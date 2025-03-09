@@ -1,48 +1,20 @@
-import { EventTemplate, kinds, NostrEvent } from "nostr-tools";
+import { EventTemplate, NostrEvent } from "nostr-tools";
 
-import { GROUPS_LIST_KIND } from "./groups.js";
 import { EventStore } from "../event-store/event-store.js";
 import { unixNow } from "./time.js";
 import { isEvent } from "./event.js";
-
-export type HiddenTagsSigner = {
-  nip04?: {
-    encrypt: (pubkey: string, plaintext: string) => Promise<string> | string;
-    decrypt: (pubkey: string, ciphertext: string) => Promise<string> | string;
-  };
-  nip44?: {
-    encrypt: (pubkey: string, plaintext: string) => Promise<string> | string;
-    decrypt: (pubkey: string, ciphertext: string) => Promise<string> | string;
-  };
-};
+import {
+  canHaveHiddenContent,
+  getHiddenContentEncryptionMethods,
+  HiddenContentSigner,
+  unlockHiddenContent,
+} from "./hidden-content.js";
 
 export const HiddenTagsSymbol = Symbol.for("hidden-tags");
 
-/** Various event kinds that can have encrypted tags in their content and which encryption method they use */
-export const EventEncryptionMethod: Record<number, "nip04" | "nip44"> = {
-  // NIP-60 wallet
-  17375: "nip44",
-
-  // NIP-51 lists
-  [kinds.BookmarkList]: "nip04",
-  [kinds.InterestsList]: "nip04",
-  [kinds.Mutelist]: "nip04",
-  [kinds.CommunitiesList]: "nip04",
-  [kinds.PublicChatsList]: "nip04",
-  [kinds.SearchRelaysList]: "nip04",
-  [GROUPS_LIST_KIND]: "nip04",
-
-  // NIP-51 sets
-  [kinds.Bookmarksets]: "nip04",
-  [kinds.Relaysets]: "nip04",
-  [kinds.Followsets]: "nip04",
-  [kinds.Curationsets]: "nip04",
-  [kinds.Interestsets]: "nip04",
-};
-
 /** Checks if an event can have hidden tags */
 export function canHaveHiddenTags(kind: number): boolean {
-  return EventEncryptionMethod[kind] !== undefined;
+  return canHaveHiddenContent(kind);
 }
 
 /** Checks if an event has hidden tags */
@@ -61,12 +33,8 @@ export function isHiddenTagsLocked(event: NostrEvent): boolean {
 }
 
 /** Returns either nip04 or nip44 encryption method depending on list kind */
-export function getListEncryptionMethods(kind: number, signer: HiddenTagsSigner) {
-  const method = EventEncryptionMethod[kind];
-  const encryption = signer[method];
-  if (!encryption) throw new Error(`Signer does not support ${method} encryption`);
-
-  return encryption;
+export function getListEncryptionMethods(kind: number, signer: HiddenContentSigner) {
+  return getHiddenContentEncryptionMethods(kind, signer);
 }
 
 /**
@@ -78,12 +46,11 @@ export function getListEncryptionMethods(kind: number, signer: HiddenTagsSigner)
  */
 export async function unlockHiddenTags<T extends { kind: number; pubkey: string; content: string }>(
   event: T,
-  signer: HiddenTagsSigner,
+  signer: HiddenContentSigner,
   store?: EventStore,
 ): Promise<T> {
   if (!canHaveHiddenTags(event.kind)) throw new Error("Event kind does not support hidden tags");
-  const encryption = getListEncryptionMethods(event.kind, signer);
-  const plaintext = await encryption.decrypt(event.pubkey, event.content);
+  const plaintext = await unlockHiddenContent(event, signer);
 
   const parsed = JSON.parse(plaintext) as string[][];
   if (!Array.isArray(parsed)) throw new Error("Content is not an array of tags");
@@ -100,12 +67,13 @@ export async function unlockHiddenTags<T extends { kind: number; pubkey: string;
 
 /**
  * Override the hidden tags in an event
+ * @deprecated use EventFactory to create draft events
  * @throws
  */
 export async function overrideHiddenTags(
   event: NostrEvent,
   hidden: string[][],
-  signer: HiddenTagsSigner,
+  signer: HiddenContentSigner,
 ): Promise<EventTemplate> {
   if (!canHaveHiddenTags(event.kind)) throw new Error("Event kind does not support hidden tags");
   const encryption = getListEncryptionMethods(event.kind, signer);
