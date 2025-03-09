@@ -6,12 +6,12 @@
   "linked": [
     [
       "applesauce-accounts",
-      "applesauce-actions",
       "applesauce-content",
       "applesauce-core",
       "applesauce-factory",
       "applesauce-loaders",
       "applesauce-react",
+      "applesauce-relay",
       "applesauce-signers"
     ]
   ],

@@ -56,34 +56,6 @@ importers:
         specifier: ^3.0.5
         version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(yaml@2.7.0)
 
-  packages/actions:
-    dependencies:
-      applesauce-core:
-        specifier: ^0.11.0
-        version: link:../core
-      applesauce-factory:
-        specifier: ^0.11.0
-        version: link:../factory
-      debug:
-        specifier: ^4.4.0
-        version: 4.4.0
-      nostr-tools:
-        specifier: ^2.10.4
-        version: 2.10.4(typescript@5.7.3)
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-    devDependencies:
-      '@types/debug':
-        specifier: ^4.1.12
-        version: 4.1.12
-      typescript:
-        specifier: ^5.7.3
-        version: 5.7.3
-      vitest:
-        specifier: ^3.0.5
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(yaml@2.7.0)
-
   packages/content:
     dependencies:
       '@cashu/cashu-ts':
@@ -341,6 +313,34 @@ importers:
       vitest:
         specifier: ^3.0.5
         version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(yaml@2.7.0)
+
+  packages/relay:
+    dependencies:
+      applesauce-core:
+        specifier: workspace:^
+        version: link:../core
+      nanoid:
+        specifier: ^5.0.9
+        version: 5.0.9
+      nostr-tools:
+        specifier: ^2.10.4
+        version: 2.10.4(typescript@5.7.3)
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+      vitest:
+        specifier: ^3.0.5
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(yaml@2.7.0)
+      vitest-nostr:
+        specifier: ^0.4.1
+        version: 0.4.1(vitest-websocket-mock@0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(yaml@2.7.0)))(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(yaml@2.7.0))
+      vitest-websocket-mock:
+        specifier: ^0.4.0
+        version: 0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(yaml@2.7.0))
 
   packages/signers:
     dependencies:

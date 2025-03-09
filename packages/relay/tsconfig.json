@@ -21,7 +21,9 @@
     "declaration": true,
     "strict": true,
 
-    "pretty": true
+    "pretty": true,
+
+    "jsx": "react-jsx"
   },
   "include": ["src/**/*"]
 }
