@@ -63,7 +63,7 @@ export function getHiddenContent(event: NostrEvent | EventTemplate): string | un
 
 /** Checks if the hidden tags are locked */
 export function isHiddenContentLocked(event: NostrEvent | UnsignedEvent): boolean {
-  return hasHiddenContent(event) && getHiddenContent(event) === undefined;
+  return getHiddenContent(event) === undefined;
 }
 
 /** Returns either nip04 or nip44 encryption methods depending on event kind */
