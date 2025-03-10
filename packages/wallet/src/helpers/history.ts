@@ -17,6 +17,10 @@ export type HistoryDetails = {
   amount: number;
   /** An array of token event ids created */
   created: string[];
+  /** The mint that was spent from */
+  mint?: string;
+  /** The fee paid */
+  fee?: number;
 };
 
 export const HistoryDetailsSymbol = Symbol.for("history-details");
@@ -44,9 +48,13 @@ export function getHistoryDetails(history: NostrEvent): HistoryDetails {
     const amount = parseInt(amountStr);
     if (!Number.isFinite(amount)) throw new Error("Failed to parse amount");
 
+    const mint = tags.find((t) => t[0] === "mint")?.[1];
+    const feeStr = tags.find((t) => t[0] === "fee")?.[1];
+    const fee = feeStr ? parseInt(feeStr) : undefined;
+
     const created = tags.filter((t) => isETag(t) && t[3] === "created").map((t) => t[1]);
 
-    return { direction, amount, created };
+    return { direction, amount, created, mint, fee };
   });
 }
 
