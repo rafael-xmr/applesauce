@@ -3,6 +3,7 @@ import {
   getOrComputeCachedValue,
   HiddenContentSigner,
   isETag,
+  isHiddenTagsLocked,
   unlockHiddenTags,
 } from "applesauce-core/helpers";
 import { NostrEvent } from "nostr-tools";
@@ -23,6 +24,11 @@ export const HistoryDetailsSymbol = Symbol.for("history-details");
 /** returns an array of redeemed event ids in a history event */
 export function getHistoryRedeemed(history: NostrEvent): string[] {
   return history.tags.filter((t) => isETag(t) && t[3] === "redeemed").map((t) => t[1]);
+}
+
+/** Checks if the history details are locked */
+export function isHistoryDetailsLocked(history: NostrEvent) {
+  return isHiddenTagsLocked(history);
 }
 
 /** Returns the parsed details of a 7376 history event */

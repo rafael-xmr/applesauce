@@ -1,21 +1,24 @@
 import { Query } from "applesauce-core";
-import { combineLatest, filter, map } from "rxjs";
+import { combineLatest, filter, map, startWith } from "rxjs";
 import { NostrEvent } from "nostr-tools";
 
 import { getTokenDetails, isTokenDetailsLocked, WALLET_TOKEN_KIND } from "../helpers/tokens.js";
 
 /** A query that subscribes to all token events for a wallet, passing locked will filter by token locked status */
-export function WalletTokensQuery(pubkey: string, locked: boolean | undefined): Query<NostrEvent[]> {
+export function WalletTokensQuery(pubkey: string, locked?: boolean | undefined): Query<NostrEvent[]> {
   return {
     key: pubkey + locked,
     run: (events) => {
-      const updates = events.updates.pipe(filter((e) => e.kind === WALLET_TOKEN_KIND && e.pubkey === pubkey));
+      const updates = events.updates.pipe(
+        filter((e) => e.kind === WALLET_TOKEN_KIND && e.pubkey === pubkey),
+        startWith(undefined),
+      );
       const timeline = events.timeline({ kinds: [WALLET_TOKEN_KIND], authors: [pubkey] });
 
       return combineLatest([updates, timeline]).pipe(
         map(([_, tokens]) => {
-          if (locked !== undefined) return tokens.filter((t) => isTokenDetailsLocked(t) === locked);
-          else return tokens;
+          if (locked === undefined) return tokens;
+          else return tokens.filter((t) => isTokenDetailsLocked(t) === locked);
         }),
       );
     },
@@ -27,7 +30,10 @@ export function WalletBalanceQuery(pubkey: string): Query<Record<string, number>
   return {
     key: pubkey,
     run: (events) => {
-      const updates = events.updates.pipe(filter((e) => e.kind === WALLET_TOKEN_KIND && e.pubkey === pubkey));
+      const updates = events.updates.pipe(
+        filter((e) => e.kind === WALLET_TOKEN_KIND && e.pubkey === pubkey),
+        startWith(undefined),
+      );
       const timeline = events.timeline({ kinds: [WALLET_TOKEN_KIND], authors: [pubkey] });
 
       return combineLatest([updates, timeline]).pipe(

@@ -19,7 +19,7 @@ export function WalletQuery(pubkey: string): Query<WalletInfo | undefined> {
         // get the latest replaceable event
         events.replaceable(WALLET_KIND, pubkey),
         // and listen for any updates to matching events
-        events.database.updated.pipe(filter((e) => e.kind === WALLET_KIND && e.pubkey === pubkey)),
+        events.updates.pipe(filter((e) => e.kind === WALLET_KIND && e.pubkey === pubkey)),
       ).pipe(
         map((wallet) => {
           if (!wallet) return;
