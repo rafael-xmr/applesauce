@@ -45,10 +45,22 @@
       "import": "./dist/queries/*.js",
       "require": "./dist/queries/*.js",
       "types": "./dist/queries/*.d.ts"
+    },
+    "./blueprints": {
+      "import": "./dist/blueprints/index.js",
+      "require": "./dist/blueprints/index.js",
+      "types": "./dist/blueprints/index.d.ts"
+    },
+    "./blueprints/*": {
+      "import": "./dist/blueprints/*.js",
+      "require": "./dist/blueprints/*.js",
+      "types": "./dist/blueprints/*.d.ts"
     }
   },
   "dependencies": {
+    "@noble/hashes": "^1.7.1",
     "applesauce-core": "^0.11.0",
+    "applesauce-factory": "^0.11.0",
     "nostr-tools": "^2.10.4",
     "rxjs": "^7.8.1"
   },
