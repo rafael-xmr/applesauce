@@ -1,7 +1,7 @@
 {
-  "name": "applesauce-content",
+  "name": "applesauce-wallet",
   "version": "0.11.0",
-  "description": "Unified plugins for processing event content",
+  "description": "",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,8 +18,7 @@
   "author": "hzrd149",
   "license": "MIT",
   "files": [
-    "dist",
-    "applesauce"
+    "dist"
   ],
   "exports": {
     ".": {
@@ -37,36 +36,37 @@
       "require": "./dist/helpers/*.js",
       "types": "./dist/helpers/*.d.ts"
     },
-    "./nast": {
-      "import": "./dist/nast/index.js",
-      "require": "./dist/nast/index.js",
-      "types": "./dist/nast/index.d.ts"
+    "./queries": {
+      "import": "./dist/queries/index.js",
+      "require": "./dist/queries/index.js",
+      "types": "./dist/queries/index.d.ts"
     },
-    "./markdown": {
-      "import": "./dist/markdown/index.js",
-      "require": "./dist/markdown/index.js",
-      "types": "./dist/markdown/index.d.ts"
+    "./queries/*": {
+      "import": "./dist/queries/*.js",
+      "require": "./dist/queries/*.js",
+      "types": "./dist/queries/*.d.ts"
     },
-    "./text": {
-      "import": "./dist/text/index.js",
-      "require": "./dist/text/index.js",
-      "types": "./dist/text/index.d.ts"
+    "./blueprints": {
+      "import": "./dist/blueprints/index.js",
+      "require": "./dist/blueprints/index.js",
+      "types": "./dist/blueprints/index.d.ts"
+    },
+    "./blueprints/*": {
+      "import": "./dist/blueprints/*.js",
+      "require": "./dist/blueprints/*.js",
+      "types": "./dist/blueprints/*.d.ts"
     }
   },
   "dependencies": {
-    "@cashu/cashu-ts": "2.0.0-rc1",
-    "@types/hast": "^3.0.4",
-    "@types/mdast": "^4.0.4",
-    "@types/unist": "^3.0.3",
+    "@noble/hashes": "^1.7.1",
     "applesauce-core": "^0.11.0",
-    "mdast-util-find-and-replace": "^3.0.2",
+    "applesauce-factory": "^0.11.0",
     "nostr-tools": "^2.10.4",
-    "remark": "^15.0.1",
-    "remark-parse": "^11.0.0",
-    "unified": "^11.0.5",
-    "unist-util-visit-parents": "^6.0.1"
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
+    "@hirez_io/observer-spy": "^2.2.0",
+    "@types/debug": "^4.1.12",
     "typescript": "^5.7.3",
     "vitest": "^3.0.5"
   },

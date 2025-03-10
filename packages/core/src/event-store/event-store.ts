@@ -49,6 +49,9 @@ export class EventStore {
   /** A method used to verify new events before added them */
   verifyEvent?: (event: NostrEvent) => boolean;
 
+  /** A stream of events that have been updated */
+  updates: Observable<NostrEvent>;
+
   constructor() {
     this.database = new Database();
 
@@ -56,6 +59,8 @@ export class EventStore {
       // reject events that are invalid
       if (this.verifyEvent && this.verifyEvent(event) === false) throw new Error("Invalid event");
     };
+
+    this.updates = this.database.updated;
   }
 
   // delete state

@@ -1,7 +1,7 @@
 {
-  "name": "applesauce-actions",
+  "name": "applesauce-relay",
   "version": "0.11.0",
-  "description": "A package for performing common nostr actions",
+  "description": "A collection of observable based loaders built on rx-nostr",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,26 +18,37 @@
   "author": "hzrd149",
   "license": "MIT",
   "files": [
-    "dist"
+    "dist",
+    "applesauce"
   ],
   "exports": {
     ".": {
       "import": "./dist/index.js",
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./operators": {
+      "import": "./dist/operators/index.js",
+      "require": "./dist/operators/index.js",
+      "types": "./dist/operators/index.d.ts"
+    },
+    "./operators/*": {
+      "import": "./dist/operators/*.js",
+      "require": "./dist/operators/*.js",
+      "types": "./dist/operators/*.d.ts"
     }
   },
   "dependencies": {
-    "applesauce-core": "^0.11.0",
-    "applesauce-factory": "^0.11.0",
-    "debug": "^4.4.0",
+    "applesauce-core": "workspace:^",
+    "nanoid": "^5.0.9",
     "nostr-tools": "^2.10.4",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
-    "@types/debug": "^4.1.12",
     "typescript": "^5.7.3",
-    "vitest": "^3.0.5"
+    "vitest": "^3.0.5",
+    "vitest-nostr": "^0.4.1",
+    "vitest-websocket-mock": "^0.4.0"
   },
   "funding": {
     "type": "lightning",

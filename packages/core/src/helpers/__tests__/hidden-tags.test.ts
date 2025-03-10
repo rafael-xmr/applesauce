@@ -1,12 +1,13 @@
 import { describe, beforeEach, it, expect } from "vitest";
 import { finalizeEvent, generateSecretKey, getPublicKey, kinds, nip04, NostrEvent } from "nostr-tools";
 
-import { getHiddenTags, HiddenTagsSigner, unlockHiddenTags } from "../hidden-tags.js";
+import { HiddenContentSigner } from "../hidden-content.js";
+import { getHiddenTags, unlockHiddenTags } from "../hidden-tags.js";
 import { unixNow } from "../time.js";
 
 const key = generateSecretKey();
 const pubkey = getPublicKey(key);
-const signer: HiddenTagsSigner = {
+const signer: HiddenContentSigner = {
   nip04: {
     encrypt: (pubkey: string, plaintext: string) => nip04.encrypt(key, pubkey, plaintext),
     decrypt: (pubkey: string, ciphertext: string) => nip04.decrypt(key, pubkey, ciphertext),
