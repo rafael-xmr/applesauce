@@ -437,9 +437,6 @@ importers:
       applesauce-signers:
         specifier: ^0.11.0
         version: link:../signers
-      nanoid:
-        specifier: ^5.0.9
-        version: 5.0.9
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
