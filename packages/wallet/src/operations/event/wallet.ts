@@ -1,6 +1,7 @@
 import { EventOperation } from "applesauce-factory";
 import { NostrEvent } from "nostr-tools";
-import { WALLET_KIND } from "../helpers/wallet.js";
+
+import { WALLET_KIND } from "../../helpers/wallet.js";
 
 /** Sets the content of a kind 375 wallet backup event */
 export function setWalletBackupContent(wallet: NostrEvent): EventOperation {

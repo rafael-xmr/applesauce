@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { setWalletBackupContent } from "../wallet.js";
-import { FakeUser } from "../../__tests__/fake-user.js";
 import { EventFactory } from "applesauce-factory";
-import { WalletBlueprint } from "../../blueprints/wallet.js";
 import { generateSecretKey } from "nostr-tools";
-import { WALLET_BACKUP_KIND } from "../../helpers/wallet.js";
 import { unixNow } from "applesauce-core/helpers";
+
+import { WALLET_BACKUP_KIND } from "../../../helpers/wallet.js";
+import { FakeUser } from "../../../__tests__/fake-user.js";
+import { WalletBlueprint } from "../../../blueprints/wallet.js";
 
 const user = new FakeUser();
 const factory = new EventFactory({ signer: user });
