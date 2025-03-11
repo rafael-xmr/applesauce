@@ -56,6 +56,37 @@ importers:
         specifier: ^3.0.5
         version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(yaml@2.7.0)
 
+  packages/actions:
+    dependencies:
+      applesauce-core:
+        specifier: ^0.11.0
+        version: link:../core
+      applesauce-factory:
+        specifier: ^0.11.0
+        version: link:../factory
+      nostr-tools:
+        specifier: ^2.10.4
+        version: 2.10.4(typescript@5.7.3)
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+    devDependencies:
+      '@types/debug':
+        specifier: ^4.1.12
+        version: 4.1.12
+      applesauce-signers:
+        specifier: workspace:^0.11.0
+        version: link:../signers
+      nanoid:
+        specifier: ^5.0.9
+        version: 5.0.9
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+      vitest:
+        specifier: ^3.0.5
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(yaml@2.7.0)
+
   packages/content:
     dependencies:
       '@cashu/cashu-ts':

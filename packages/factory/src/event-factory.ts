@@ -165,6 +165,12 @@ export class EventFactory {
     return { ...draft, pubkey: await this.context.signer.getPublicKey() };
   }
 
+  async sign(draft: EventTemplate | UnsignedEvent): Promise<NostrEvent> {
+    if (!this.context.signer) throw new Error("Missing signer");
+    draft = await this.stamp(draft);
+    return await this.context.signer.signEvent(draft);
+  }
+
   // Helpers
 
   /** Create a NIP-22 comment */
