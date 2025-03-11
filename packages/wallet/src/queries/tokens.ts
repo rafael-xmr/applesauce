@@ -2,7 +2,7 @@ import { Query } from "applesauce-core";
 import { combineLatest, filter, map, startWith } from "rxjs";
 import { NostrEvent } from "nostr-tools";
 
-import { getTokenDetails, isTokenDetailsLocked, WALLET_TOKEN_KIND } from "../helpers/tokens.js";
+import { getTokenContent, isTokenContentLocked, WALLET_TOKEN_KIND } from "../helpers/tokens.js";
 
 /** removes deleted events from sorted array */
 function filterDeleted(tokens: NostrEvent[]) {
@@ -13,10 +13,10 @@ function filterDeleted(tokens: NostrEvent[]) {
       // skip this event if it a newer event says its deleted
       if (deleted.has(token.id)) return false;
       // skip if token is locked
-      if (isTokenDetailsLocked(token)) return false;
+      if (isTokenContentLocked(token)) return false;
       else {
         // add ids to deleted array
-        const details = getTokenDetails(token);
+        const details = getTokenContent(token);
         for (const id of details.del) deleted.add(id);
       }
 
@@ -40,7 +40,7 @@ export function WalletTokensQuery(pubkey: string, locked?: boolean | undefined):
         // filter out locked tokens
         map(([_, tokens]) => {
           if (locked === undefined) return tokens;
-          else return tokens.filter((t) => isTokenDetailsLocked(t) === locked);
+          else return tokens.filter((t) => isTokenContentLocked(t) === locked);
         }),
         // remove deleted events
         map(filterDeleted),
@@ -68,7 +68,7 @@ export function WalletBalanceQuery(pubkey: string): Query<Record<string, number>
         map((tokens) =>
           tokens.reduce(
             (totals, token) => {
-              const details = getTokenDetails(token);
+              const details = getTokenContent(token);
               const total = details.proofs.reduce((t, p) => t + p.amount, 0);
               return { ...totals, [details.mint]: (totals[details.mint] ?? 0) + total };
             },

@@ -2,6 +2,7 @@ import * as kinds from "nostr-tools/kinds";
 import { UnsignedEvent, type EventTemplate, type NostrEvent } from "nostr-tools";
 
 import { GROUPS_LIST_KIND } from "./groups.js";
+import { getParentEventStore } from "./event.js";
 
 export const HiddenContentSymbol = Symbol.for("hidden-content");
 
@@ -96,6 +97,10 @@ export async function unlockHiddenContent(
   const plaintext = await encryption.decrypt(event.pubkey, event.content);
 
   Reflect.set(event, HiddenContentSymbol, plaintext);
+
+  // if the event has been added to an event store, notify it
+  const eventStore = getParentEventStore(event as NostrEvent);
+  if (eventStore) eventStore.update(event as NostrEvent);
 
   return plaintext;
 }

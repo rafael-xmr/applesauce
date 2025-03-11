@@ -10,7 +10,7 @@ import { NostrEvent } from "nostr-tools";
 
 export const WALLET_HISTORY_KIND = 7376;
 
-export type HistoryDetails = {
+export type HistoryContent = {
   /** The direction of the transaction, in = received, out = sent */
   direction: "in" | "out";
   /** The amount of the transaction */
@@ -23,21 +23,21 @@ export type HistoryDetails = {
   fee?: number;
 };
 
-export const HistoryDetailsSymbol = Symbol.for("history-details");
+export const HistoryContentSymbol = Symbol.for("history-content");
 
 /** returns an array of redeemed event ids in a history event */
 export function getHistoryRedeemed(history: NostrEvent): string[] {
   return history.tags.filter((t) => isETag(t) && t[3] === "redeemed").map((t) => t[1]);
 }
 
-/** Checks if the history details are locked */
-export function isHistoryDetailsLocked(history: NostrEvent) {
+/** Checks if the history contents are locked */
+export function isHistoryContentLocked(history: NostrEvent) {
   return isHiddenTagsLocked(history);
 }
 
-/** Returns the parsed details of a 7376 history event */
-export function getHistoryDetails(history: NostrEvent): HistoryDetails {
-  return getOrComputeCachedValue(history, HistoryDetailsSymbol, () => {
+/** Returns the parsed content of a 7376 history event */
+export function getHistoryContent(history: NostrEvent): HistoryContent {
+  return getOrComputeCachedValue(history, HistoryContentSymbol, () => {
     const tags = getHiddenTags(history);
     if (!tags) throw new Error("History event is locked");
 
@@ -59,7 +59,7 @@ export function getHistoryDetails(history: NostrEvent): HistoryDetails {
 }
 
 /** Decrypts a wallet history event */
-export async function unlockHistoryDetails(history: NostrEvent, signer: HiddenContentSigner) {
+export async function unlockHistoryContent(history: NostrEvent, signer: HiddenContentSigner) {
   await unlockHiddenTags(history, signer);
-  return getHistoryDetails(history);
+  return getHistoryContent(history);
 }
