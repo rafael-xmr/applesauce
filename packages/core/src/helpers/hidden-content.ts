@@ -47,6 +47,11 @@ export const EventContentEncryptionMethod: Record<number, "nip04" | "nip44"> = {
   [kinds.Interestsets]: "nip04",
 };
 
+/** Sets the encryption method that is used for the contents of a specific event kind */
+export function setEventContentEncryptionMethod(kind: number, method: "nip04" | "nip44") {
+  EventContentEncryptionMethod[kind] = method;
+}
+
 /** Checks if an event can have hidden content */
 export function canHaveHiddenContent(kind: number): boolean {
   return EventContentEncryptionMethod[kind] !== undefined;

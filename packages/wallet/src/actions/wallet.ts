@@ -9,10 +9,10 @@ export function CreateWallet(mints: string[], privateKey = generateSecretKey()):
     const existing = events.getReplaceable(WALLET_KIND, self);
     if (existing) throw new Error("Wallet already exists");
 
-    const backup = await factory.create(WalletBackupBlueprint, privateKey, mints);
-    const wallet = await factory.create(WalletBlueprint, privateKey, mints);
+    const wallet = await factory.sign(await factory.create(WalletBlueprint, privateKey, mints));
+    const backup = await factory.sign(await factory.create(WalletBackupBlueprint, wallet));
 
-    await publish("Wallet backup", await factory.sign(backup));
-    await publish("New wallet", await factory.sign(wallet));
+    await publish("Wallet backup", backup);
+    await publish("Create wallet", wallet);
   };
 }

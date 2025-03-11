@@ -5,7 +5,7 @@ import { ActionHub } from "applesauce-actions";
 
 import { FakeUser } from "../../__tests__/fake-user.js";
 import { CreateWallet } from "../wallet.js";
-import { WALLET_BACKUP_KIND, WALLET_KIND } from "../../helpers/wallet.js";
+import { WALLET_BACKUP_KIND } from "../../helpers/wallet.js";
 import { NostrEvent } from "nostr-tools";
 import { unlockHiddenTags } from "applesauce-core/helpers";
 

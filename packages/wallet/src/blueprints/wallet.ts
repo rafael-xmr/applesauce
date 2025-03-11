@@ -3,6 +3,8 @@ import { modifyHiddenTags } from "applesauce-factory/operations/event";
 
 import { WALLET_BACKUP_KIND, WALLET_KIND } from "../helpers/wallet.js";
 import { setMintTags, setPrivateKeyTag } from "../operations/index.js";
+import { NostrEvent } from "nostr-tools";
+import { setWalletBackupContent } from "../operations/wallet.js";
 
 /** A blueprint to create a new 17375 wallet */
 export function WalletBlueprint(privateKey: Uint8Array, mints: string[]): EventBlueprint {
@@ -15,11 +17,6 @@ export function WalletBlueprint(privateKey: Uint8Array, mints: string[]): EventB
 }
 
 /** A blueprint that creates a new 375 wallet backup event */
-export function WalletBackupBlueprint(privateKey: Uint8Array, mints: string[]): EventBlueprint {
-  return (ctx) =>
-    EventFactory.runProcess(
-      { kind: WALLET_BACKUP_KIND },
-      ctx,
-      modifyHiddenTags(setPrivateKeyTag(privateKey), setMintTags(mints)),
-    );
+export function WalletBackupBlueprint(wallet: NostrEvent): EventBlueprint {
+  return (ctx) => EventFactory.runProcess({ kind: WALLET_BACKUP_KIND }, ctx, setWalletBackupContent(wallet));
 }
