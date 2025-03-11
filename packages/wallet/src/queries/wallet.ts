@@ -1,12 +1,14 @@
 import { Query } from "applesauce-core";
 import { filter, map, merge } from "rxjs";
 import { getWalletMints, getWalletPrivateKey, isWalletLocked, WALLET_KIND } from "../helpers/wallet.js";
+import { NostrEvent } from "nostr-tools";
 
 export type WalletInfo =
-  | { locked: true }
+  | { locked: true; event: NostrEvent }
   | {
       locked: false;
-      privateKey: string;
+      event: NostrEvent;
+      privateKey: Uint8Array;
       mints: string[];
     };
 
@@ -24,12 +26,12 @@ export function WalletQuery(pubkey: string): Query<WalletInfo | undefined> {
         map((wallet) => {
           if (!wallet) return;
 
-          if (isWalletLocked(wallet)) return { locked: true };
+          if (isWalletLocked(wallet)) return { locked: true, event: wallet };
 
           const mints = getWalletMints(wallet);
           const privateKey = getWalletPrivateKey(wallet);
 
-          return { locked: false, mints, privateKey };
+          return { locked: false, mints, privateKey, event: wallet };
         }),
       ),
   };

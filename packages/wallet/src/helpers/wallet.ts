@@ -1,3 +1,4 @@
+import { hexToBytes } from "@noble/hashes/utils";
 import {
   getHiddenTags,
   getOrComputeCachedValue,
@@ -33,13 +34,13 @@ export function getWalletMints(wallet: NostrEvent): string[] {
 }
 
 /** Returns the wallets private key as a string */
-export function getWalletPrivateKey(wallet: NostrEvent): string {
+export function getWalletPrivateKey(wallet: NostrEvent): Uint8Array {
   return getOrComputeCachedValue(wallet, WalletPrivateKeySymbol, () => {
     const tags = getHiddenTags(wallet);
     if (!tags) throw new Error("Wallet is locked");
 
     const key = tags.find((t) => t[0] === "privkey" && t[1])?.[1];
     if (!key) throw new Error("Wallet missing private key");
-    return key;
+    return hexToBytes(key);
   });
 }
