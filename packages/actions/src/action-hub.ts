@@ -33,15 +33,7 @@ export class ActionHub {
     public events: EventStore,
     public factory: EventFactory,
     public publish: PublishMethod,
-  ) {
-    /** The the context observable to get the pubkey */
-    // this.context = defer(() => {
-    //   if (!this.factory.context.signer) throw new Error("Missing signer");
-    //   return from(this.factory.context.signer.getPublicKey());
-    // }).pipe(map((self) => ({ self, events: this.events, factory: this.factory, publish: this.publish })));
-  }
-
-  // log = new Subject<{ label: string; args: Array<any>; result: any }>();
+  ) {}
 
   protected context: ActionContext | undefined = undefined;
   async getContext() {
@@ -55,7 +47,6 @@ export class ActionHub {
   }
 
   async run<Args extends Array<any>, T extends unknown = unknown>(
-    // label: string,
     Action: ActionConstructor<Args, T>,
     ...args: Args
   ): Promise<T> {
@@ -63,11 +54,6 @@ export class ActionHub {
 
     const ctx = await this.getContext();
     return await action(ctx);
-
-    // const log = { label, args, result };
-    // this.log.next(log);
-
-    // return await result;
   }
 
   // helper methods

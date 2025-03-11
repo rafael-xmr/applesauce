@@ -412,6 +412,9 @@ importers:
       '@noble/hashes':
         specifier: ^1.7.1
         version: 1.7.1
+      applesauce-actions:
+        specifier: ^0.11.0
+        version: link:../actions
       applesauce-core:
         specifier: ^0.11.0
         version: link:../core
@@ -431,6 +434,12 @@ importers:
       '@types/debug':
         specifier: ^4.1.12
         version: 4.1.12
+      applesauce-signers:
+        specifier: ^0.11.0
+        version: link:../signers
+      nanoid:
+        specifier: ^5.0.9
+        version: 5.0.9
       typescript:
         specifier: ^5.7.3
         version: 5.7.3

@@ -20,6 +20,7 @@ export type HiddenContentSigner = {
 export const EventContentEncryptionMethod: Record<number, "nip04" | "nip44"> = {
   // NIP-60 wallet
   17375: "nip44",
+  375: "nip44",
   7375: "nip44",
   7376: "nip44",
 

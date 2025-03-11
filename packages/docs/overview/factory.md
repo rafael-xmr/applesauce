@@ -25,11 +25,11 @@ const factory = new EventFactory({
 
 ## Relay hints
 
-Relay hints can ge added to all event tags that support them by passing in `getRelayHint` and `getPubkeyRelayHint` methods into the [context](https://hzrd149.github.io/applesauce/typedoc/types/applesauce_factory.EventFactoryContext.html)
+Relay hints can ge added to all event tags that support them by passing in `getEventRelayHint` and `getPubkeyRelayHint` methods into the [context](https://hzrd149.github.io/applesauce/typedoc/types/applesauce_factory.EventFactoryContext.html)
 
 ```ts
 const factory = new EventFactory({
-  getRelayHint: async (event) => {
+  getEventRelayHint: async (event) => {
     // an async process to find the best relay hint for this event
     try {
       return await calculateRelayHint(event)

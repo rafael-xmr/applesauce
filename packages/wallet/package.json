@@ -59,6 +59,7 @@
   },
   "dependencies": {
     "@noble/hashes": "^1.7.1",
+    "applesauce-actions": "^0.11.0",
     "applesauce-core": "^0.11.0",
     "applesauce-factory": "^0.11.0",
     "nostr-tools": "^2.10.4",
@@ -67,6 +68,7 @@
   "devDependencies": {
     "@hirez_io/observer-spy": "^2.2.0",
     "@types/debug": "^4.1.12",
+    "applesauce-signers": "^0.11.0",
     "typescript": "^5.7.3",
     "vitest": "^3.0.5"
   },

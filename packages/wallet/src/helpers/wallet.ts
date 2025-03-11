@@ -8,6 +8,7 @@ import {
 import { NostrEvent } from "nostr-tools";
 
 export const WALLET_KIND = 17375;
+export const WALLET_BACKUP_KIND = 375;
 
 export const WalletPrivateKeySymbol = Symbol.for("wallet-private-key");
 export const WalletMintsSymbol = Symbol.for("wallet-mints");
