@@ -67,9 +67,6 @@ importers:
       nostr-tools:
         specifier: ^2.10.4
         version: 2.10.4(typescript@5.7.3)
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
     devDependencies:
       '@types/debug':
         specifier: ^4.1.12
