@@ -4,7 +4,7 @@ import { WALLET_KIND } from "../helpers/wallet.js";
 import { WalletBackupBlueprint, WalletBlueprint } from "../blueprints/wallet.js";
 
 /** An action that creates a new 17375 wallet event and 375 wallet backup */
-export function CreateWallet(mints: string[], privateKey = generateSecretKey()): Action {
+export function CreateWallet(mints: string[], privateKey: Uint8Array = generateSecretKey()): Action {
   return async ({ events, factory, self, publish }) => {
     const existing = events.getReplaceable(WALLET_KIND, self);
     if (existing) throw new Error("Wallet already exists");
