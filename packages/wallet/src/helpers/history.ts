@@ -10,9 +10,11 @@ import { NostrEvent } from "nostr-tools";
 
 export const WALLET_HISTORY_KIND = 7376;
 
+export type HistoryDirection = "in" | "out";
+
 export type HistoryContent = {
   /** The direction of the transaction, in = received, out = sent */
-  direction: "in" | "out";
+  direction: HistoryDirection;
   /** The amount of the transaction */
   amount: number;
   /** An array of token event ids created */
@@ -41,7 +43,7 @@ export function getHistoryContent(history: NostrEvent): HistoryContent {
     const tags = getHiddenTags(history);
     if (!tags) throw new Error("History event is locked");
 
-    const direction = tags.find((t) => t[0] === "direction")?.[1] as "in" | "out" | undefined;
+    const direction = tags.find((t) => t[0] === "direction")?.[1] as HistoryDirection | undefined;
     if (!direction) throw new Error("History event missing direction");
     const amountStr = tags.find((t) => t[0] === "amount")?.[1];
     if (!amountStr) throw new Error("History event missing amount");

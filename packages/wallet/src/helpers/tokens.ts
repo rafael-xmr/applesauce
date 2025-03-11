@@ -14,6 +14,8 @@ export type TokenContent = {
   mint: string;
   /** Cashu proofs */
   proofs: { amount: number; secret: string; C: string; id: string }[];
+  /** The cashu unit */
+  unit?: string;
   /** tokens that were destroyed in the creation of this token (helps on wallet state transitions) */
   del: string[];
 };
@@ -29,7 +31,7 @@ export function getTokenContent(token: NostrEvent): TokenContent {
     const details = JSON.parse(plaintext) as TokenContent;
 
     if (!details.mint) throw new Error("Token missing mint");
-    if (!details.proofs) details.proofs = [];
+    if (!details.proofs) throw new Error("Token missing proofs");
     if (!details.del) details.del = [];
 
     return details;
