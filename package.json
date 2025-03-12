@@ -7,7 +7,9 @@
     "coverage": "turbo build && vitest run --coverage",
     "format": "prettier --write .",
     "version-packages": "changeset version && pnpm install --no-frozen-lockfile && pnpm format",
-    "release": "pnpm run -r build && changeset publish"
+    "release": "pnpm run -r build && changeset publish",
+    "prerelease-next": "turbo build && vitest run",
+    "release-next": "changeset version --snapshot next && changeset publish --tag next"
   },
   "dependencies": {
     "@changesets/cli": "^2.28.1",
