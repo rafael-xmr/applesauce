@@ -8,7 +8,7 @@ import { Query } from "../query-store/index.js";
 export function UserMuteQuery(pubkey: string): Query<Mutes | undefined> {
   return {
     key: pubkey,
-    run: (store) => store.replaceable(kinds.Mutelist, pubkey).pipe(map((event) => event && getMutedThings(event))),
+    run: (event) => event.replaceable(kinds.Mutelist, pubkey).pipe(map((event) => event && getMutedThings(event))),
   };
 }
 

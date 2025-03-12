@@ -3,7 +3,7 @@ import { Filter, NostrEvent } from "nostr-tools";
 import hash_sum from "hash-sum";
 import type { AddressPointer, EventPointer } from "nostr-tools/nip19";
 
-import { EventStore } from "../event-store/event-store.js";
+import { IEventStore } from "../event-store/interface.js";
 
 import * as Queries from "../queries/index.js";
 import { getObservableValue } from "../observable/get-observable-value.js";
@@ -12,7 +12,7 @@ export type Query<T extends unknown> = {
   /** A unique key for this query. this is used to detect duplicate queries */
   key: string;
   /** The meat of the query, this should return an Observables that subscribes to the eventStore in some way */
-  run: (events: EventStore, store: QueryStore) => Observable<T>;
+  run: (events: IEventStore, store: QueryStore) => Observable<T>;
 };
 
 export type QueryConstructor<T extends unknown, Args extends Array<any>> = (...args: Args) => Query<T>;
@@ -20,8 +20,8 @@ export type QueryConstructor<T extends unknown, Args extends Array<any>> = (...a
 export class QueryStore {
   static Queries = Queries;
 
-  store: EventStore;
-  constructor(store: EventStore) {
+  store: IEventStore;
+  constructor(store: IEventStore) {
     if (!store) throw new Error("EventStore required");
     this.store = store;
   }

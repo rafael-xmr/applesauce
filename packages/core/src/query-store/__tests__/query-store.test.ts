@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { NostrEvent } from "nostr-tools";
 
-import { EventStore } from "../event-store/event-store.js";
-import { QueryStore } from "./query-store.js";
-import { ProfileQuery } from "../queries/profile.js";
+import { EventStore } from "../../event-store/event-store.js";
+import { QueryStore } from "../query-store.js";
+import { ProfileQuery } from "../../queries/profile.js";
 
 let eventStore: EventStore;
 let queryStore: QueryStore;

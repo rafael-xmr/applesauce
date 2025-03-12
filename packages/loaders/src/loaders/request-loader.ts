@@ -7,7 +7,7 @@ import {
   UserContactsQuery,
 } from "applesauce-core/queries";
 import { getObservableValue, simpleTimeout } from "applesauce-core/observable";
-import { EventStore, QueryStore } from "applesauce-core";
+import { IEventStore, QueryStore } from "applesauce-core";
 import { ProfilePointer } from "nostr-tools/nip19";
 import { filter, Observable } from "rxjs";
 
@@ -26,7 +26,7 @@ export class RequestLoader {
   protected async runWithTimeout<T extends unknown, Args extends Array<any>>(
     queryConstructor: (...args: Args) => {
       key: string;
-      run: (events: EventStore, store: QueryStore) => Observable<T>;
+      run: (events: IEventStore, store: QueryStore) => Observable<T>;
     },
     ...args: Args
   ): Promise<NonNullable<T>> {

@@ -1,7 +1,7 @@
 import {
   canHaveHiddenTags,
   getHiddenTags,
-  getListEncryptionMethods,
+  getHiddenTagsEncryptionMethods,
   hasHiddenTags,
   unlockHiddenTags,
 } from "applesauce-core/helpers";
@@ -78,7 +78,7 @@ export function modifyHiddenTags(...operations: TagOperation[]): EventOperation 
     let newHidden = Array.from(hidden);
     for (const operation of operations) newHidden = await operation(newHidden, ctx);
 
-    const encryption = getListEncryptionMethods(draft.kind, ctx.signer);
+    const encryption = getHiddenTagsEncryptionMethods(draft.kind, ctx.signer);
 
     const pubkey = await ctx.signer.getPublicKey();
     const content = await encryption.encrypt(pubkey, JSON.stringify(newHidden));
