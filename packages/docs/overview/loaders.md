@@ -1,6 +1,6 @@
 # Loaders
 
-The `applesauce-loaders` package contains a bunch of loader classes built on top of [rx-nostr](https://github.com/penpenpng/rx-nostr)
+The `applesauce-loaders` package contains loader classes built on top of [rx-nostr](https://github.com/penpenpng/rx-nostr) that can be used to setup common event loading patterns
 
 ## Event Loader pattern
 

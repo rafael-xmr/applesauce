@@ -15,3 +15,4 @@ export * from "./quote.js";
 export * from "./reaction.js";
 export * from "./tags.js";
 export * from "./zap.js";
+export * from "./profile.js";

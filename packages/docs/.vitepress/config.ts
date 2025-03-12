@@ -27,7 +27,7 @@ export default defineConfig({
           { text: "Events", link: "/overview/events" },
           { text: "Queries", link: "/overview/queries" },
           { text: "Helpers", link: "/overview/helpers" },
-          { text: "Event Factory", link: "/overview/factory" },
+          { text: "Factory", link: "/overview/factory" },
           { text: "Loaders", link: "/overview/loaders" },
           { text: "Actions", link: "/overview/actions" },
         ],
