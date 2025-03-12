@@ -4,12 +4,12 @@ import { ensureSingletonTag } from "applesauce-factory/helpers";
 
 /** Sets the "mint" tags in a wallet event */
 export function setMintTags(mints: string[]): TagOperation {
-  return (tags) =>
-    tags
-      // remove all existing mint tags
-      .filter((t) => t[0] !== "mint")
-      // add new mint tags
-      .concat(...mints.map((mint) => ["mint", mint]));
+  return (tags) => [
+    // remove all existing mint tags
+    ...tags.filter((t) => t[0] !== "mint"),
+    // add new mint tags
+    ...mints.map((mint) => ["mint", mint]),
+  ];
 }
 
 /** Sets the "privkey" tag on a wallet event */

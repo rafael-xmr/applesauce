@@ -1,5 +1,5 @@
 import { Query } from "applesauce-core";
-import { getHistoryRedeemed, isHistoryDetailsLocked, WALLET_HISTORY_KIND } from "../helpers/history.js";
+import { getHistoryRedeemed, isHistoryContentLocked, WALLET_HISTORY_KIND } from "../helpers/history.js";
 import { NostrEvent } from "nostr-tools";
 import { combineLatest, filter, map, scan, startWith } from "rxjs";
 
@@ -28,7 +28,7 @@ export function WalletHistoryQuery(pubkey: string, locked?: boolean | undefined)
       return combineLatest([updates, timeline]).pipe(
         map(([_, history]) => {
           if (locked === undefined) return history;
-          else return history.filter((entry) => isHistoryDetailsLocked(entry) === locked);
+          else return history.filter((entry) => isHistoryContentLocked(entry) === locked);
         }),
       );
     },

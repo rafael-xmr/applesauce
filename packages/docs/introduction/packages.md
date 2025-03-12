@@ -120,6 +120,28 @@ pnpm install applesauce-loaders
 
 :::
 
+:::
+
+## Actions
+
+The `applesauce-actions` package provides prebuilt actions that apps can use. [see more](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_actions.html)
+
+:::code-group
+
+```sh [npm]
+npm install applesauce-actions
+```
+
+```sh [yarn]
+yarn install applesauce-actions
+```
+
+```sh [pnpm]
+pnpm install applesauce-actions
+```
+
+:::
+
 ## React
 
 The `applesauce-react` package contains a bunch of useful react hooks for working with other applesauce packages. [see more](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_react.html)

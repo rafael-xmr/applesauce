@@ -2,6 +2,7 @@ import * as kinds from "nostr-tools/kinds";
 import { UnsignedEvent, type EventTemplate, type NostrEvent } from "nostr-tools";
 
 import { GROUPS_LIST_KIND } from "./groups.js";
+import { getParentEventStore } from "./event.js";
 
 export const HiddenContentSymbol = Symbol.for("hidden-content");
 
@@ -20,6 +21,7 @@ export type HiddenContentSigner = {
 export const EventContentEncryptionMethod: Record<number, "nip04" | "nip44"> = {
   // NIP-60 wallet
   17375: "nip44",
+  375: "nip44",
   7375: "nip44",
   7376: "nip44",
 
@@ -45,6 +47,11 @@ export const EventContentEncryptionMethod: Record<number, "nip04" | "nip44"> = {
   [kinds.Curationsets]: "nip04",
   [kinds.Interestsets]: "nip04",
 };
+
+/** Sets the encryption method that is used for the contents of a specific event kind */
+export function setEventContentEncryptionMethod(kind: number, method: "nip04" | "nip44") {
+  EventContentEncryptionMethod[kind] = method;
+}
 
 /** Checks if an event can have hidden content */
 export function canHaveHiddenContent(kind: number): boolean {
@@ -90,6 +97,10 @@ export async function unlockHiddenContent(
   const plaintext = await encryption.decrypt(event.pubkey, event.content);
 
   Reflect.set(event, HiddenContentSymbol, plaintext);
+
+  // if the event has been added to an event store, notify it
+  const eventStore = getParentEventStore(event as NostrEvent);
+  if (eventStore) eventStore.update(event as NostrEvent);
 
   return plaintext;
 }

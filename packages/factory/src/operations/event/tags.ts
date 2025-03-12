@@ -30,6 +30,8 @@ export function includeAltTag(description: string): EventOperation {
 /** Creates an operation that modifies the existing array of tags on an event */
 export function modifyPublicTags(...operations: TagOperation[]): EventOperation {
   return async (draft, ctx) => {
+    if (operations.length === 0) return draft;
+
     let tags = Array.from(draft.tags);
 
     // modify the pubic tags
@@ -44,6 +46,8 @@ export function modifyPublicTags(...operations: TagOperation[]): EventOperation 
 /** Creates an operation that modifies the existing array of tags on an event */
 export function modifyHiddenTags(...operations: TagOperation[]): EventOperation {
   return async (draft, ctx) => {
+    if (operations.length === 0) return draft;
+
     let tags = Array.from(draft.tags);
 
     if (!ctx.signer) throw new Error("Missing signer for hidden tags");

@@ -36,6 +36,8 @@ import { getDeleteCoordinates, getDeleteIds } from "../helpers/delete.js";
 import { claimEvents } from "../observable/claim-events.js";
 import { claimLatest } from "../observable/claim-latest.js";
 
+export const EventStoreSymbol = Symbol.for("event-store");
+
 function sortDesc(a: NostrEvent, b: NostrEvent) {
   return b.created_at - a.created_at;
 }
@@ -59,6 +61,16 @@ export class EventStore {
       // reject events that are invalid
       if (this.verifyEvent && this.verifyEvent(event) === false) throw new Error("Invalid event");
     };
+
+    // when events are added to the database, add the symbol
+    this.database.inserted.subscribe((event) => {
+      Reflect.set(event, EventStoreSymbol, this);
+    });
+
+    // when events are removed from the database, remove the symbol
+    this.database.removed.subscribe((event) => {
+      Reflect.deleteProperty(event, EventStoreSymbol);
+    });
 
     this.updates = this.database.updated;
   }
@@ -166,11 +178,11 @@ export class EventStore {
   }
 
   /** Check if the store has an event */
-  hasEvent(uid: string): boolean {
-    return this.database.hasEvent(uid);
+  hasEvent(id: string): boolean {
+    return this.database.hasEvent(id);
   }
-  getEvent(uid: string): NostrEvent | undefined {
-    return this.database.getEvent(uid);
+  getEvent(id: string): NostrEvent | undefined {
+    return this.database.getEvent(id);
   }
 
   /** Check if the store has a replaceable event */

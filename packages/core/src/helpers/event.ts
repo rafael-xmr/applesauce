@@ -3,6 +3,7 @@ import { INDEXABLE_TAGS } from "../event-store/common.js";
 import { getHiddenTags } from "./hidden-tags.js";
 import { getOrComputeCachedValue } from "./cache.js";
 import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
+import { EventStore, EventStoreSymbol } from "../event-store/event-store.js";
 
 export const EventUIDSymbol = Symbol.for("event-uid");
 export const EventIndexableTagsSymbol = Symbol.for("indexable-tags");
@@ -113,6 +114,11 @@ export function markFromCache(event: NostrEvent) {
 /** Returns if an event was from a cache */
 export function isFromCache(event: NostrEvent) {
   return !!event[FromCacheSymbol];
+}
+
+/** Returns the EventStore of an event if its been added to one */
+export function getParentEventStore(event: NostrEvent): EventStore | undefined {
+  return Reflect.get(event, EventStoreSymbol);
 }
 
 /**

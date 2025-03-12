@@ -10,9 +10,11 @@ import { NostrEvent } from "nostr-tools";
 
 export const WALLET_HISTORY_KIND = 7376;
 
-export type HistoryDetails = {
+export type HistoryDirection = "in" | "out";
+
+export type HistoryContent = {
   /** The direction of the transaction, in = received, out = sent */
-  direction: "in" | "out";
+  direction: HistoryDirection;
   /** The amount of the transaction */
   amount: number;
   /** An array of token event ids created */
@@ -23,25 +25,25 @@ export type HistoryDetails = {
   fee?: number;
 };
 
-export const HistoryDetailsSymbol = Symbol.for("history-details");
+export const HistoryContentSymbol = Symbol.for("history-content");
 
 /** returns an array of redeemed event ids in a history event */
 export function getHistoryRedeemed(history: NostrEvent): string[] {
   return history.tags.filter((t) => isETag(t) && t[3] === "redeemed").map((t) => t[1]);
 }
 
-/** Checks if the history details are locked */
-export function isHistoryDetailsLocked(history: NostrEvent) {
+/** Checks if the history contents are locked */
+export function isHistoryContentLocked(history: NostrEvent) {
   return isHiddenTagsLocked(history);
 }
 
-/** Returns the parsed details of a 7376 history event */
-export function getHistoryDetails(history: NostrEvent): HistoryDetails {
-  return getOrComputeCachedValue(history, HistoryDetailsSymbol, () => {
+/** Returns the parsed content of a 7376 history event */
+export function getHistoryContent(history: NostrEvent): HistoryContent {
+  return getOrComputeCachedValue(history, HistoryContentSymbol, () => {
     const tags = getHiddenTags(history);
     if (!tags) throw new Error("History event is locked");
 
-    const direction = tags.find((t) => t[0] === "direction")?.[1] as "in" | "out" | undefined;
+    const direction = tags.find((t) => t[0] === "direction")?.[1] as HistoryDirection | undefined;
     if (!direction) throw new Error("History event missing direction");
     const amountStr = tags.find((t) => t[0] === "amount")?.[1];
     if (!amountStr) throw new Error("History event missing amount");
@@ -59,7 +61,7 @@ export function getHistoryDetails(history: NostrEvent): HistoryDetails {
 }
 
 /** Decrypts a wallet history event */
-export async function unlockHistoryDetails(history: NostrEvent, signer: HiddenContentSigner) {
+export async function unlockHistoryContent(history: NostrEvent, signer: HiddenContentSigner) {
   await unlockHiddenTags(history, signer);
-  return getHistoryDetails(history);
+  return getHistoryContent(history);
 }
