@@ -1,5 +1,5 @@
 import { Emoji } from "applesauce-core/helpers/emoji";
-import { getPubkeyFromDecodeResult } from "applesauce-core/helpers";
+import { getPubkeyFromDecodeResult, HiddenContentSymbol } from "applesauce-core/helpers";
 
 import { EventOperation } from "../../event-factory.js";
 import { includeQuoteTags } from "./quote.js";
@@ -21,7 +21,12 @@ export function setEncryptedContent(pubkey: string, content: string, method: "ni
     if (!signer) throw new Error("Signer required for encrypted content");
     if (!signer[method]) throw new Error(`Signer does not support ${method} encryption`);
 
-    return { ...draft, content: await signer[method].encrypt(pubkey, content) };
+    const newDraft = { ...draft, content: await signer[method].encrypt(pubkey, content) };
+
+    // add the plaintext content on the draft so it can be carried forward
+    Reflect.set(newDraft, HiddenContentSymbol, content);
+
+    return newDraft;
   };
 }
 

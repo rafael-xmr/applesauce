@@ -1,10 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { EventFactory } from "../event-factory.js";
 import { finalizeEvent, kinds, nip04 } from "nostr-tools";
-import { FakeUser } from "./fixtures.js";
-import { getHiddenTags, unlockHiddenTags } from "applesauce-core/helpers";
+import { FakeUser } from "./fake-user.js";
+import { getHiddenTags, HiddenContentSymbol, unlockHiddenTags } from "applesauce-core/helpers";
 import { addEventTag, removeEventTag } from "../operations/tag/common.js";
 import { setListTitle } from "../operations/event/list.js";
+import { setEncryptedContent } from "../operations/event/content.js";
+import { includeAltTag } from "../operations/event/tags.js";
 
 let factory = new EventFactory();
 let user = new FakeUser();
@@ -35,6 +37,18 @@ describe("runProcess", () => {
       created_at: expect.any(Number),
       kind: kinds.Bookmarksets,
     });
+  });
+
+  it("should preserve plaintext hidden content", async () => {
+    const user = new FakeUser();
+    const draft = await EventFactory.runProcess(
+      { kind: kinds.PrivateDirectMessage },
+      { signer: user },
+      setEncryptedContent(user.pubkey, "hello world", "nip04"),
+      includeAltTag("direct message"),
+    );
+
+    expect(Reflect.get(draft, HiddenContentSymbol)).toEqual("hello world");
   });
 });
 
@@ -131,5 +145,22 @@ describe("modifyTags", () => {
     await factory.modifyTags(encryptedList, { hidden: addEventTag("second-event-id") });
 
     expect(signer.nip04!.decrypt).not.toHaveBeenCalled();
+  });
+});
+
+describe("sign", () => {
+  it("should throw if no signer is present", async () => {
+    const factory = new EventFactory();
+
+    await expect(async () => factory.sign(await factory.note("testing"))).rejects.toThrow();
+  });
+
+  it("should preserve plaintext hidden content", async () => {
+    const user = new FakeUser();
+    const factory = new EventFactory({ signer: user });
+    const draft = await factory.build({ kind: 4 }, setEncryptedContent(user.pubkey, "testing", "nip04"));
+    const signed = await factory.sign(draft);
+
+    expect(Reflect.get(signed, HiddenContentSymbol)).toBe("testing");
   });
 });

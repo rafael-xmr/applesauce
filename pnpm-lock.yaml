@@ -264,6 +264,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 2.1.8
         version: 2.1.8(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(yaml@2.7.0))
+      applesauce-signers:
+        specifier: workspace:^
+        version: link:../signers
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
@@ -310,6 +313,9 @@ importers:
       applesauce-accounts:
         specifier: ^0.11.0
         version: link:../accounts
+      applesauce-actions:
+        specifier: workspace:^0.11.0
+        version: link:../actions
       applesauce-content:
         specifier: ^0.11.0
         version: link:../content

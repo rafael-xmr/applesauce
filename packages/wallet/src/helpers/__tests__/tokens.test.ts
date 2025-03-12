@@ -4,6 +4,7 @@ import { EventFactory } from "applesauce-factory";
 import { FakeUser } from "../../__tests__/fake-user.js";
 import { WalletTokenBlueprint } from "../../blueprints/tokens.js";
 import { dumbTokenSelection, unlockTokenContent } from "../tokens.js";
+import { HiddenContentSymbol } from "applesauce-core/helpers";
 
 const user = new FakeUser();
 const factory = new EventFactory({ signer: user });
@@ -68,6 +69,9 @@ describe("dumbTokenSelection", () => {
         proofs: [{ secret: "A", C: "A", id: "A", amount: 100 }],
       }),
     );
+
+    // manually remove the hidden content to lock it again
+    Reflect.deleteProperty(a, HiddenContentSymbol);
 
     expect(() => dumbTokenSelection([a], 20)).toThrow();
   });

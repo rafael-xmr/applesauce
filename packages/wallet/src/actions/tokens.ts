@@ -30,6 +30,28 @@ export function ReceiveToken(token: Token, redeemed?: string[]): Action {
   };
 }
 
+/** An action that deletes old tokens and creates a new one but does not add a history event */
+export function RolloverTokens(tokens: NostrEvent[], token: Token): Action {
+  return async ({ factory, publish }) => {
+    // create a delete event for old tokens
+    const deleteDraft = await factory.create(DeleteBlueprint, tokens);
+    // create a new token event
+    const tokenDraft = await factory.create(
+      WalletTokenBlueprint,
+      token,
+      tokens.map((e) => e.id),
+    );
+
+    // sign events
+    const signedDelete = await factory.sign(deleteDraft);
+    const signedToken = await factory.sign(tokenDraft);
+
+    // publish events
+    await publish("Delete old tokens", signedDelete);
+    await publish("Save new token", signedToken);
+  };
+}
+
 /** An action that deletes old token events and adds a spend history item */
 export function CompleteSpend(spent: NostrEvent[], change: Token): Action {
   return async ({ factory, publish }) => {
