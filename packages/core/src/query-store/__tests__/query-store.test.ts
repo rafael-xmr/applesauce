@@ -1,9 +1,11 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import { subscribeSpyTo } from "@hirez_io/observer-spy";
 import { NostrEvent } from "nostr-tools";
 
 import { EventStore } from "../../event-store/event-store.js";
 import { QueryStore } from "../query-store.js";
 import { ProfileQuery } from "../../queries/profile.js";
+import { SingleEventQuery } from "../../queries/simple.js";
 
 let eventStore: EventStore;
 let queryStore: QueryStore;
@@ -22,6 +24,42 @@ const event: NostrEvent = {
 beforeEach(() => {
   eventStore = new EventStore();
   queryStore = new QueryStore(eventStore);
+});
+
+describe("createQuery", () => {
+  it("should emit synchronous value if it exists", () => {
+    let value: any = undefined;
+    eventStore.add(event);
+    queryStore.createQuery(ProfileQuery, event.pubkey).subscribe((v) => (value = v));
+
+    expect(value).not.toBe(undefined);
+  });
+
+  it("should not emit undefined if value exists", () => {
+    eventStore.add(event);
+    const spy = subscribeSpyTo(queryStore.createQuery(SingleEventQuery, event.id));
+
+    expect(spy.getValues()).toEqual([event]);
+  });
+
+  it("should emit synchronous undefined if value does not exists", () => {
+    let value: any = 0;
+    queryStore.createQuery(ProfileQuery, event.pubkey).subscribe((v) => {
+      value = v;
+    });
+
+    expect(value).not.toBe(0);
+    expect(value).toBe(undefined);
+  });
+
+  it("should share latest value", () => {
+    eventStore.add(event);
+    const spy = subscribeSpyTo(queryStore.createQuery(SingleEventQuery, event.id));
+    const spy2 = subscribeSpyTo(queryStore.createQuery(SingleEventQuery, event.id));
+
+    expect(spy.getValues()).toEqual([event]);
+    expect(spy2.getValues()).toEqual([event]);
+  });
 });
 
 describe("executeQuery", () => {
