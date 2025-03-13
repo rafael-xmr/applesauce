@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getDecodedToken } from "@cashu/cashu-ts";
-import { lastValueFrom, take, timer } from "rxjs";
+import { lastValueFrom, map, take, timer } from "rxjs";
 import { subscribeSpyTo } from "@hirez_io/observer-spy";
 
 import { receiveAnimated, sendAnimated } from "../animated-qr.js";
@@ -43,7 +43,10 @@ describe("sendAnimated", () => {
 
 describe("receiveAnimated", () => {
   it("should decode animated qr", async () => {
-    const qr$ = sendAnimated(token, { interval: 0 }).pipe(receiveAnimated);
+    const qr$ = sendAnimated(token, { interval: 0 }).pipe(
+      receiveAnimated,
+      map((part) => (typeof part === "string" ? getDecodedToken(part) : part)),
+    );
     const spy = subscribeSpyTo(qr$);
 
     await lastValueFrom(qr$);

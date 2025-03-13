@@ -1,4 +1,4 @@
-import { getDecodedToken, getEncodedTokenV4, Token } from "@cashu/cashu-ts";
+import { getEncodedTokenV4, Token } from "@cashu/cashu-ts";
 import { UR, URDecoder, UREncoder } from "@gandlaf21/bc-ur/dist/lib/es6/index.js";
 import { defer, filter, interval, map, Observable, OperatorFunction, shareReplay } from "rxjs";
 
@@ -79,19 +79,14 @@ function urDecoder(): OperatorFunction<string, string | number> {
 }
 
 /** Creates an observable that completes with decoded token */
-export function receiveAnimated(input: Observable<string>): Observable<Token | number> {
+export function receiveAnimated(input: Observable<string>): Observable<string | number> {
   return input.pipe(
     // convert to lower case
     map((str) => str.toLowerCase()),
     // filter out non UR parts
-    filter((str) => str.startsWith("ur:")),
+    filter((str) => str.startsWith("ur:bytes")),
     // decode UR and complete
     urDecoder(),
-    // decode cashu token
-    map((part) => {
-      if (typeof part === "string") return getDecodedToken(part);
-      else return part;
-    }),
     // only run one decoder
     shareReplay(1),
   );
