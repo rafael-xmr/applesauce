@@ -1,5 +1,6 @@
 import { generateSecretKey } from "nostr-tools";
 import { Action } from "applesauce-actions";
+
 import { isWalletLocked, unlockWallet, WALLET_KIND } from "../helpers/wallet.js";
 import { WalletBackupBlueprint, WalletBlueprint } from "../blueprints/wallet.js";
 import { isTokenContentLocked, unlockTokenContent, WALLET_TOKEN_KIND } from "../helpers/tokens.js";

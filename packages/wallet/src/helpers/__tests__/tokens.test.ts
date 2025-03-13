@@ -30,7 +30,7 @@ describe("dumbTokenSelection", () => {
     expect(dumbTokenSelection([a, b], 40)).toEqual([b]);
   });
 
-  it("should enough tokens to total min amount", async () => {
+  it("should select enough tokens to total min amount", async () => {
     const a = await user.signEvent(
       await factory.create(WalletTokenBlueprint, {
         mint: "https://money.com",
@@ -62,17 +62,25 @@ describe("dumbTokenSelection", () => {
     expect(() => dumbTokenSelection([a], 120)).toThrow();
   });
 
-  it("should throw if tokens are locked", async () => {
+  it("should ignore locked tokens", async () => {
     const a = await user.signEvent(
       await factory.create(WalletTokenBlueprint, {
         mint: "https://money.com",
         proofs: [{ secret: "A", C: "A", id: "A", amount: 100 }],
       }),
     );
+    await unlockTokenContent(a, user);
+
+    const bDraft = await factory.create(WalletTokenBlueprint, {
+      mint: "https://money.com",
+      proofs: [{ secret: "B", C: "B", id: "B", amount: 50 }],
+    });
+    bDraft.created_at -= 60 * 60 * 7;
+    const b = await user.signEvent(bDraft);
 
     // manually remove the hidden content to lock it again
-    Reflect.deleteProperty(a, HiddenContentSymbol);
+    Reflect.deleteProperty(b, HiddenContentSymbol);
 
-    expect(() => dumbTokenSelection([a], 20)).toThrow();
+    expect(dumbTokenSelection([a, b], 20)).toEqual([a]);
   });
 });

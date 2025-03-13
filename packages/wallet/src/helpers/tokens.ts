@@ -3,6 +3,7 @@ import {
   getOrComputeCachedValue,
   HiddenContentSigner,
   isHiddenContentLocked,
+  isHiddenTagsLocked,
   unlockHiddenContent,
 } from "applesauce-core/helpers";
 import { NostrEvent } from "nostr-tools";
@@ -27,7 +28,9 @@ export const TokenProofsTotalSymbol = Symbol.for("token-proofs-total");
  * Returns the decrypted and parsed details of a 7375 token event
  * @throws
  */
-export function getTokenContent(token: NostrEvent): TokenContent {
+export function getTokenContent(token: NostrEvent): TokenContent | undefined {
+  if (isHiddenTagsLocked(token)) return undefined;
+
   return getOrComputeCachedValue(token, TokenContentSymbol, () => {
     const plaintext = getHiddenContent(token);
     if (!plaintext) throw new Error("Token is locked");
@@ -50,13 +53,15 @@ export function isTokenContentLocked(token: NostrEvent): boolean {
 /** Decrypts a k:7375 token event */
 export async function unlockTokenContent(token: NostrEvent, signer: HiddenContentSigner): Promise<TokenContent> {
   if (isHiddenContentLocked(token)) await unlockHiddenContent(token, signer);
-  return getTokenContent(token);
+  return getTokenContent(token)!;
 }
 
 /** Gets the totaled amount of proofs in a token event */
-export function getTokenProofsTotal(token: NostrEvent) {
+export function getTokenProofsTotal(token: NostrEvent): number | undefined {
+  if (isTokenContentLocked(token)) return undefined;
+
   return getOrComputeCachedValue(token, TokenProofsTotalSymbol, () => {
-    const content = getTokenContent(token);
+    const content = getTokenContent(token)!;
     return content.proofs.reduce((t, p) => t + p.amount, 0);
   });
 }
@@ -65,14 +70,14 @@ export function getTokenProofsTotal(token: NostrEvent) {
  * Selects oldest tokens that total up to more than the min amount
  * @throws
  */
-export function dumbTokenSelection(tokens: NostrEvent[], minAmount: number) {
-  if (tokens.some((t) => isTokenContentLocked(t))) throw new Error("All tokens must be unlocked");
-
-  const total = tokens.reduce((t, token) => t + getTokenProofsTotal(token), 0);
-  if (total < minAmount) throw new Error("Insufficient funds");
-
+export function dumbTokenSelection(tokens: NostrEvent[], minAmount: number, mint?: string) {
   // sort newest to oldest
-  const sorted = Array.from(tokens).sort((a, b) => b.created_at - a.created_at);
+  const sorted = tokens
+    .filter((token) => !isTokenContentLocked(token) && (mint ? getTokenContent(token)!.mint === mint : true))
+    .sort((a, b) => b.created_at - a.created_at);
+
+  const total = sorted.reduce((t, token) => t + getTokenProofsTotal(token)!, 0);
+  if (total < minAmount) throw new Error("Insufficient funds");
 
   let amount = 0;
   const selected: NostrEvent[] = [];
@@ -81,7 +86,7 @@ export function dumbTokenSelection(tokens: NostrEvent[], minAmount: number) {
     if (!token) throw new Error("Ran out of tokens");
 
     selected.push(token);
-    amount += getTokenProofsTotal(token);
+    amount += getTokenProofsTotal(token)!;
   }
 
   return selected;

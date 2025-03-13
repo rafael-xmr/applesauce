@@ -6,7 +6,9 @@ export const GiftWrapSealSymbol = Symbol.for("gift-wrap-seal");
 export const GiftWrapEventSymbol = Symbol.for("gift-wrap-event");
 
 /** Returns the unsigned seal event in a gift-wrap event */
-export function getGiftWrapSeal(gift: NostrEvent): NostrEvent {
+export function getGiftWrapSeal(gift: NostrEvent): NostrEvent | undefined {
+  if (isHiddenContentLocked(gift)) return undefined;
+
   return getOrComputeCachedValue(gift, GiftWrapSealSymbol, () => {
     const plaintext = getHiddenContent(gift);
     if (!plaintext) throw new Error("Gift-wrap is locked");
@@ -20,9 +22,12 @@ export function getGiftWrapSeal(gift: NostrEvent): NostrEvent {
 }
 
 /** Returns the unsigned event in the gift-wrap seal */
-export function getGiftWrapEvent(gift: NostrEvent) {
+export function getGiftWrapEvent(gift: NostrEvent): UnsignedEvent | undefined {
+  if (isHiddenContentLocked(gift)) return undefined;
+
   return getOrComputeCachedValue(gift, GiftWrapEventSymbol, () => {
     const seal = getGiftWrapSeal(gift);
+    if (!seal) throw new Error("Gift is locked");
     const plaintext = getHiddenContent(seal);
     if (!plaintext) throw new Error("Gift-wrap seal is locked");
     const event = JSON.parse(plaintext) as UnsignedEvent;
@@ -35,13 +40,13 @@ export function getGiftWrapEvent(gift: NostrEvent) {
 
 /** Returns if a gift-wrap event or gift-wrap seal is locked */
 export function isGiftWrapLocked(gift: NostrEvent): boolean {
-  return isHiddenContentLocked(gift) || isHiddenContentLocked(getGiftWrapSeal(gift));
+  return isHiddenContentLocked(gift) || isHiddenContentLocked(getGiftWrapSeal(gift)!);
 }
 
 /** Unlocks and returns the unsigned seal event in a gift-wrap */
 export async function unlockGiftWrap(gift: NostrEvent, signer: HiddenContentSigner): Promise<UnsignedEvent> {
   if (isHiddenContentLocked(gift)) await unlockHiddenContent(gift, signer);
-  const seal = getGiftWrapSeal(gift);
+  const seal = getGiftWrapSeal(gift)!;
   if (isHiddenContentLocked(seal)) await unlockHiddenContent(seal, signer);
-  return getGiftWrapEvent(gift);
+  return getGiftWrapEvent(gift)!;
 }

@@ -1,6 +1,6 @@
+import { combineLatest, filter, map, startWith } from "rxjs";
 import { Query } from "applesauce-core";
 import { NostrEvent } from "nostr-tools";
-import { combineLatest, filter, map, startWith } from "rxjs";
 
 import { getTokenContent, isTokenContentLocked, WALLET_TOKEN_KIND } from "../helpers/tokens.js";
 
@@ -15,7 +15,7 @@ function filterDeleted(tokens: NostrEvent[]) {
 
       // add ids to deleted array
       if (!isTokenContentLocked(token)) {
-        const details = getTokenContent(token);
+        const details = getTokenContent(token)!;
         for (const id of details.del) deleted.add(id);
       }
 
@@ -67,7 +67,7 @@ export function WalletBalanceQuery(pubkey: string): Query<Record<string, number>
         map((tokens) =>
           tokens.reduce(
             (totals, token) => {
-              const details = getTokenContent(token);
+              const details = getTokenContent(token)!;
               const total = details.proofs.reduce((t, p) => t + p.amount, 0);
               return { ...totals, [details.mint]: (totals[details.mint] ?? 0) + total };
             },

@@ -74,7 +74,7 @@ export function CompleteSpend(spent: NostrEvent[], change: Token): Action {
         : undefined;
 
     const total = spent.reduce(
-      (total, token) => total + getTokenContent(token).proofs.reduce((t, p) => t + p.amount, 0),
+      (total, token) => total + getTokenContent(token)!.proofs.reduce((t, p) => t + p.amount, 0),
       0,
     );
 
