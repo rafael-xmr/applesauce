@@ -33,9 +33,10 @@ export type SendAnimatedOptions = {
 export function sendAnimated(token: Token | string, options?: SendAnimatedOptions): Observable<string> {
   // start the stream as soon as there is subscriber
   return defer(() => {
-    let encoded = typeof token === "string" ? token : getEncodedTokenV4(token);
-    let buffer = Buffer.from(encoded);
-    let ur = UR.fromBuffer(buffer);
+    let str = typeof token === "string" ? token : getEncodedTokenV4(token);
+    let utf8 = new TextEncoder();
+    let buffer = utf8.encode(str);
+    let ur = UR.from(buffer);
     let encoder = new UREncoder(ur, options?.fragmentLength ?? 100, 0);
 
     return interval(options?.interval ?? ANIMATED_QR_INTERVAL.FAST).pipe(map(() => encoder.nextPart()));

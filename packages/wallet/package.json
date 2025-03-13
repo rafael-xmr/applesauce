@@ -89,7 +89,6 @@
     "applesauce-actions": "^0.11.0",
     "applesauce-core": "^0.11.0",
     "applesauce-factory": "^0.11.0",
-    "buffer": "^6.0.3",
     "nostr-tools": "^2.10.4",
     "rxjs": "^7.8.1"
   },
