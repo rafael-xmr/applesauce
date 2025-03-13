@@ -60,7 +60,7 @@ export function WalletBalanceQuery(pubkey: string): Query<Record<string, number>
       const timeline = events.timeline({ kinds: [WALLET_TOKEN_KIND], authors: [pubkey] });
 
       return combineLatest([updates, timeline]).pipe(
-        map(([_, tokens]) => tokens),
+        map(([_, tokens]) => tokens.filter((t) => !isTokenContentLocked(t))),
         // filter out deleted tokens
         map(filterDeleted),
         // map tokens to totals

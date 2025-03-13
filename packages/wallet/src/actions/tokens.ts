@@ -12,7 +12,7 @@ import { WalletHistoryBlueprint } from "../blueprints/history.js";
  * @param token the cashu token to add
  * @param redeemed an array of nutzap event ids to mark as redeemed
  */
-export function ReceiveToken(token: Token, redeemed?: string[]): Action {
+export function ReceiveToken(token: Token, redeemed?: string[], fee?: number): Action {
   return async ({ factory, publish }) => {
     const amount = token.proofs.reduce((t, p) => t + p.amount, 0);
 
@@ -20,7 +20,7 @@ export function ReceiveToken(token: Token, redeemed?: string[]): Action {
     const history = await factory.sign(
       await factory.create(
         WalletHistoryBlueprint,
-        { direction: "in", amount, mint: token.mint, created: [tokenEvent.id] },
+        { direction: "in", amount, mint: token.mint, created: [tokenEvent.id], fee },
         redeemed ?? [],
       ),
     );
