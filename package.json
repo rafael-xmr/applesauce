@@ -9,14 +9,17 @@
     "version-packages": "changeset version && pnpm install --no-frozen-lockfile && pnpm format",
     "release": "pnpm run -r build && changeset publish",
     "prerelease-next": "turbo build && vitest run",
-    "release-next": "changeset version --snapshot next && changeset publish --tag next"
+    "release-next": "changeset version --snapshot next && changeset publish --tag next",
+    "test:browser": "vitest"
   },
   "dependencies": {
     "@changesets/cli": "^2.28.1",
     "typedoc": "^0.27.9"
   },
   "devDependencies": {
+    "@vitest/browser": "^3.0.8",
     "@vitest/coverage-v8": "2.1.8",
+    "playwright": "^1.51.0",
     "prettier": "^3.5.3",
     "turbo": "^2.4.4",
     "typescript": "^5.8.2",
