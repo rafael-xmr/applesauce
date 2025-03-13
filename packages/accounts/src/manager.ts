@@ -2,6 +2,7 @@ import { Nip07Interface } from "applesauce-signers";
 import { BehaviorSubject } from "rxjs";
 
 import { IAccount, IAccountConstructor, SerializedAccount } from "./types.js";
+import { ProxySigner } from "./proxy-signer.js";
 
 export class AccountManager<Metadata extends unknown = any> {
   types = new Map<string, IAccountConstructor<any, any, Metadata>>();
@@ -17,22 +18,13 @@ export class AccountManager<Metadata extends unknown = any> {
   }
 
   /** Proxy signer for currently active account */
-  signer: IAccount<any, any, Metadata>;
+  signer: Nip07Interface;
 
   /** Disable request queueing for any accounts added to this manager */
   disableQueue?: boolean;
 
   constructor() {
-    this.signer = new Proxy({} as IAccount, {
-      get: (_, p) => {
-        if (!this.active) throw new Error("No active account");
-        return Reflect.get(this.active, p);
-      },
-      has: (_, p) => {
-        if (!this.active) throw new Error("No active account");
-        return Reflect.has(this.active, p);
-      },
-    });
+    this.signer = new ProxySigner(this.active$, "No active account");
   }
 
   // Account type CRUD

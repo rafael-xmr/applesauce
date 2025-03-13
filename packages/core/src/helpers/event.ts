@@ -1,9 +1,10 @@
-import { EventTemplate, kinds, NostrEvent, VerifiedEvent, verifiedSymbol } from "nostr-tools";
+import { kinds, NostrEvent, VerifiedEvent, verifiedSymbol } from "nostr-tools";
 import { INDEXABLE_TAGS } from "../event-store/common.js";
 import { getHiddenTags } from "./hidden-tags.js";
 import { getOrComputeCachedValue } from "./cache.js";
 import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
-import { EventStore, EventStoreSymbol } from "../event-store/event-store.js";
+import { EventStoreSymbol } from "../event-store/event-store.js";
+import { IEventStore } from "../event-store/interface.js";
 
 export const EventUIDSymbol = Symbol.for("event-uid");
 export const EventIndexableTagsSymbol = Symbol.for("indexable-tags");
@@ -92,7 +93,10 @@ export function getIndexableTags(event: NostrEvent) {
  * Returns the second index ( tag[1] ) of the first tag that matches the name
  * If the event has any hidden tags they will be searched first
  */
-export function getTagValue(event: NostrEvent | EventTemplate, name: string) {
+export function getTagValue<T extends { kind: number; tags: string[][]; content: string; pubkey: string }>(
+  event: T,
+  name: string,
+) {
   const hidden = getHiddenTags(event);
 
   const hiddenValue = hidden?.find((t) => t[0] === name)?.[1];
@@ -117,8 +121,8 @@ export function isFromCache(event: NostrEvent) {
 }
 
 /** Returns the EventStore of an event if its been added to one */
-export function getParentEventStore(event: NostrEvent): EventStore | undefined {
-  return Reflect.get(event, EventStoreSymbol);
+export function getParentEventStore<T extends object>(event: T): IEventStore | undefined {
+  return Reflect.get(event, EventStoreSymbol) as IEventStore | undefined;
 }
 
 /**

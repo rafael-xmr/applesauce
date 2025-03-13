@@ -1,11 +1,11 @@
 import { createContext, PropsWithChildren } from "react";
-import { EventStore, QueryStore } from "applesauce-core";
+import { IEventStore, QueryStore } from "applesauce-core";
 
 export const QueryStoreContext = createContext<QueryStore | null>(null);
-export const EventStoreContext = createContext<EventStore | null>(null);
+export const EventStoreContext = createContext<IEventStore | null>(null);
 
 /** Provides a EventStore to the component tree */
-export function EventStoreProvider({ eventStore, children }: PropsWithChildren<{ eventStore: EventStore }>) {
+export function EventStoreProvider({ eventStore, children }: PropsWithChildren<{ eventStore: IEventStore }>) {
   return <EventStoreContext.Provider value={eventStore}>{children}</EventStoreContext.Provider>;
 }
 

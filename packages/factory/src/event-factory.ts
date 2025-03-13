@@ -1,4 +1,4 @@
-import { Emoji, unixNow } from "applesauce-core/helpers";
+import { Emoji, HiddenContentSymbol, unixNow } from "applesauce-core/helpers";
 import { AddressPointer } from "nostr-tools/nip19";
 import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
 import { EventTemplate, NostrEvent, UnsignedEvent } from "nostr-tools";
@@ -74,9 +74,16 @@ export class EventFactory {
     // make sure parameterized replaceable events have "d" tags
     if (isParameterizedReplaceableKind(draft.kind)) draft = await includeReplaceableIdentifier()(draft, context);
 
+    let hiddenContent: string | undefined = undefined;
+
     // run operations
     for (const operation of operations) {
-      if (operation) draft = await operation(draft, context);
+      if (operation) {
+        draft = await operation(draft, context);
+
+        // if the operation has set encrypted content and left the plaintext version, carry it forward
+        if (Reflect.has(draft, HiddenContentSymbol)) hiddenContent = Reflect.get(draft, HiddenContentSymbol) as string;
+      }
     }
 
     // add client tag
@@ -84,10 +91,21 @@ export class EventFactory {
       draft = await includeClientTag(context.client.name, context.client.address)(draft, context);
     }
 
+    // if there was hidden content set, carry it forward
+    if (hiddenContent !== undefined) Reflect.set(draft, HiddenContentSymbol, hiddenContent);
+
     return draft;
   }
 
-  /** Process an event template with operations */
+  /** Build an event template with operations */
+  async build(template: EventFactoryTemplate, ...operations: (EventOperation | undefined)[]): Promise<EventTemplate> {
+    return await EventFactory.runProcess(template, this.context, ...operations);
+  }
+
+  /**
+   * Build an event template with operations
+   * @deprecated use the build method instead
+   */
   async process(template: EventFactoryTemplate, ...operations: (EventOperation | undefined)[]): Promise<EventTemplate> {
     return await EventFactory.runProcess(template, this.context, ...operations);
   }
@@ -162,13 +180,27 @@ export class EventFactory {
     Reflect.deleteProperty(draft, "id");
     Reflect.deleteProperty(draft, "sig");
 
-    return { ...draft, pubkey: await this.context.signer.getPublicKey() };
+    const newDraft = { ...draft, pubkey: await this.context.signer.getPublicKey() };
+
+    // copy the plaintext hidden content if its on the draft
+    if (Reflect.has(draft, HiddenContentSymbol)) {
+      Reflect.set(newDraft, HiddenContentSymbol, Reflect.get(draft, HiddenContentSymbol)!);
+    }
+
+    return newDraft;
   }
 
   async sign(draft: EventTemplate | UnsignedEvent): Promise<NostrEvent> {
     if (!this.context.signer) throw new Error("Missing signer");
     draft = await this.stamp(draft);
-    return await this.context.signer.signEvent(draft);
+    const signed = await this.context.signer.signEvent(draft);
+
+    // copy the plaintext hidden content if its on the draft
+    if (Reflect.has(draft, HiddenContentSymbol)) {
+      Reflect.set(signed, HiddenContentSymbol, Reflect.get(draft, HiddenContentSymbol)!);
+    }
+
+    return signed;
   }
 
   // Helpers

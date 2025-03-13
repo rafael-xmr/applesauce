@@ -29,12 +29,12 @@ export function ReplaceableQuery(kind: number, pubkey: string, d?: string): Quer
 }
 
 /** Creates a Query that returns an array of sorted events matching the filters */
-export function TimelineQuery(filters: Filter | Filter[], keepOldVersions?: boolean): Query<NostrEvent[]> {
+export function TimelineQuery(filters: Filter | Filter[], includeOldVersion?: boolean): Query<NostrEvent[]> {
   filters = Array.isArray(filters) ? filters : [filters];
 
   return {
-    key: hash_sum(filters) + (keepOldVersions ? "-history" : ""),
-    run: (events) => events.timeline(filters, keepOldVersions),
+    key: hash_sum(filters) + (includeOldVersion ? "-history" : ""),
+    run: (events) => events.timeline(filters, includeOldVersion),
   };
 }
 

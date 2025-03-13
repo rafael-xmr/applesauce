@@ -1,8 +1,7 @@
 import * as kinds from "nostr-tools/kinds";
-import { UnsignedEvent, type EventTemplate, type NostrEvent } from "nostr-tools";
 
 import { GROUPS_LIST_KIND } from "./groups.js";
-import { getParentEventStore } from "./event.js";
+import { getParentEventStore, isEvent } from "./event.js";
 
 export const HiddenContentSymbol = Symbol.for("hidden-content");
 
@@ -59,18 +58,18 @@ export function canHaveHiddenContent(kind: number): boolean {
 }
 
 /** Checks if an event has hidden content */
-export function hasHiddenContent(event: { kind: number; content: string }): boolean {
+export function hasHiddenContent<T extends { kind: number; content: string }>(event: T): boolean {
   return canHaveHiddenContent(event.kind) && event.content.length > 0;
 }
 
 /** Returns the hidden tags for an event if they are unlocked */
-export function getHiddenContent(event: NostrEvent | EventTemplate): string | undefined {
+export function getHiddenContent<T extends object>(event: T): string | undefined {
   return Reflect.get(event, HiddenContentSymbol) as string | undefined;
 }
 
 /** Checks if the hidden tags are locked */
-export function isHiddenContentLocked(event: NostrEvent | UnsignedEvent): boolean {
-  return getHiddenContent(event) === undefined;
+export function isHiddenContentLocked<T extends object>(event: T): boolean {
+  return Reflect.has(event, HiddenContentSymbol) === false;
 }
 
 /** Returns either nip04 or nip44 encryption methods depending on event kind */
@@ -82,14 +81,16 @@ export function getHiddenContentEncryptionMethods(kind: number, signer: HiddenCo
   return encryption;
 }
 
+export type HiddenContentEvent = { kind: number; pubkey: string; content: string };
+
 /**
  * Unlocks the encrypted content in an event
  * @param event The event with content to decrypt
  * @param signer A signer to use to decrypt the tags
  * @throws
  */
-export async function unlockHiddenContent(
-  event: { kind: number; pubkey: string; content: string },
+export async function unlockHiddenContent<T extends HiddenContentEvent>(
+  event: T,
   signer: HiddenContentSigner,
 ): Promise<string> {
   if (!canHaveHiddenContent(event.kind)) throw new Error("Event kind does not support hidden content");
@@ -99,8 +100,10 @@ export async function unlockHiddenContent(
   Reflect.set(event, HiddenContentSymbol, plaintext);
 
   // if the event has been added to an event store, notify it
-  const eventStore = getParentEventStore(event as NostrEvent);
-  if (eventStore) eventStore.update(event as NostrEvent);
+  if (isEvent(event)) {
+    const eventStore = getParentEventStore(event);
+    if (eventStore) eventStore.update(event);
+  }
 
   return plaintext;
 }

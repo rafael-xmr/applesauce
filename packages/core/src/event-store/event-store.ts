@@ -35,6 +35,7 @@ import { addSeenRelay, getSeenRelays } from "../helpers/relays.js";
 import { getDeleteCoordinates, getDeleteIds } from "../helpers/delete.js";
 import { claimEvents } from "../observable/claim-events.js";
 import { claimLatest } from "../observable/claim-latest.js";
+import { IEventStore } from "./interface.js";
 
 export const EventStoreSymbol = Symbol.for("event-store");
 
@@ -42,7 +43,7 @@ function sortDesc(a: NostrEvent, b: NostrEvent) {
   return b.created_at - a.created_at;
 }
 
-export class EventStore {
+export class EventStore implements IEventStore {
   database: Database;
 
   /** Enable this to keep old versions of replaceable events */
@@ -237,8 +238,8 @@ export class EventStore {
   }
 
   /** Creates an observable that emits when event is updated */
-  updated(id: string): Observable<NostrEvent> {
-    return this.database.updated.pipe(filter((e) => e.id === id));
+  updated(event: string | NostrEvent): Observable<NostrEvent> {
+    return this.database.updated.pipe(filter((e) => e.id === event || e === event));
   }
 
   /** Creates an observable that subscribes to a single event */
@@ -257,7 +258,7 @@ export class EventStore {
       this.removed(id).pipe(endWith(undefined)),
     ).pipe(
       // claim all events
-      claimEvents(this.database),
+      claimLatest(this.database),
     );
   }
 

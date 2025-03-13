@@ -1,14 +1,13 @@
-import { EventTemplate, NostrEvent } from "nostr-tools";
-
-import { EventStore } from "../event-store/event-store.js";
-import { unixNow } from "./time.js";
-import { isEvent } from "./event.js";
 import {
   canHaveHiddenContent,
+  getHiddenContent,
   getHiddenContentEncryptionMethods,
+  HiddenContentEvent,
   HiddenContentSigner,
+  isHiddenContentLocked,
   unlockHiddenContent,
 } from "./hidden-content.js";
+import { getOrComputeCachedValue } from "./cache.js";
 
 export const HiddenTagsSymbol = Symbol.for("hidden-tags");
 
@@ -18,22 +17,32 @@ export function canHaveHiddenTags(kind: number): boolean {
 }
 
 /** Checks if an event has hidden tags */
-export function hasHiddenTags(event: NostrEvent | EventTemplate): boolean {
+export function hasHiddenTags<T extends { content: string; kind: number }>(event: T): boolean {
   return canHaveHiddenTags(event.kind) && event.content.length > 0;
 }
 
 /** Returns the hidden tags for an event if they are unlocked */
-export function getHiddenTags(event: NostrEvent | EventTemplate): string[][] | undefined {
-  return Reflect.get(event, HiddenTagsSymbol) as string[][] | undefined;
+export function getHiddenTags<T extends object>(event: T): string[][] | undefined {
+  if (isHiddenTagsLocked(event)) return undefined;
+
+  return getOrComputeCachedValue(event, HiddenTagsSymbol, () => {
+    const plaintext = getHiddenContent(event)!;
+
+    const parsed = JSON.parse(plaintext) as string[][];
+    if (!Array.isArray(parsed)) throw new Error("Content is not an array of tags");
+
+    // Convert array to tags array string[][]
+    return parsed.filter((t) => Array.isArray(t)).map((t) => t.map((v) => String(v)));
+  });
 }
 
 /** Checks if the hidden tags are locked */
-export function isHiddenTagsLocked(event: NostrEvent): boolean {
-  return hasHiddenTags(event) && getHiddenTags(event) === undefined;
+export function isHiddenTagsLocked<T extends object>(event: T): boolean {
+  return isHiddenContentLocked(event);
 }
 
 /** Returns either nip04 or nip44 encryption method depending on list kind */
-export function getListEncryptionMethods(kind: number, signer: HiddenContentSigner) {
+export function getHiddenTagsEncryptionMethods(kind: number, signer: HiddenContentSigner) {
   return getHiddenContentEncryptionMethods(kind, signer);
 }
 
@@ -44,45 +53,14 @@ export function getListEncryptionMethods(kind: number, signer: HiddenContentSign
  * @param store An optional EventStore to notify about the update
  * @throws
  */
-export async function unlockHiddenTags<T extends { kind: number; pubkey: string; content: string }>(
+export async function unlockHiddenTags<T extends HiddenContentEvent>(
   event: T,
   signer: HiddenContentSigner,
-  store?: EventStore,
 ): Promise<string[][]> {
   if (!canHaveHiddenTags(event.kind)) throw new Error("Event kind does not support hidden tags");
-  const plaintext = await unlockHiddenContent(event, signer);
 
-  const parsed = JSON.parse(plaintext) as string[][];
-  if (!Array.isArray(parsed)) throw new Error("Content is not an array of tags");
+  // unlock hidden content is needed
+  if (isHiddenContentLocked(event)) await unlockHiddenContent(event, signer);
 
-  // Convert array to tags array string[][]
-  const tags = parsed.filter((t) => Array.isArray(t)).map((t) => t.map((v) => String(v)));
-
-  Reflect.set(event, HiddenTagsSymbol, tags);
-
-  if (store && isEvent(event)) store.update(event);
-
-  return tags;
-}
-
-/**
- * Override the hidden tags in an event
- * @deprecated use EventFactory to create draft events
- * @throws
- */
-export async function overrideHiddenTags(
-  event: NostrEvent,
-  hidden: string[][],
-  signer: HiddenContentSigner,
-): Promise<EventTemplate> {
-  if (!canHaveHiddenTags(event.kind)) throw new Error("Event kind does not support hidden tags");
-  const encryption = getListEncryptionMethods(event.kind, signer);
-  const ciphertext = await encryption.encrypt(event.pubkey, JSON.stringify(hidden));
-
-  return {
-    kind: event.kind,
-    content: ciphertext,
-    created_at: unixNow(),
-    tags: event.tags,
-  };
+  return getHiddenTags(event)!;
 }

@@ -1,10 +1,9 @@
 import { unixNow } from "applesauce-core/helpers";
-import { nanoid } from "nanoid";
+import { SimpleSigner } from "applesauce-signers/signers/simple-signer";
 import type { NostrEvent } from "nostr-tools";
-import { finalizeEvent, generateSecretKey, getPublicKey, kinds } from "nostr-tools";
+import { finalizeEvent, getPublicKey, kinds } from "nostr-tools";
 
-export class FakeUser {
-  key = generateSecretKey();
+export class FakeUser extends SimpleSigner {
   pubkey = getPublicKey(this.key);
 
   event(data?: Partial<NostrEvent>): NostrEvent {
@@ -27,11 +26,15 @@ export class FakeUser {
     return this.event({ kind: kinds.Metadata, content: JSON.stringify({ ...profile }), ...extra });
   }
 
+  contacts(pubkeys: string[] = []) {
+    return this.event({ kind: kinds.Contacts, tags: pubkeys.map((p) => ["p", p]) });
+  }
+
   list(tags: string[][] = [], extra?: Partial<NostrEvent>) {
     return this.event({
       kind: kinds.Bookmarksets,
       content: "",
-      tags: [["d", nanoid()], ...tags],
+      tags: [["d", String(Math.round(Math.random() * 10000))], ...tags],
       ...extra,
     });
   }

@@ -1,6 +1,6 @@
 import { Query } from "applesauce-core";
-import { combineLatest, filter, map, startWith } from "rxjs";
 import { NostrEvent } from "nostr-tools";
+import { combineLatest, filter, map, startWith } from "rxjs";
 
 import { getTokenContent, isTokenContentLocked, WALLET_TOKEN_KIND } from "../helpers/tokens.js";
 
@@ -12,10 +12,9 @@ function filterDeleted(tokens: NostrEvent[]) {
     .filter((token) => {
       // skip this event if it a newer event says its deleted
       if (deleted.has(token.id)) return false;
-      // skip if token is locked
-      if (isTokenContentLocked(token)) return false;
-      else {
-        // add ids to deleted array
+
+      // add ids to deleted array
+      if (!isTokenContentLocked(token)) {
         const details = getTokenContent(token);
         for (const id of details.del) deleted.add(id);
       }

@@ -13,6 +13,7 @@ export type Mutes = {
   words: Set<string>;
 };
 
+/** Parses mute tags */
 export function parseMutedTags(tags: string[][]): Mutes {
   const pubkeys = new Set(tags.filter(isPTag).map((t) => t[1]));
   const threads = new Set(tags.filter(isETag).map((t) => t[1]));
@@ -24,7 +25,7 @@ export function parseMutedTags(tags: string[][]): Mutes {
 
 /** Returns muted things */
 export function getMutedThings(mute: NostrEvent) {
-  return getOrComputeCachedValue(mute, MutePublicSymbol, (e) => parseMutedTags(e.tags));
+  return getOrComputeCachedValue(mute, MutePublicSymbol, () => parseMutedTags(mute.tags));
 }
 
 /** Returns the hidden muted content if the event is unlocked */

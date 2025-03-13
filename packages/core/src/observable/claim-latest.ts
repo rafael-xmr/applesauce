@@ -1,8 +1,10 @@
 import { finalize, MonoTypeOperatorFunction, tap } from "rxjs";
 import { NostrEvent } from "nostr-tools";
-import { Database } from "../event-store/database.js";
 
-export function claimLatest(database: Database): MonoTypeOperatorFunction<NostrEvent | undefined> {
+import { type Database } from "../event-store/database.js";
+
+/** An operator that claims the latest event with the database */
+export function claimLatest<T extends NostrEvent | undefined>(database: Database): MonoTypeOperatorFunction<T> {
   return (source) => {
     let latest: NostrEvent | undefined = undefined;
 
@@ -16,7 +18,7 @@ export function claimLatest(database: Database): MonoTypeOperatorFunction<NostrE
         latest = event;
       }),
       finalize(() => {
-        // late claim
+        // remove latest claim
         if (latest) database.removeClaim(latest, source);
       }),
     );

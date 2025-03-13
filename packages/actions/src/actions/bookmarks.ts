@@ -1,7 +1,7 @@
 import { kinds, NostrEvent } from "nostr-tools";
 import { isReplaceable } from "applesauce-core/helpers";
 import { addEventBookmarkTag, removeEventBookmarkTag } from "applesauce-factory/operations/tag";
-import { type EventStore } from "applesauce-core";
+import { IEventStore } from "applesauce-core";
 
 import { Action } from "../action-hub.js";
 import {
@@ -12,7 +12,7 @@ import {
   setListTitle,
 } from "applesauce-factory/operations/event";
 
-function getBookmarkEvent(events: EventStore, self: string, identifier?: string) {
+function getBookmarkEvent(events: IEventStore, self: string, identifier?: string) {
   return events.getReplaceable(identifier ? kinds.Bookmarksets : kinds.BookmarkList, self, identifier);
 }
 
