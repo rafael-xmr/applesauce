@@ -62,11 +62,11 @@
     "nostr-tools": "^2.10.4",
     "observable-hooks": "^4.2.4",
     "react": "^18.3.1",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "@types/react": "^18.3.18",
-    "typescript": "^5.7.3",
+    "typescript": "^5.8.2",
     "vitest": "^3.0.5"
   },
   "funding": {

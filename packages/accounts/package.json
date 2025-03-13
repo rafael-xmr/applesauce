@@ -42,10 +42,10 @@
     "applesauce-signers": "^0.11.0",
     "nanoid": "^5.0.9",
     "nostr-tools": "^2.10.4",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
-    "typescript": "^5.7.3",
+    "typescript": "^5.8.2",
     "vitest": "^3.0.5"
   },
   "funding": {
