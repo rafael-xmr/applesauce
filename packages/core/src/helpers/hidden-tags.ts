@@ -5,6 +5,7 @@ import {
   HiddenContentEvent,
   HiddenContentSigner,
   isHiddenContentLocked,
+  lockHiddenContent,
   unlockHiddenContent,
 } from "./hidden-content.js";
 import { getOrComputeCachedValue } from "./cache.js";
@@ -63,4 +64,9 @@ export async function unlockHiddenTags<T extends HiddenContentEvent>(
   if (isHiddenContentLocked(event)) await unlockHiddenContent(event, signer);
 
   return getHiddenTags(event)!;
+}
+
+export function lockHiddenTags<T extends object>(event: T) {
+  Reflect.deleteProperty(event, HiddenTagsSymbol);
+  lockHiddenContent(event);
 }

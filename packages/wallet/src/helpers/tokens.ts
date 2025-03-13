@@ -4,6 +4,7 @@ import {
   HiddenContentSigner,
   isHiddenContentLocked,
   isHiddenTagsLocked,
+  lockHiddenContent,
   unlockHiddenContent,
 } from "applesauce-core/helpers";
 import { NostrEvent } from "nostr-tools";
@@ -54,6 +55,13 @@ export function isTokenContentLocked(token: NostrEvent): boolean {
 export async function unlockTokenContent(token: NostrEvent, signer: HiddenContentSigner): Promise<TokenContent> {
   if (isHiddenContentLocked(token)) await unlockHiddenContent(token, signer);
   return getTokenContent(token)!;
+}
+
+/** Removes the unencrypted hidden content */
+export function lockTokenContent(token: NostrEvent) {
+  Reflect.deleteProperty(token, TokenContentSymbol);
+  Reflect.deleteProperty(token, TokenProofsTotalSymbol);
+  lockHiddenContent(token);
 }
 
 /** Gets the totaled amount of proofs in a token event */

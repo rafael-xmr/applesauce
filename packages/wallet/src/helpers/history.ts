@@ -5,6 +5,7 @@ import {
   isETag,
   isHiddenContentLocked,
   isHiddenTagsLocked,
+  lockHiddenTags,
   unlockHiddenTags,
 } from "applesauce-core/helpers";
 import { NostrEvent } from "nostr-tools";
@@ -67,4 +68,9 @@ export function getHistoryContent(history: NostrEvent): HistoryContent | undefin
 export async function unlockHistoryContent(history: NostrEvent, signer: HiddenContentSigner): Promise<HistoryContent> {
   if (isHiddenContentLocked(history)) await unlockHiddenTags(history, signer);
   return getHistoryContent(history)!;
+}
+
+export function lockHistoryContent(history: NostrEvent) {
+  Reflect.deleteProperty(history, HistoryContentSymbol);
+  lockHiddenTags(history);
 }
