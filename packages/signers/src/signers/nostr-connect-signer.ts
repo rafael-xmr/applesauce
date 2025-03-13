@@ -244,7 +244,7 @@ export class NostrConnectSigner implements Nip07Interface {
                 }
               }
             }
-          } else p.reject(response);
+          } else p.reject(new Error(response.error));
         } else if (response.result) {
           this.log("Got Response", response.id, response.result);
           p.resolve(response.result);
