@@ -6,29 +6,29 @@ import { Action } from "../action-hub.js";
 
 /** An action that pins a note to the users pin list */
 export function PinNote(note: NostrEvent): Action {
-  return async ({ events, factory, self, publish }) => {
+  return async function* ({ events, factory, self }) {
     const pins = events.getReplaceable(kinds.Pinlist, self);
     if (!pins) throw new Error("Missing pin list");
 
     const draft = await factory.modifyTags(pins, addEventTag(note.id));
-    await publish("Pin note", await factory.sign(draft));
+    yield await factory.sign(draft);
   };
 }
 
 /** An action that removes an event from the users pin list */
 export function UnpinNote(note: NostrEvent): Action {
-  return async ({ events, factory, self, publish }) => {
+  return async function* ({ events, factory, self }) {
     const pins = events.getReplaceable(kinds.Pinlist, self);
     if (!pins) throw new Error("Missing pin list");
 
     const draft = await factory.modifyTags(pins, removeEventTag(note.id));
-    await publish("Pin note", await factory.sign(draft));
+    yield await factory.sign(draft);
   };
 }
 
 /** An action that creates a new pin list for a user */
 export function CreatePinList(pins: NostrEvent[] = []): Action {
-  return async ({ events, factory, self, publish }) => {
+  return async function* ({ events, factory, self }) {
     const existing = events.getReplaceable(kinds.Pinlist, self);
     if (existing) throw new Error("Pin list already exists");
 
@@ -36,6 +36,6 @@ export function CreatePinList(pins: NostrEvent[] = []): Action {
       { kind: kinds.Pinlist },
       modifyPublicTags(...pins.map((event) => addEventTag(event.id))),
     );
-    await publish("Create pin list", await factory.sign(draft));
+    yield await factory.sign(draft);
   };
 }

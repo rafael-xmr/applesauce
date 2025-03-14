@@ -24,6 +24,6 @@ describe("CreateBookmarkList", () => {
   it("should publish a kind 10003 bookmark list", async () => {
     await hub.run(CreateBookmarkList);
 
-    expect(publish).toBeCalledWith(expect.any(String), expect.objectContaining({ kind: kinds.BookmarkList }));
+    expect(publish).toBeCalledWith(expect.objectContaining({ kind: kinds.BookmarkList }));
   });
 });

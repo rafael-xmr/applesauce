@@ -60,7 +60,7 @@ importers:
         version: 5.7.3
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
 
   packages/actions:
     dependencies:
@@ -73,12 +73,18 @@ importers:
       nostr-tools:
         specifier: ^2.10.4
         version: 2.10.4(typescript@5.7.3)
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
     devDependencies:
+      '@hirez_io/observer-spy':
+        specifier: ^2.2.0
+        version: 2.2.0(rxjs@7.8.1)(typescript@5.7.3)
       '@types/debug':
         specifier: ^4.1.12
         version: 4.1.12
       applesauce-signers:
-        specifier: workspace:^0.11.0
+        specifier: ^0.11.0
         version: link:../signers
       nanoid:
         specifier: ^5.0.9
@@ -88,7 +94,7 @@ importers:
         version: 5.7.3
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
 
   packages/content:
     dependencies:
@@ -131,7 +137,7 @@ importers:
         version: 5.7.3
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
 
   packages/core:
     dependencies:
@@ -177,7 +183,7 @@ importers:
         version: 5.7.3
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
 
   packages/docs:
     devDependencies:
@@ -200,16 +206,16 @@ importers:
         specifier: ^6.4.4
         version: 6.4.4(@emotion/react@11.14.0(@types/react@18.3.18)(react@18.3.1))(@emotion/styled@11.14.0(@emotion/react@11.14.0(@types/react@18.3.18)(react@18.3.1))(@types/react@18.3.18)(react@18.3.1))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       applesauce-core:
-        specifier: workspace:^
+        specifier: ^0.11.0
         version: link:../core
       applesauce-factory:
-        specifier: workspace:^
+        specifier: ^0.11.0
         version: link:../factory
       applesauce-loaders:
-        specifier: workspace:^
+        specifier: ^0.11.0
         version: link:../loaders
       applesauce-react:
-        specifier: workspace:^
+        specifier: ^0.11.0
         version: link:../react
       nostr-tools:
         specifier: ^2.10.4
@@ -269,16 +275,16 @@ importers:
         version: 22.13.1
       '@vitest/coverage-v8':
         specifier: 2.1.8
-        version: 2.1.8(@vitest/browser@3.0.8)(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0))
+        version: 2.1.8(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0))
       applesauce-signers:
-        specifier: workspace:^
+        specifier: ^0.11.0
         version: link:../signers
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
 
   packages/loaders:
     dependencies:
@@ -306,13 +312,13 @@ importers:
         version: 5.7.3
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
       vitest-nostr:
         specifier: ^0.4.1
-        version: 0.4.1(vitest-websocket-mock@0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)))(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0))
+        version: 0.4.1(vitest-websocket-mock@0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)))(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0))
       vitest-websocket-mock:
         specifier: ^0.4.0
-        version: 0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0))
+        version: 0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0))
 
   packages/react:
     dependencies:
@@ -320,7 +326,7 @@ importers:
         specifier: ^0.11.0
         version: link:../accounts
       applesauce-actions:
-        specifier: workspace:^0.11.0
+        specifier: ^0.11.0
         version: link:../actions
       applesauce-content:
         specifier: ^0.11.0
@@ -352,12 +358,12 @@ importers:
         version: 5.7.3
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
 
   packages/relay:
     dependencies:
       applesauce-core:
-        specifier: workspace:^
+        specifier: ^0.11.0
         version: link:../core
       nanoid:
         specifier: ^5.0.9
@@ -374,13 +380,13 @@ importers:
         version: 5.7.3
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
       vitest-nostr:
         specifier: ^0.4.1
-        version: 0.4.1(vitest-websocket-mock@0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)))(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0))
+        version: 0.4.1(vitest-websocket-mock@0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)))(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0))
       vitest-websocket-mock:
         specifier: ^0.4.0
-        version: 0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0))
+        version: 0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0))
 
   packages/signers:
     dependencies:
@@ -417,7 +423,7 @@ importers:
         version: 5.7.3
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
 
   packages/wallet:
     dependencies:
@@ -460,7 +466,7 @@ importers:
         version: 5.7.3
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
 
 packages:
 
@@ -5072,7 +5078,7 @@ snapshots:
       - utf-8-validate
       - vite
 
-  '@vitest/coverage-v8@2.1.8(@vitest/browser@3.0.8)(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0))':
+  '@vitest/coverage-v8@2.1.8(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -5086,7 +5092,7 @@ snapshots:
       std-env: 3.8.1
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
-      vitest: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
+      vitest: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
     optionalDependencies:
       '@vitest/browser': 3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8)
     transitivePeerDependencies:
@@ -7046,18 +7052,18 @@ snapshots:
       - typescript
       - universal-cookie
 
-  vitest-nostr@0.4.1(vitest-websocket-mock@0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)))(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)):
+  vitest-nostr@0.4.1(vitest-websocket-mock@0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)))(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)):
     dependencies:
-      vitest: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
-      vitest-websocket-mock: 0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0))
+      vitest: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
+      vitest-websocket-mock: 0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0))
 
-  vitest-websocket-mock@0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)):
+  vitest-websocket-mock@0.4.0(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)):
     dependencies:
       '@vitest/utils': 2.1.8
       mock-socket: 9.3.1
-      vitest: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
+      vitest: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0)
 
-  vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0):
+  vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@22.13.1)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@22.13.1)(yaml@2.7.0))(vitest@3.0.8))(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.0):
     dependencies:
       '@vitest/expect': 3.0.5
       '@vitest/mocker': 3.0.5(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(vite@6.1.0(@types/node@22.13.1)(yaml@2.7.0))

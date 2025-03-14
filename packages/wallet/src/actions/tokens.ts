@@ -13,7 +13,7 @@ import { WalletHistoryBlueprint } from "../blueprints/history.js";
  * @param redeemed an array of nutzap event ids to mark as redeemed
  */
 export function ReceiveToken(token: Token, redeemed?: string[], fee?: number): Action {
-  return async ({ factory, publish }) => {
+  return async function* ({ factory }) {
     const amount = token.proofs.reduce((t, p) => t + p.amount, 0);
 
     const tokenEvent = await factory.sign(await factory.create(WalletTokenBlueprint, token, []));
@@ -25,14 +25,14 @@ export function ReceiveToken(token: Token, redeemed?: string[], fee?: number): A
       ),
     );
 
-    await publish("Save tokens", tokenEvent);
-    await publish("Save transaction", history);
+    yield tokenEvent;
+    yield history;
   };
 }
 
 /** An action that deletes old tokens and creates a new one but does not add a history event */
 export function RolloverTokens(tokens: NostrEvent[], token: Token): Action {
-  return async ({ factory, publish }) => {
+  return async function* ({ factory }) {
     // create a delete event for old tokens
     const deleteDraft = await factory.create(DeleteBlueprint, tokens);
     // create a new token event
@@ -47,14 +47,14 @@ export function RolloverTokens(tokens: NostrEvent[], token: Token): Action {
     const signedToken = await factory.sign(tokenDraft);
 
     // publish events
-    await publish("Delete old tokens", signedDelete);
-    await publish("Save new token", signedToken);
+    yield signedDelete;
+    yield signedToken;
   };
 }
 
 /** An action that deletes old token events and adds a spend history item */
 export function CompleteSpend(spent: NostrEvent[], change: Token): Action {
-  return async ({ factory, publish }) => {
+  return async function* ({ factory }) {
     if (spent.length === 0) throw new Error("Cant complete spent with no token events");
     if (spent.some((s) => isTokenContentLocked(s))) throw new Error("Cant complete spend with locked tokens");
 
@@ -96,8 +96,8 @@ export function CompleteSpend(spent: NostrEvent[], change: Token): Action {
     const signedHistory = await factory.sign(history);
 
     // publish events
-    await publish("Delete old tokens", signedDelete);
-    if (signedToken) await publish("Save change", signedToken);
-    await publish("Save transaction", signedHistory);
+    yield signedDelete;
+    if (signedToken) yield signedToken;
+    yield signedHistory;
   };
 }

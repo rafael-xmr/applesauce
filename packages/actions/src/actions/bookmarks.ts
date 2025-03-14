@@ -1,5 +1,4 @@
 import { kinds, NostrEvent } from "nostr-tools";
-import { isReplaceable } from "applesauce-core/helpers";
 import { addEventBookmarkTag, removeEventBookmarkTag } from "applesauce-factory/operations/tag";
 import { IEventStore } from "applesauce-core";
 
@@ -23,14 +22,14 @@ function getBookmarkEvent(events: IEventStore, self: string, identifier?: string
  * @param hidden set to true to add to hidden bookmarks
  */
 export function BookmarkEvent(event: NostrEvent, identifier?: string, hidden = false): Action {
-  return async ({ events, factory, self, publish }) => {
+  return async function* ({ events, factory, self }) {
     const bookmarks = getBookmarkEvent(events, self, identifier);
     if (!bookmarks) throw new Error("Cant find bookmarks");
 
     const operation = addEventBookmarkTag(event);
 
     const draft = await factory.modifyTags(bookmarks, hidden ? { hidden: operation } : operation);
-    await publish(`Bookmark ${isReplaceable(event.kind) ? "note" : "article"}`, await factory.sign(draft));
+    yield await factory.sign(draft);
   };
 }
 
@@ -41,28 +40,28 @@ export function BookmarkEvent(event: NostrEvent, identifier?: string, hidden = f
  * @param hidden set to true to remove from hidden bookmarks
  */
 export function UnbookmarkEvent(event: NostrEvent, identifier: string, hidden = false): Action {
-  return async ({ events, factory, self, publish }) => {
+  return async function* ({ events, factory, self }) {
     const bookmarks = getBookmarkEvent(events, self, identifier);
     if (!bookmarks) throw new Error("Cant find bookmarks");
 
     const operation = removeEventBookmarkTag(event);
 
     const draft = await factory.modifyTags(bookmarks, hidden ? { hidden: operation } : operation);
-    await publish("Remove bookmark", await factory.sign(draft));
+    yield await factory.sign(draft);
   };
 }
 
 /** An action that creates a new bookmark list for a user */
 export function CreateBookmarkList(bookmarks?: NostrEvent[]): Action {
-  return async ({ events, factory, self, publish }) => {
+  return async function* ({ events, factory, self }) {
     const existing = getBookmarkEvent(events, self);
     if (existing) throw new Error("Bookmark list already exists");
 
-    const draft = await factory.process(
+    const draft = await factory.build(
       { kind: kinds.BookmarkList },
       bookmarks ? modifyPublicTags(...bookmarks.map(addEventBookmarkTag)) : undefined,
     );
-    await publish("Create bookmark list", await factory.sign(draft));
+    yield await factory.sign(draft);
   };
 }
 
@@ -72,7 +71,7 @@ export function CreateBookmarkSet(
   description: string,
   additional: { image?: string; hidden?: NostrEvent[]; public?: NostrEvent[] },
 ): Action {
-  return async ({ events, factory, self, publish }) => {
+  return async function* ({ events, factory, self }) {
     const existing = getBookmarkEvent(events, self);
     if (existing) throw new Error("Bookmark list already exists");
 
@@ -84,6 +83,6 @@ export function CreateBookmarkSet(
       additional.public ? modifyPublicTags(...additional.public.map(addEventBookmarkTag)) : undefined,
       additional.hidden ? modifyHiddenTags(...additional.hidden.map(addEventBookmarkTag)) : undefined,
     );
-    await publish("Create bookmark set", await factory.sign(draft));
+    yield await factory.sign(draft);
   };
 }
