@@ -3,7 +3,7 @@ import { EventFactory } from "applesauce-factory";
 
 import { FakeUser } from "../../__tests__/fake-user.js";
 import { WalletTokenBlueprint } from "../../blueprints/tokens.js";
-import { dumbTokenSelection, unlockTokenContent } from "../tokens.js";
+import { decodeTokenFromEmojiString, dumbTokenSelection, encodeTokenToEmoji, unlockTokenContent } from "../tokens.js";
 import { HiddenContentSymbol } from "applesauce-core/helpers";
 
 const user = new FakeUser();
@@ -82,5 +82,39 @@ describe("dumbTokenSelection", () => {
     Reflect.deleteProperty(b, HiddenContentSymbol);
 
     expect(dumbTokenSelection([a, b], 20)).toEqual([a]);
+  });
+});
+
+describe("encodeTokenToEmoji", () => {
+  it("should encode token into emoji string", () => {
+    const token =
+      "cashuBo2FteBtodHRwczovL3Rlc3RudXQuY2FzaHUuc3BhY2VhdWNzYXRhdIGiYWlIAJofKTJT5B5hcIGkYWEBYXN4QDdlZDBkMzk3NGQ5ZWM2OTc2YTAzYmZmYjdkMTA4NzIzZTBiMDRjMzRhNDc3MjlmNjMwOGJlODc3OTA2NTY0NDVhY1ghA36iYyOHCe4CnTxzORbcXFVeAbkMUFE6FqPWInujnAOcYWSjYWVYIJmHRwCQ0Uopkd3P5xb0MdcWQEaZz9hXWtcn-FMhZj8LYXNYIF4X9ybXxg5Pp0KSowfu4y_Aovo9iy3TXlLSaKyVJzz2YXJYIC_UFkoC5U9BpSgBTGUQgsjfz_emv5xykDiavZUfRN8E";
+    expect(encodeTokenToEmoji(token).length).toBeGreaterThan(token.length);
+  });
+});
+
+const emoji =
+  "🥜󠅓󠅑󠅣󠅘󠅥󠄲󠅟󠄢󠄶󠅤󠅕󠄲󠅤󠅟󠅔󠄸󠅂󠅧󠅓󠅪󠅟󠅦󠄼󠄣󠅂󠅜󠅓󠄣󠅂󠅥󠅔󠅈󠅁󠅥󠅉󠄢󠄶󠅪󠅑󠄸󠅅󠅥󠅓󠄣󠄲󠅘󠅉󠄢󠅆󠅘󠅔󠅇󠄾󠅪󠅉󠅈󠅂󠅘󠅔󠄹󠄷󠅙󠅉󠅇󠅜󠄹󠄱󠄺󠅟󠅖󠄻󠅄󠄺󠅄󠄥󠄲󠄥󠅘󠅓󠄹󠄷󠅛󠅉󠅇󠄵󠄲󠅉󠅈󠄾󠄤󠅁󠄴󠅔󠅜󠅊󠄴󠄲󠅛󠄽󠅪󠅛󠄣󠄾󠄷󠅁󠄥󠅊󠅇󠄽󠄢󠄿󠅄󠅓󠄢󠅉󠅄󠄱󠅪󠅉󠅝󠅊󠅝󠅉󠅚󠅔󠅛󠄽󠅄󠄱󠄤󠄾󠅪󠄹󠅪󠅊󠅄󠄲󠅙󠄽󠄴󠅂󠅚󠄽󠅪󠅂󠅘󠄾󠄴󠅓󠄣󠄽󠅚󠅜󠅝󠄾󠅚󠄽󠅧󠄿󠄷󠄺󠅜󠄿󠄴󠅓󠄣󠄿󠅄󠄱󠄢󠄾󠅄󠅉󠄠󠄾󠄴󠅆󠅘󠅉󠄡󠅗󠅘󠄱󠄣󠄦󠅙󠅉󠅩󠄿󠄸󠄳󠅕󠄤󠄳󠅞󠅄󠅨󠅪󠄿󠅂󠅒󠅓󠅈󠄶󠅆󠅕󠄱󠅒󠅛󠄽󠅅󠄶󠄵󠄦󠄶󠅡󠅀󠅇󠄹󠅞󠅥󠅚󠅞󠄱󠄿󠅓󠅉󠅇󠅃󠅚󠅉󠅇󠅆󠅉󠄹󠄺󠅝󠄸󠅂󠅧󠄳󠅁󠄠󠅅󠅟󠅠󠅛󠅔󠄣󠅀󠄥󠅨󠅒󠄠󠄽󠅔󠅓󠅇󠅁󠄵󠅑󠅊󠅪󠄩󠅘󠅈󠅇󠅤󠅓󠅞󠄝󠄶󠄽󠅘󠅊󠅚󠄨󠄼󠅉󠅈󠄾󠅉󠄹󠄶󠄤󠅈󠄩󠅩󠅒󠅈󠅨󠅗󠄥󠅀󠅠󠄠󠄻󠅃󠅟󠅧󠅖󠅥󠄤󠅩󠅏󠄱󠅟󠅦󠅟󠄩󠅙󠅩󠄣󠅄󠅈󠅜󠄼󠅃󠅑󠄻󠅩󠅆󠄺󠅪󠅪󠄢󠅉󠅈󠄺󠅉󠄹󠄳󠅏󠅅󠄶󠅛󠅟󠄳󠄥󠅅󠄩󠄲󠅠󠅃󠅗󠄲󠅄󠄷󠅅󠅁󠅗󠅣󠅚󠅖󠅪󠅏󠅕󠅝󠅦󠄥󠅨󠅩󠅛󠄴󠅙󠅑󠅦󠅊󠅅󠅖󠅂󠄾󠄨󠄵";
+describe("decodeTokenFromEmojiString", () => {
+  it("should decode single emoji", () => {
+    expect(decodeTokenFromEmojiString(emoji)).toEqual(
+      expect.objectContaining({
+        mint: "https://testnut.cashu.space",
+        proofs: [expect.any(Object)],
+        unit: "sat",
+      }),
+    );
+  });
+
+  it("should decode an emoji in text", () => {
+    expect(
+      decodeTokenFromEmojiString("the money is in the emoji, " + emoji + " you can redeem it using cashu.me"),
+    ).toEqual(
+      expect.objectContaining({
+        mint: "https://testnut.cashu.space",
+        proofs: [expect.any(Object)],
+        unit: "sat",
+      }),
+    );
   });
 });
