@@ -1,9 +1,9 @@
-import { CashuMint, CashuWallet, CheckStateEnum, Proof, Token } from "@cashu/cashu-ts";
+import { Token } from "@cashu/cashu-ts";
 import { Action } from "applesauce-actions";
 import { DeleteBlueprint } from "applesauce-factory/blueprints";
 import { NostrEvent } from "nostr-tools";
 
-import { getTokenContent, ignoreDuplicateProofs, isTokenContentLocked, WALLET_TOKEN_KIND } from "../helpers/tokens.js";
+import { getTokenContent, isTokenContentLocked } from "../helpers/tokens.js";
 import { WalletTokenBlueprint } from "../blueprints/tokens.js";
 import { WalletHistoryBlueprint } from "../blueprints/history.js";
 
