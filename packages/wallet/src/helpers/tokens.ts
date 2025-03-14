@@ -1,4 +1,4 @@
-import { getDecodedToken, getEncodedToken, Token } from "@cashu/cashu-ts";
+import { getDecodedToken, getEncodedToken, Proof, Token } from "@cashu/cashu-ts";
 import {
   getHiddenContent,
   getOrComputeCachedValue,
@@ -9,6 +9,23 @@ import {
   unlockHiddenContent,
 } from "applesauce-core/helpers";
 import { NostrEvent } from "nostr-tools";
+
+/** Internal method for creating a unique id for each proof */
+export function getProofUID(proof: Proof): string {
+  return proof.id + proof.amount + proof.C + proof.secret;
+}
+
+/** Internal method to filter out duplicate proofs */
+export function ignoreDuplicateProofs(seen = new Set<string>()): (proof: Proof) => boolean {
+  return (proof) => {
+    const id = getProofUID(proof);
+    if (seen.has(id)) return false;
+    else {
+      seen.add(id);
+      return true;
+    }
+  };
+}
 
 export const WALLET_TOKEN_KIND = 7375;
 
@@ -24,7 +41,6 @@ export type TokenContent = {
 };
 
 export const TokenContentSymbol = Symbol.for("token-content");
-export const TokenProofsTotalSymbol = Symbol.for("token-proofs-total");
 
 /**
  * Returns the decrypted and parsed details of a 7375 token event
@@ -61,44 +77,52 @@ export async function unlockTokenContent(token: NostrEvent, signer: HiddenConten
 /** Removes the unencrypted hidden content */
 export function lockTokenContent(token: NostrEvent) {
   Reflect.deleteProperty(token, TokenContentSymbol);
-  Reflect.deleteProperty(token, TokenProofsTotalSymbol);
   lockHiddenContent(token);
 }
 
-/** Gets the totaled amount of proofs in a token event */
+/**
+ * Gets the totaled amount of proofs in a token event
+ * @param token The token event to calculate the total
+ */
 export function getTokenProofsTotal(token: NostrEvent): number | undefined {
   if (isTokenContentLocked(token)) return undefined;
 
-  return getOrComputeCachedValue(token, TokenProofsTotalSymbol, () => {
-    const content = getTokenContent(token)!;
-    return content.proofs.reduce((t, p) => t + p.amount, 0);
-  });
+  const content = getTokenContent(token)!;
+  return content.proofs.reduce((t, p) => t + p.amount, 0);
 }
 
 /**
- * Selects oldest tokens that total up to more than the min amount
+ * Selects oldest tokens and proofs that total up to more than the min amount
  * @throws
  */
-export function dumbTokenSelection(tokens: NostrEvent[], minAmount: number, mint?: string) {
+export function dumbTokenSelection(
+  tokens: NostrEvent[],
+  minAmount: number,
+  mint?: string,
+): { events: NostrEvent[]; proofs: Proof[] } {
   // sort newest to oldest
   const sorted = tokens
     .filter((token) => !isTokenContentLocked(token) && (mint ? getTokenContent(token)!.mint === mint : true))
     .sort((a, b) => b.created_at - a.created_at);
 
-  const total = sorted.reduce((t, token) => t + getTokenProofsTotal(token)!, 0);
-  if (total < minAmount) throw new Error("Insufficient funds");
-
   let amount = 0;
-  const selected: NostrEvent[] = [];
+  const seen = new Set<string>();
+  const selectedTokens: NostrEvent[] = [];
+  const selectedProofs: Proof[] = [];
+
   while (amount < minAmount) {
     const token = sorted.pop();
-    if (!token) throw new Error("Ran out of tokens");
+    if (!token) throw new Error("Insufficient funds");
 
-    selected.push(token);
-    amount += getTokenProofsTotal(token)!;
+    const proofs = getTokenContent(token)!.proofs.filter(ignoreDuplicateProofs(seen));
+    const total = proofs.reduce((t, p) => t + p.amount, 0);
+
+    selectedTokens.push(token);
+    selectedProofs.push(...proofs);
+    amount += total;
   }
 
-  return selected;
+  return { events: selectedTokens, proofs: selectedProofs };
 }
 
 /**

@@ -4,7 +4,7 @@ import { EventFactory } from "applesauce-factory";
 import { FakeUser } from "../../__tests__/fake-user.js";
 import { WalletTokenBlueprint } from "../../blueprints/tokens.js";
 import { decodeTokenFromEmojiString, dumbTokenSelection, encodeTokenToEmoji, unlockTokenContent } from "../tokens.js";
-import { HiddenContentSymbol } from "applesauce-core/helpers";
+import { HiddenContentSymbol, unixNow } from "applesauce-core/helpers";
 
 const user = new FakeUser();
 const factory = new EventFactory({ signer: user });
@@ -27,7 +27,7 @@ describe("dumbTokenSelection", () => {
     const b = await user.signEvent(bDraft);
     await unlockTokenContent(b, user);
 
-    expect(dumbTokenSelection([a, b], 40)).toEqual([b]);
+    expect(dumbTokenSelection([a, b], 40).events).toEqual([b]);
   });
 
   it("should select enough tokens to total min amount", async () => {
@@ -47,7 +47,7 @@ describe("dumbTokenSelection", () => {
     const b = await user.signEvent(bDraft);
     await unlockTokenContent(b, user);
 
-    expect(dumbTokenSelection([a, b], 120)).toEqual(expect.arrayContaining([a, b]));
+    expect(dumbTokenSelection([a, b], 120).events).toEqual(expect.arrayContaining([a, b]));
   });
 
   it("should throw if not enough funds", async () => {
@@ -81,7 +81,61 @@ describe("dumbTokenSelection", () => {
     // manually remove the hidden content to lock it again
     Reflect.deleteProperty(b, HiddenContentSymbol);
 
-    expect(dumbTokenSelection([a, b], 20)).toEqual([a]);
+    expect(dumbTokenSelection([a, b], 20).events).toEqual([a]);
+  });
+
+  it("should ignore duplicate proofs", async () => {
+    const a = await user.signEvent(
+      await factory.create(WalletTokenBlueprint, {
+        mint: "https://money.com",
+        proofs: [{ secret: "A", C: "A", id: "A", amount: 100 }],
+      }),
+    );
+
+    // create a second event with the same proofs
+    const b = await user.signEvent(
+      await factory.create(WalletTokenBlueprint, {
+        mint: "https://money.com",
+        proofs: [{ secret: "A", C: "A", id: "A", amount: 100 }],
+      }),
+    );
+
+    expect(() => dumbTokenSelection([a, b], 150)).toThrow();
+  });
+
+  it("should include duplicate token events and ignore duplicate proofs", async () => {
+    const A = { secret: "A", C: "A", id: "A", amount: 100 };
+    const a = await user.signEvent({
+      ...(await factory.create(WalletTokenBlueprint, {
+        mint: "https://money.com",
+        proofs: [A],
+      })),
+      // make event older
+      created_at: unixNow() - 100,
+    });
+
+    // create a second event with the same proofs
+    const a2 = await user.signEvent({
+      ...(await factory.create(WalletTokenBlueprint, {
+        mint: "https://money.com",
+        proofs: [A],
+      })),
+      // make event older
+      created_at: a.created_at - 200,
+    });
+
+    const B = { secret: "B", C: "B", id: "B", amount: 50 };
+    const b = await user.signEvent(
+      await factory.create(WalletTokenBlueprint, {
+        mint: "https://money.com",
+        proofs: [B],
+      }),
+    );
+
+    const result = dumbTokenSelection([a, a2, b], 150);
+
+    expect(result.events.map((e) => e.id)).toEqual(expect.arrayContaining([a.id, a2.id, b.id]));
+    expect(result.proofs).toEqual([A, B]);
   });
 });
 

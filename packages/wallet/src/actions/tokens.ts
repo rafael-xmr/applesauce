@@ -1,9 +1,9 @@
-import { Token } from "@cashu/cashu-ts";
+import { CashuMint, CashuWallet, CheckStateEnum, Proof, Token } from "@cashu/cashu-ts";
 import { Action } from "applesauce-actions";
 import { DeleteBlueprint } from "applesauce-factory/blueprints";
 import { NostrEvent } from "nostr-tools";
 
-import { getTokenContent, isTokenContentLocked } from "../helpers/tokens.js";
+import { getTokenContent, ignoreDuplicateProofs, isTokenContentLocked, WALLET_TOKEN_KIND } from "../helpers/tokens.js";
 import { WalletTokenBlueprint } from "../blueprints/tokens.js";
 import { WalletHistoryBlueprint } from "../blueprints/history.js";
 
@@ -101,3 +101,38 @@ export function CompleteSpend(spent: NostrEvent[], change: Token): Action {
     yield signedHistory;
   };
 }
+
+/** combines all unlocked existing token events into a single event per mint */
+// export function ConsolidateTokens({ ignoreLocked = true }): Action {
+//   return async function* ({ events, factory, self }) {
+//     const tokens = Array.from(events.getAll({ kinds: [WALLET_TOKEN_KIND], authors: [self] })).filter((token) => {
+//       if (isTokenContentLocked(token)) {
+//         if (ignoreLocked) return false;
+//         else throw new Error("Token is locked");
+//       } else return true;
+//     });
+
+//     const byMint = tokens.reduce((map, token) => {
+//       const mint = getTokenContent(token)!.mint;
+//       if (!map.has(mint)) map.set(mint, []);
+//       map.get(mint)!.push(token);
+//       return map;
+//     }, new Map<string, NostrEvent[]>());
+
+//     for (const [mint, tokens] of byMint) {
+//       const cashuMint = new CashuMint(mint);
+//       const cashuWallet = new CashuWallet(cashuMint);
+
+//       const proofs = tokens
+//         .map((t) => getTokenContent(t)!.proofs)
+//         .flat()
+//         .filter(ignoreDuplicateProofs());
+
+//       // NOTE: this assumes that the states array is the same length and order as the proofs array
+//       const states = await cashuWallet.checkProofsStates(proofs);
+//       const notSpent = proofs.filter((_, i) => states[i].state !== CheckStateEnum.SPENT);
+
+//       // delete old
+//     }
+//   };
+// }
