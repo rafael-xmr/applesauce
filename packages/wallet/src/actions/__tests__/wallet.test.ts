@@ -6,8 +6,8 @@ import { ActionHub } from "applesauce-actions";
 import { FakeUser } from "../../__tests__/fake-user.js";
 import { CreateWallet } from "../wallet.js";
 import { WALLET_BACKUP_KIND } from "../../helpers/wallet.js";
-import { NostrEvent } from "nostr-tools";
 import { unlockHiddenTags } from "applesauce-core/helpers";
+import { lastValueFrom } from "rxjs";
 
 const user = new FakeUser();
 
@@ -25,16 +25,12 @@ beforeEach(() => {
 describe("CreateWallet", () => {
   it("should publish a wallet backup event", async () => {
     await hub.run(CreateWallet, ["https://mint.money.com"]);
-    expect(publish).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ kind: WALLET_BACKUP_KIND }));
+    expect(publish).toHaveBeenCalledWith(expect.objectContaining({ kind: WALLET_BACKUP_KIND }));
   });
 
   it("should publish a wallet event with mints", async () => {
-    await hub.run(CreateWallet, ["https://mint.money.com"]);
-
-    // @ts-expect-error
-    const walletEvent = publish.mock.calls[1][1] as NostrEvent;
-
-    const hiddenTags = await unlockHiddenTags(walletEvent, user);
+    const event = await lastValueFrom(hub.exec(CreateWallet, ["https://mint.money.com"]));
+    const hiddenTags = await unlockHiddenTags(event, user);
 
     // the second call should be the wallet event
     expect(hiddenTags).toEqual(expect.arrayContaining([["mint", "https://mint.money.com"]]));

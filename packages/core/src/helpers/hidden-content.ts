@@ -107,3 +107,14 @@ export async function unlockHiddenContent<T extends HiddenContentEvent>(
 
   return plaintext;
 }
+
+/** Removes the unencrypted hidden content on an event */
+export function lockHiddenContent<T extends object>(event: T) {
+  Reflect.deleteProperty(event, HiddenContentSymbol);
+
+  // if the event has been added to an event store, notify it
+  if (isEvent(event)) {
+    const eventStore = getParentEventStore(event);
+    if (eventStore) eventStore.update(event);
+  }
+}

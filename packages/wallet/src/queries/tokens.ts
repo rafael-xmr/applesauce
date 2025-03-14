@@ -1,8 +1,8 @@
+import { combineLatest, filter, map, startWith } from "rxjs";
 import { Query } from "applesauce-core";
 import { NostrEvent } from "nostr-tools";
-import { combineLatest, filter, map, startWith } from "rxjs";
 
-import { getTokenContent, isTokenContentLocked, WALLET_TOKEN_KIND } from "../helpers/tokens.js";
+import { getTokenContent, ignoreDuplicateProofs, isTokenContentLocked, WALLET_TOKEN_KIND } from "../helpers/tokens.js";
 
 /** removes deleted events from sorted array */
 function filterDeleted(tokens: NostrEvent[]) {
@@ -15,7 +15,7 @@ function filterDeleted(tokens: NostrEvent[]) {
 
       // add ids to deleted array
       if (!isTokenContentLocked(token)) {
-        const details = getTokenContent(token);
+        const details = getTokenContent(token)!;
         for (const id of details.del) deleted.add(id);
       }
 
@@ -60,20 +60,23 @@ export function WalletBalanceQuery(pubkey: string): Query<Record<string, number>
       const timeline = events.timeline({ kinds: [WALLET_TOKEN_KIND], authors: [pubkey] });
 
       return combineLatest([updates, timeline]).pipe(
-        map(([_, tokens]) => tokens),
+        map(([_, tokens]) => tokens.filter((t) => !isTokenContentLocked(t))),
         // filter out deleted tokens
         map(filterDeleted),
         // map tokens to totals
-        map((tokens) =>
-          tokens.reduce(
+        map((tokens) => {
+          // ignore duplicate proofs
+          const seen = new Set<string>();
+
+          return tokens.reduce(
             (totals, token) => {
-              const details = getTokenContent(token);
-              const total = details.proofs.reduce((t, p) => t + p.amount, 0);
+              const details = getTokenContent(token)!;
+              const total = details.proofs.filter(ignoreDuplicateProofs(seen)).reduce((t, p) => t + p.amount, 0);
               return { ...totals, [details.mint]: (totals[details.mint] ?? 0) + total };
             },
             {} as Record<string, number>,
-          ),
-        ),
+          );
+        }),
       );
     },
   };

@@ -12,27 +12,27 @@ import { WalletHistoryBlueprint } from "../blueprints/history.js";
  * @param token the cashu token to add
  * @param redeemed an array of nutzap event ids to mark as redeemed
  */
-export function ReceiveToken(token: Token, redeemed?: string[]): Action {
-  return async ({ factory, publish }) => {
+export function ReceiveToken(token: Token, redeemed?: string[], fee?: number): Action {
+  return async function* ({ factory }) {
     const amount = token.proofs.reduce((t, p) => t + p.amount, 0);
 
     const tokenEvent = await factory.sign(await factory.create(WalletTokenBlueprint, token, []));
     const history = await factory.sign(
       await factory.create(
         WalletHistoryBlueprint,
-        { direction: "in", amount, mint: token.mint, created: [tokenEvent.id] },
+        { direction: "in", amount, mint: token.mint, created: [tokenEvent.id], fee },
         redeemed ?? [],
       ),
     );
 
-    await publish("Save tokens", tokenEvent);
-    await publish("Save transaction", history);
+    yield tokenEvent;
+    yield history;
   };
 }
 
 /** An action that deletes old tokens and creates a new one but does not add a history event */
 export function RolloverTokens(tokens: NostrEvent[], token: Token): Action {
-  return async ({ factory, publish }) => {
+  return async function* ({ factory }) {
     // create a delete event for old tokens
     const deleteDraft = await factory.create(DeleteBlueprint, tokens);
     // create a new token event
@@ -47,14 +47,14 @@ export function RolloverTokens(tokens: NostrEvent[], token: Token): Action {
     const signedToken = await factory.sign(tokenDraft);
 
     // publish events
-    await publish("Delete old tokens", signedDelete);
-    await publish("Save new token", signedToken);
+    yield signedDelete;
+    yield signedToken;
   };
 }
 
 /** An action that deletes old token events and adds a spend history item */
 export function CompleteSpend(spent: NostrEvent[], change: Token): Action {
-  return async ({ factory, publish }) => {
+  return async function* ({ factory }) {
     if (spent.length === 0) throw new Error("Cant complete spent with no token events");
     if (spent.some((s) => isTokenContentLocked(s))) throw new Error("Cant complete spend with locked tokens");
 
@@ -74,7 +74,7 @@ export function CompleteSpend(spent: NostrEvent[], change: Token): Action {
         : undefined;
 
     const total = spent.reduce(
-      (total, token) => total + getTokenContent(token).proofs.reduce((t, p) => t + p.amount, 0),
+      (total, token) => total + getTokenContent(token)!.proofs.reduce((t, p) => t + p.amount, 0),
       0,
     );
 
@@ -96,8 +96,43 @@ export function CompleteSpend(spent: NostrEvent[], change: Token): Action {
     const signedHistory = await factory.sign(history);
 
     // publish events
-    await publish("Delete old tokens", signedDelete);
-    if (signedToken) await publish("Save change", signedToken);
-    await publish("Save transaction", signedHistory);
+    yield signedDelete;
+    if (signedToken) yield signedToken;
+    yield signedHistory;
   };
 }
+
+/** combines all unlocked existing token events into a single event per mint */
+// export function ConsolidateTokens({ ignoreLocked = true }): Action {
+//   return async function* ({ events, factory, self }) {
+//     const tokens = Array.from(events.getAll({ kinds: [WALLET_TOKEN_KIND], authors: [self] })).filter((token) => {
+//       if (isTokenContentLocked(token)) {
+//         if (ignoreLocked) return false;
+//         else throw new Error("Token is locked");
+//       } else return true;
+//     });
+
+//     const byMint = tokens.reduce((map, token) => {
+//       const mint = getTokenContent(token)!.mint;
+//       if (!map.has(mint)) map.set(mint, []);
+//       map.get(mint)!.push(token);
+//       return map;
+//     }, new Map<string, NostrEvent[]>());
+
+//     for (const [mint, tokens] of byMint) {
+//       const cashuMint = new CashuMint(mint);
+//       const cashuWallet = new CashuWallet(cashuMint);
+
+//       const proofs = tokens
+//         .map((t) => getTokenContent(t)!.proofs)
+//         .flat()
+//         .filter(ignoreDuplicateProofs());
+
+//       // NOTE: this assumes that the states array is the same length and order as the proofs array
+//       const states = await cashuWallet.checkProofsStates(proofs);
+//       const notSpent = proofs.filter((_, i) => states[i].state !== CheckStateEnum.SPENT);
+
+//       // delete old
+//     }
+//   };
+// }

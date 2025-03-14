@@ -1,7 +1,8 @@
-import { Query } from "applesauce-core";
-import { getHistoryRedeemed, isHistoryContentLocked, WALLET_HISTORY_KIND } from "../helpers/history.js";
-import { NostrEvent } from "nostr-tools";
 import { combineLatest, filter, map, scan, startWith } from "rxjs";
+import { Query } from "applesauce-core";
+import { NostrEvent } from "nostr-tools";
+
+import { getHistoryRedeemed, isHistoryContentLocked, WALLET_HISTORY_KIND } from "../helpers/history.js";
 
 /** Query that returns an array of redeemed event ids for a wallet */
 export function WalletRedeemedQuery(pubkey: string): Query<string[]> {

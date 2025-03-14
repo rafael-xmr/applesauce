@@ -3,7 +3,9 @@ import {
   getOrComputeCachedValue,
   HiddenContentSigner,
   isETag,
+  isHiddenContentLocked,
   isHiddenTagsLocked,
+  lockHiddenTags,
   unlockHiddenTags,
 } from "applesauce-core/helpers";
 import { NostrEvent } from "nostr-tools";
@@ -33,12 +35,14 @@ export function getHistoryRedeemed(history: NostrEvent): string[] {
 }
 
 /** Checks if the history contents are locked */
-export function isHistoryContentLocked(history: NostrEvent) {
+export function isHistoryContentLocked(history: NostrEvent): boolean {
   return isHiddenTagsLocked(history);
 }
 
 /** Returns the parsed content of a 7376 history event */
-export function getHistoryContent(history: NostrEvent): HistoryContent {
+export function getHistoryContent(history: NostrEvent): HistoryContent | undefined {
+  if (isHistoryContentLocked(history)) return undefined;
+
   return getOrComputeCachedValue(history, HistoryContentSymbol, () => {
     const tags = getHiddenTags(history);
     if (!tags) throw new Error("History event is locked");
@@ -61,7 +65,12 @@ export function getHistoryContent(history: NostrEvent): HistoryContent {
 }
 
 /** Decrypts a wallet history event */
-export async function unlockHistoryContent(history: NostrEvent, signer: HiddenContentSigner) {
-  await unlockHiddenTags(history, signer);
-  return getHistoryContent(history);
+export async function unlockHistoryContent(history: NostrEvent, signer: HiddenContentSigner): Promise<HistoryContent> {
+  if (isHiddenContentLocked(history)) await unlockHiddenTags(history, signer);
+  return getHistoryContent(history)!;
+}
+
+export function lockHistoryContent(history: NostrEvent) {
+  Reflect.deleteProperty(history, HistoryContentSymbol);
+  lockHiddenTags(history);
 }

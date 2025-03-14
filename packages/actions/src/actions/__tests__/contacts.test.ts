@@ -32,7 +32,6 @@ describe("FollowUser", () => {
     await hub.run(FollowUser, user.pubkey);
 
     expect(publish).toHaveBeenCalledWith(
-      expect.any(String),
       expect.objectContaining({ tags: expect.arrayContaining([["p", user.pubkey]]) }),
     );
   });
@@ -51,7 +50,7 @@ describe("UnfollowUser", () => {
 
     await hub.run(UnfollowUser, user.pubkey);
 
-    expect(publish).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ kind: 3, tags: [] }));
+    expect(publish).toHaveBeenCalledWith(expect.objectContaining({ kind: 3, tags: [] }));
   });
 });
 
@@ -67,7 +66,6 @@ describe("NewContacts", () => {
 
     expect(publish).toHaveBeenCalled();
     expect(publish).toHaveBeenCalledWith(
-      expect.any(String),
       expect.objectContaining({ kind: 3, tags: expect.arrayContaining([["p", user.pubkey]]) }),
     );
   });

@@ -1,5 +1,6 @@
 import { generateSecretKey } from "nostr-tools";
 import { Action } from "applesauce-actions";
+
 import { isWalletLocked, unlockWallet, WALLET_KIND } from "../helpers/wallet.js";
 import { WalletBackupBlueprint, WalletBlueprint } from "../blueprints/wallet.js";
 import { isTokenContentLocked, unlockTokenContent, WALLET_TOKEN_KIND } from "../helpers/tokens.js";
@@ -7,21 +8,22 @@ import { isHistoryContentLocked, unlockHistoryContent, WALLET_HISTORY_KIND } fro
 
 /** An action that creates a new 17375 wallet event and 375 wallet backup */
 export function CreateWallet(mints: string[], privateKey: Uint8Array = generateSecretKey()): Action {
-  return async ({ events, factory, self, publish }) => {
+  return async function* ({ events, factory, self }) {
     const existing = events.getReplaceable(WALLET_KIND, self);
     if (existing) throw new Error("Wallet already exists");
 
     const wallet = await factory.sign(await factory.create(WalletBlueprint, privateKey, mints));
     const backup = await factory.sign(await factory.create(WalletBackupBlueprint, wallet));
 
-    await publish("Wallet backup", backup);
-    await publish("Create wallet", wallet);
+    // publish the backup first
+    yield backup;
+    yield wallet;
   };
 }
 
 /** Unlocks the wallet event and optionally the tokens and history events */
 export function UnlockWallet(unlock?: { history?: boolean; tokens?: boolean }): Action {
-  return async ({ events, self, factory }) => {
+  return async function* ({ events, self, factory }) {
     const signer = factory.context.signer;
     if (!signer) throw new Error("Missing signer");
 

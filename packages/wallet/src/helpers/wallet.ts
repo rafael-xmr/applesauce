@@ -4,6 +4,7 @@ import {
   getOrComputeCachedValue,
   HiddenContentSigner,
   isHiddenTagsLocked,
+  lockHiddenTags,
   unlockHiddenTags,
 } from "applesauce-core/helpers";
 import { NostrEvent } from "nostr-tools";
@@ -22,6 +23,12 @@ export function isWalletLocked(wallet: NostrEvent): boolean {
 /** Unlocks a wallet and returns the hidden tags */
 export async function unlockWallet(wallet: NostrEvent, signer: HiddenContentSigner): Promise<string[][]> {
   return await unlockHiddenTags(wallet, signer);
+}
+
+export function lockWallet(wallet: NostrEvent) {
+  Reflect.deleteProperty(wallet, WalletPrivateKeySymbol);
+  Reflect.deleteProperty(wallet, WalletMintsSymbol);
+  lockHiddenTags(wallet);
 }
 
 /** Returns the wallets mints */
