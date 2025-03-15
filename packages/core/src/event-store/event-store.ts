@@ -174,8 +174,8 @@ export class EventStore implements IEventStore {
   }
 
   /** Get all events matching a filter */
-  getAll(filters: Filter[]): Set<NostrEvent> {
-    return this.database.getEventsForFilters(filters);
+  getAll(filters: Filter | Filter[]): Set<NostrEvent> {
+    return this.database.getEventsForFilters(Array.isArray(filters) ? filters : [filters]);
   }
 
   /** Check if the store has an event */
