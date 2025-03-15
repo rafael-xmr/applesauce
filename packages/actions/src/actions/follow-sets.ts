@@ -3,6 +3,7 @@ import { addPubkeyTag, removePubkeyTag } from "applesauce-factory/operations/tag
 import { IEventStore } from "applesauce-core";
 
 import { Action } from "../action-hub.js";
+import { ProfilePointer } from "nostr-tools/nip19";
 
 function getFollowSetEvent(events: IEventStore, self: string, identifier: NostrEvent | string) {
   const set = typeof identifier === "string" ? events.getReplaceable(kinds.Followsets, self, identifier) : identifier;
@@ -17,11 +18,15 @@ function getFollowSetEvent(events: IEventStore, self: string, identifier: NostrE
  * @param identifier the "d" tag of the follow set
  * @param hidden set to true to add to hidden follows
  */
-export function AddUserToFollowSet(pubkey: string, identifier: NostrEvent | string, hidden = false): Action {
+export function AddUserToFollowSet(
+  pubkey: string | ProfilePointer,
+  identifier: NostrEvent | string,
+  hidden = false,
+): Action {
   return async function* ({ events, factory, self }) {
     const follows = getFollowSetEvent(events, self, identifier);
 
-    const operation = addPubkeyTag({ pubkey });
+    const operation = addPubkeyTag(pubkey);
 
     const draft = await factory.modifyTags(follows, hidden ? { hidden: operation } : operation);
     yield await factory.sign(draft);
@@ -34,7 +39,11 @@ export function AddUserToFollowSet(pubkey: string, identifier: NostrEvent | stri
  * @param identifier the "d" tag of the follow set
  * @param hidden set to true to remove from hidden follows
  */
-export function RemoveUserFromFollowSet(pubkey: string, identifier: NostrEvent | string, hidden = false): Action {
+export function RemoveUserFromFollowSet(
+  pubkey: string | ProfilePointer,
+  identifier: NostrEvent | string,
+  hidden = false,
+): Action {
   return async function* ({ events, factory, self }) {
     const follows = getFollowSetEvent(events, self, identifier);
 
