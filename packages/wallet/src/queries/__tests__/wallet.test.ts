@@ -21,7 +21,7 @@ beforeEach(() => {
 
 describe("WalletQuery", () => {
   it("it should update when event is unlocked", async () => {
-    const wallet = await user.signEvent(await factory.create(WalletBlueprint, generateSecretKey(), []));
+    const wallet = await user.signEvent(await factory.create(WalletBlueprint, [], generateSecretKey()));
     lockWallet(wallet);
     events.add(wallet);
 

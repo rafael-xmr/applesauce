@@ -29,7 +29,7 @@ export function includeAltTag(description: string): EventOperation {
 }
 
 /** Creates an operation that modifies the existing array of tags on an event */
-export function modifyPublicTags(...operations: TagOperation[]): EventOperation {
+export function modifyPublicTags(...operations: (TagOperation | undefined)[]): EventOperation {
   return async (draft, ctx) => {
     if (operations.length === 0) return draft;
 
@@ -37,7 +37,7 @@ export function modifyPublicTags(...operations: TagOperation[]): EventOperation 
 
     // modify the pubic tags
     if (Array.isArray(operations)) {
-      for (const operation of operations) tags = await operation(tags, ctx);
+      for (const operation of operations) if (operation) tags = await operation(tags, ctx);
     }
 
     return { ...draft, tags };
@@ -45,7 +45,7 @@ export function modifyPublicTags(...operations: TagOperation[]): EventOperation 
 }
 
 /** Creates an operation that modifies the existing array of tags on an event */
-export function modifyHiddenTags(...operations: TagOperation[]): EventOperation {
+export function modifyHiddenTags(...operations: (TagOperation | undefined)[]): EventOperation {
   return async (draft, ctx) => {
     if (operations.length === 0) return draft;
 
@@ -77,7 +77,7 @@ export function modifyHiddenTags(...operations: TagOperation[]): EventOperation 
     if (hidden === undefined) throw new Error("Failed to find hidden tags");
 
     let newHidden = Array.from(hidden);
-    for (const operation of operations) newHidden = await operation(newHidden, ctx);
+    for (const operation of operations) if (operation) newHidden = await operation(newHidden, ctx);
 
     const encryption = getHiddenTagsEncryptionMethods(draft.kind, ctx.signer);
 
