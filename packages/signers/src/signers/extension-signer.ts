@@ -13,9 +13,23 @@ export class ExtensionSigner implements Nip07Interface {
     return window.nostr?.nip44;
   }
 
+  protected pubkey: string | undefined = undefined;
+
   getPublicKey() {
     if (!window.nostr) throw new ExtensionMissingError("Signer extension missing");
-    return window.nostr.getPublicKey();
+    if (this.pubkey) return this.pubkey;
+
+    const p = window.nostr.getPublicKey();
+
+    if (p instanceof Promise)
+      return p.then((pubkey) => {
+        this.pubkey = pubkey;
+        return pubkey;
+      });
+    else {
+      this.pubkey = p;
+      return p;
+    }
   }
   getRelays() {
     if (!window.nostr) throw new ExtensionMissingError("Signer extension missing");

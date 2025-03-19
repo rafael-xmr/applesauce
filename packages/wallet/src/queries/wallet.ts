@@ -8,7 +8,7 @@ export type WalletInfo =
   | {
       locked: false;
       event: NostrEvent;
-      privateKey: Uint8Array;
+      privateKey?: Uint8Array;
       mints: string[];
     };
 

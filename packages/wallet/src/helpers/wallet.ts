@@ -41,13 +41,12 @@ export function getWalletMints(wallet: NostrEvent): string[] {
 }
 
 /** Returns the wallets private key as a string */
-export function getWalletPrivateKey(wallet: NostrEvent): Uint8Array {
+export function getWalletPrivateKey(wallet: NostrEvent): Uint8Array | undefined {
   return getOrComputeCachedValue(wallet, WalletPrivateKeySymbol, () => {
     const tags = getHiddenTags(wallet);
     if (!tags) throw new Error("Wallet is locked");
 
     const key = tags.find((t) => t[0] === "privkey" && t[1])?.[1];
-    if (!key) throw new Error("Wallet missing private key");
-    return hexToBytes(key);
+    return key ? hexToBytes(key) : undefined;
   });
 }
