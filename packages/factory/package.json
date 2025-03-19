@@ -82,7 +82,7 @@
     "applesauce-content": "^0.11.0",
     "applesauce-core": "^0.11.0",
     "nanoid": "^5.0.9",
-    "nostr-tools": "^2.10.4"
+    "nostr-tools": "^2.11.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

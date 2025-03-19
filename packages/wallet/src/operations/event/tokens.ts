@@ -13,6 +13,9 @@ export function setTokenContent(token: Token, del: string[] = []): EventOperatio
     const method = EventContentEncryptionMethod[draft.kind];
     if (!method) throw new Error("Failed to find encryption method");
 
+    if (!token.mint) throw new Error("Token mint is required");
+    if (!token.proofs || token.proofs.length === 0) throw new Error("Token proofs are required");
+
     const content: TokenContent = {
       mint: token.mint,
       proofs: token.proofs,

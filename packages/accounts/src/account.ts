@@ -52,47 +52,34 @@ export class BaseAccount<Signer extends Nip07Interface, SignerData, Metadata ext
     this.metadata$.next(metadata);
   }
 
-  // encryption interfaces
-  nip04?:
-    | {
-        encrypt: (pubkey: string, plaintext: string) => Promise<string> | string;
-        decrypt: (pubkey: string, ciphertext: string) => Promise<string> | string;
-      }
-    | undefined;
-  nip44?:
-    | {
-        encrypt: (pubkey: string, plaintext: string) => Promise<string> | string;
-        decrypt: (pubkey: string, ciphertext: string) => Promise<string> | string;
-      }
-    | undefined;
+  get nip04(): Nip07Interface["nip04"] | undefined {
+    if (!this.signer.nip04) return undefined;
+    return {
+      encrypt: (pubkey, plaintext) => {
+        return this.waitForLock(() => this.signer.nip04!.encrypt(pubkey, plaintext));
+      },
+      decrypt: (pubkey, plaintext) => {
+        return this.waitForLock(() => this.signer.nip04!.decrypt(pubkey, plaintext));
+      },
+    };
+  }
+
+  get nip44(): Nip07Interface["nip44"] | undefined {
+    if (!this.signer.nip44) return undefined;
+    return {
+      encrypt: (pubkey, plaintext) => {
+        return this.waitForLock(() => this.signer.nip44!.encrypt(pubkey, plaintext));
+      },
+      decrypt: (pubkey, plaintext) => {
+        return this.waitForLock(() => this.signer.nip44!.decrypt(pubkey, plaintext));
+      },
+    };
+  }
 
   constructor(
     public pubkey: string,
     public signer: Signer,
-  ) {
-    // setup encryption interfaces to check if account is locked
-    if (this.signer.nip04) {
-      this.nip04 = {
-        encrypt: (pubkey, plaintext) => {
-          return this.waitForLock(() => this.signer.nip04!.encrypt(pubkey, plaintext));
-        },
-        decrypt: (pubkey, plaintext) => {
-          return this.waitForLock(() => this.signer.nip04!.decrypt(pubkey, plaintext));
-        },
-      };
-    }
-
-    if (this.signer.nip44) {
-      this.nip44 = {
-        encrypt: (pubkey, plaintext) => {
-          return this.waitForLock(() => this.signer.nip44!.encrypt(pubkey, plaintext));
-        },
-        decrypt: (pubkey, plaintext) => {
-          return this.waitForLock(() => this.signer.nip44!.decrypt(pubkey, plaintext));
-        },
-      };
-    }
-  }
+  ) {}
 
   // This should be overwritten by a sub class
   toJSON(): SerializedAccount<SignerData, Metadata> {
