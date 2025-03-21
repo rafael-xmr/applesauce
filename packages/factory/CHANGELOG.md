@@ -1,5 +1,11 @@
 # applesauce-factory
 
+## 0.12.1
+
+### Patch Changes
+
+- 925bf01: Fix `addOutboxRelay` and `addInboxRelay` operations adding both inbox and outbox relays
+
 ## 0.12.0
 
 ### Minor Changes
