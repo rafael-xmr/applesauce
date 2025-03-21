@@ -1,5 +1,11 @@
 # applesauce-core
 
+## 0.12.1
+
+### Patch Changes
+
+- a3b9585: Fix EventStore.inserts emitting when old replaceable events where added to the store
+
 ## 0.12.0
 
 ### Minor Changes
