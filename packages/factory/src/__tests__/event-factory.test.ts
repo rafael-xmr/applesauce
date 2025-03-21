@@ -5,7 +5,7 @@ import { FakeUser } from "./fake-user.js";
 import { getHiddenTags, HiddenContentSymbol, unlockHiddenTags } from "applesauce-core/helpers";
 import { addEventTag, removeEventTag } from "../operations/tag/common.js";
 import { setListTitle } from "../operations/event/list.js";
-import { setEncryptedContent } from "../operations/event/content.js";
+import { setContent, setEncryptedContent } from "../operations/event/content.js";
 import { includeAltTag } from "../operations/event/tags.js";
 
 let factory = new EventFactory();
@@ -50,9 +50,41 @@ describe("runProcess", () => {
 
     expect(Reflect.get(draft, HiddenContentSymbol)).toEqual("hello world");
   });
+
+  it("should not carry over generic symbols", async () => {
+    const symbol = Symbol("test");
+    const event = user.profile({ name: "name" });
+    Reflect.set(event, symbol, "testing");
+
+    const draft = await EventFactory.runProcess(event, {}, includeAltTag("profile"));
+    expect(Reflect.has(draft, symbol)).toBe(false);
+  });
+
+  it("should carry over hidden-content symbol", async () => {
+    const user = new FakeUser();
+    const draft = await EventFactory.runProcess(
+      { kind: 4 },
+      { signer: user },
+      setEncryptedContent(user.pubkey, "testing", "nip04"),
+    );
+
+    expect(Reflect.get(draft, HiddenContentSymbol)).toBe("testing");
+  });
+
+  it("should override created_at", async () => {
+    const draft = await EventFactory.runProcess({ kind: 4, created_at: 0 }, { signer: user }, setContent("content"));
+
+    expect(draft.created_at).not.toBe(0);
+  });
 });
 
 describe("modify", () => {
+  it("should apply operations to event", async () => {
+    expect(await factory.modify(user.list([["e", "event-id"]]), setListTitle("read later"))).toEqual(
+      expect.objectContaining({ tags: expect.arrayContaining([["title", "read later"]]) }),
+    );
+  });
+
   it("should add created_at", async () => {
     expect(await factory.modify({ kind: kinds.BookmarkList })).toEqual({
       kind: kinds.BookmarkList,
@@ -68,13 +100,12 @@ describe("modify", () => {
       created_at: 0,
     });
   });
-});
 
-describe("modify", () => {
-  it("should apply operations to event", async () => {
-    expect(await factory.modify(user.list([["e", "event-id"]]), setListTitle("read later"))).toEqual(
-      expect.objectContaining({ tags: expect.arrayContaining([["title", "read later"]]) }),
-    );
+  it("should remove id and sig", async () => {
+    const event = await factory.modify(user.profile({ name: "testing" }));
+
+    expect(Reflect.has(event, "id")).toBe(false);
+    expect(Reflect.has(event, "sig")).toBe(false);
   });
 });
 

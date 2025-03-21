@@ -1,4 +1,4 @@
-import { Emoji, HiddenContentSymbol, unixNow } from "applesauce-core/helpers";
+import { Emoji, getHiddenContent, HiddenContentSymbol, unixNow } from "applesauce-core/helpers";
 import { AddressPointer } from "nostr-tools/nip19";
 import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
 import { EventTemplate, NostrEvent, UnsignedEvent } from "nostr-tools";
@@ -15,7 +15,6 @@ import { includeReplaceableIdentifier, modifyHiddenTags, modifyPublicTags } from
 export type EventFactoryTemplate = {
   kind: number;
   content?: string;
-  pubkey?: string;
   tags?: string[][];
   created_at?: number;
 };
@@ -69,12 +68,21 @@ export class EventFactory {
     context: EventFactoryContext,
     ...operations: (EventOperation | undefined)[]
   ): Promise<EventTemplate> {
-    let draft: EventTemplate = { content: "", created_at: unixNow(), tags: [], ...template };
+    let draft: EventTemplate = {
+      kind: template.kind,
+      content: template.content ?? "",
+      created_at: unixNow(),
+      tags: template.tags ? Array.from(template.tags) : [],
+    };
+
+    // preserve the existing hidden content
+    if (Reflect.has(template, HiddenContentSymbol)) Reflect.set(draft, HiddenContentSymbol, getHiddenContent(template));
 
     // make sure parameterized replaceable events have "d" tags
     if (isParameterizedReplaceableKind(draft.kind)) draft = await includeReplaceableIdentifier()(draft, context);
 
-    let hiddenContent: string | undefined = undefined;
+    // get the existing hidden content
+    let hiddenContent = getHiddenContent(template);
 
     // run operations
     for (const operation of operations) {
@@ -123,13 +131,6 @@ export class EventFactory {
     draft: EventFactoryTemplate | NostrEvent,
     ...operations: (EventOperation | undefined)[]
   ): Promise<EventTemplate> {
-    draft = { ...draft, created_at: unixNow() };
-
-    // Remove old fields from signed nostr event
-    Reflect.deleteProperty(draft, "id");
-    Reflect.deleteProperty(draft, "sig");
-    Reflect.deleteProperty(draft, "pubkey");
-
     return await EventFactory.runProcess(draft, this.context, ...operations);
   }
 
