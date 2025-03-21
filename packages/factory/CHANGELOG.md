@@ -1,5 +1,11 @@
 # applesauce-factory
 
+## 0.12.2
+
+### Patch Changes
+
+- e4c6632: Fix `EventFactory.modify` copying symbols to new draft event
+
 ## 0.12.1
 
 ### Patch Changes
