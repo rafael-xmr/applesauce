@@ -2,7 +2,9 @@ import { Filter, NostrEvent } from "nostr-tools";
 import { Observable } from "rxjs";
 
 export interface IEventStore {
+  inserts: Observable<NostrEvent>;
   updates: Observable<NostrEvent>;
+  removes: Observable<NostrEvent>;
 
   // management methods
   add(event: NostrEvent, fromRelay?: string): NostrEvent;

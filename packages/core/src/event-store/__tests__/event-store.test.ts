@@ -63,6 +63,33 @@ describe("add", () => {
   });
 });
 
+describe("inserts", () => {
+  it("should emit newer replaceable events", () => {
+    const spy = subscribeSpyTo(eventStore.inserts);
+    eventStore.add(profile);
+    const newer = user.profile({ name: "new name" }, { created_at: profile.created_at + 100 });
+    eventStore.add(newer);
+    expect(spy.getValues()).toEqual([profile, newer]);
+  });
+
+  it("should not emit when older replaceable event is added", () => {
+    const spy = subscribeSpyTo(eventStore.inserts);
+    eventStore.add(profile);
+    eventStore.add(user.profile({ name: "new name" }, { created_at: profile.created_at - 1000 }));
+    expect(spy.getValues()).toEqual([profile]);
+  });
+});
+
+describe("removes", () => {
+  it("should emit older replaceable events when the newest replaceable event is added", () => {
+    const spy = subscribeSpyTo(eventStore.removes);
+    eventStore.add(profile);
+    const newer = user.profile({ name: "new name" }, { created_at: profile.created_at + 1000 });
+    eventStore.add(newer);
+    expect(spy.getValues()).toEqual([profile]);
+  });
+});
+
 describe("verifyEvent", () => {
   it("should be called for all events added", () => {
     const verifyEvent = vi.fn().mockReturnValue(true);
@@ -225,6 +252,14 @@ describe("replaceable", () => {
     eventStore.add(user.profile({ name: "old name" }, { created_at: profile.created_at - 500 }));
     eventStore.add(user.profile({ name: "really old name" }, { created_at: profile.created_at - 1000 }));
     expect(spy.getValues()).toEqual([profile]);
+  });
+
+  it("should emit newer events", () => {
+    const spy = subscribeSpyTo(eventStore.replaceable(0, user.pubkey));
+    eventStore.add(profile);
+    const newProfile = user.profile({ name: "new name" }, { created_at: profile.created_at + 500 });
+    eventStore.add(newProfile);
+    expect(spy.getValues()).toEqual([profile, newProfile]);
   });
 });
 

@@ -2,7 +2,7 @@ import { Filter, NostrEvent } from "nostr-tools";
 import { binarySearch, insertEventIntoDescendingList } from "nostr-tools/utils";
 import { Subject } from "rxjs";
 
-import { FromCacheSymbol, getEventUID, getIndexableTags, getReplaceableUID, isReplaceable } from "../helpers/event.js";
+import { getEventUID, getIndexableTags, getReplaceableUID, isReplaceable } from "../helpers/event.js";
 import { INDEXABLE_TAGS } from "./common.js";
 import { logger } from "../logger.js";
 import { LRU } from "../helpers/lru.js";
@@ -22,6 +22,8 @@ export class Database {
 
   /** LRU cache of last events touched */
   events = new LRU<NostrEvent>();
+
+  /** A sorted array of replaceable events by uid */
   protected replaceable = new Map<string, NostrEvent[]>();
 
   /** A stream of events inserted into the database */
@@ -99,12 +101,7 @@ export class Database {
     const id = event.id;
 
     const current = this.events.get(id);
-    if (current) {
-      // if this is a duplicate event, transfer some important symbols
-      if (event[FromCacheSymbol]) current[FromCacheSymbol] = event[FromCacheSymbol];
-
-      return current;
-    }
+    if (current) return current;
 
     this.onBeforeInsert?.(event);
 
@@ -127,10 +124,12 @@ export class Database {
 
       let array = this.replaceable.get(uid)!;
       if (!this.replaceable.has(uid)) {
+        // add an empty array if there is no array
         array = [];
         this.replaceable.set(uid, array);
       }
 
+      // insert the event into the sorted array
       insertEventIntoDescendingList(array, event);
     }
 
