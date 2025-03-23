@@ -12,12 +12,6 @@ import {
   setListTitle,
 } from "applesauce-factory/operations/event";
 
-export type FollowSetInformation = {
-  title?: string;
-  description?: string;
-  image?: string;
-};
-
 function getFollowSetEvent(events: IEventStore, self: string, identifier: NostrEvent | string) {
   const set = typeof identifier === "string" ? events.getReplaceable(kinds.Followsets, self, identifier) : identifier;
   if (!set) throw new Error("Can't find follow set");
@@ -33,26 +27,26 @@ function getFollowSetEvent(events: IEventStore, self: string, identifier: NostrE
  * @throws if a follow set already exists
  */
 export function CreateFollowSet(
-  identifier: string,
-  pubkeys: (string | ProfilePointer)[],
-  info?: FollowSetInformation,
-  hidden = false,
+  title: string,
+  options?: {
+    description?: string;
+    image?: string;
+    public?: (string | ProfilePointer)[];
+    hidden?: (string | ProfilePointer)[];
+  },
 ): Action {
-  return async function* ({ events, factory, self }) {
-    const existing = events.getReplaceable(kinds.Followsets, self, identifier);
-    if (existing) throw new Error("Follow set already exists");
-
-    const operations = pubkeys.map((p) => addPubkeyTag(p));
+  return async function* ({ factory }) {
     const draft = await factory.build(
       { kind: kinds.Followsets },
 
       // set list information
-      info?.title ? setListTitle(info.title) : undefined,
-      info?.description ? setListDescription(info.description) : undefined,
-      info?.image ? setListImage(info.image) : undefined,
+      setListTitle(title),
+      options?.description ? setListDescription(options.description) : undefined,
+      options?.image ? setListImage(options.image) : undefined,
 
       // add pubkey tags
-      hidden ? modifyHiddenTags(...operations) : modifyPublicTags(...operations),
+      options?.public ? modifyPublicTags(...options.public.map((p) => addPubkeyTag(p))) : undefined,
+      options?.hidden ? modifyHiddenTags(...options.hidden.map((p) => addPubkeyTag(p))) : undefined,
     );
 
     yield await factory.sign(draft);
@@ -109,7 +103,14 @@ export function RemoveUserFromFollowSet(
  * @param info the new information for the follow set
  * @throws if the follow set does not exist
  */
-export function UpdateFollowSetInformation(identifier: string, info: FollowSetInformation): Action {
+export function UpdateFollowSetInformation(
+  identifier: string,
+  info: {
+    title?: string;
+    description?: string;
+    image?: string;
+  },
+): Action {
   return async function* ({ events, factory, self }) {
     const follows = getFollowSetEvent(events, self, identifier);
 
