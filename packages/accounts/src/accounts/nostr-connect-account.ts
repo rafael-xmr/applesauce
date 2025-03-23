@@ -1,4 +1,4 @@
-import { NostrConnectSigner, NostrPublishMethod, NostrSubscriptionMethod, SimpleSigner } from "applesauce-signers";
+import { NostrConnectSigner, SimpleSigner } from "applesauce-signers";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 
 import { BaseAccount } from "../account.js";
@@ -30,26 +30,10 @@ export class NostrConnectAccount<Metadata extends unknown> extends BaseAccount<
     });
   }
 
-  /** A global method used for creating subscriptions for all nostr connect accounts */
-  static subscriptionMethod?: NostrSubscriptionMethod;
-  /** A global method used for publishing events for all nostr connect accounts */
-  static publishMethod?: NostrPublishMethod;
-
   static fromJSON<Metadata extends unknown>(
     json: SerializedAccount<NostrConnectAccountSignerData, Metadata>,
-    subscription?: NostrSubscriptionMethod,
-    publish?: NostrPublishMethod,
   ): NostrConnectAccount<Metadata> {
-    subscription = subscription || NostrConnectAccount.subscriptionMethod;
-    publish = publish || NostrConnectAccount.publishMethod;
-
-    if (!subscription || !publish) {
-      throw new Error(
-        "Cant create NostrConnectAccount without either passing in connection methods or setting NostrConnectAccount.subscriptionMethod and NostrConnectAccount.publishMethod",
-      );
-    }
-
-    const signer = new NostrConnectSigner(subscription, publish, {
+    const signer = new NostrConnectSigner({
       relays: json.signer.relays,
       pubkey: json.pubkey,
       remote: json.signer.remote,
