@@ -79,6 +79,10 @@ export type NostrConnectSignerOptions = {
   pubkey?: string;
   /** A method for handling "auth" requests */
   onAuth?: (url: string) => Promise<void>;
+  /** A method for subscribing to relays */
+  subscriptionMethod?: NostrSubscriptionMethod;
+  /** A method for publishing events */
+  publishMethod?: NostrPublishMethod;
 };
 
 // simple types copied from rxjs
@@ -106,10 +110,10 @@ export type NostrConnectAppMetadata = {
 
 export class NostrConnectSigner implements Nip07Interface {
   /** A method that is called when an event needs to be published */
-  protected publish: NostrPublishMethod;
+  protected publishMethod: NostrPublishMethod;
 
   /** The active nostr subscription */
-  protected subscription: NostrSubscriptionMethod;
+  protected subscriptionMethod: NostrSubscriptionMethod;
 
   protected log = logger.extend("NostrConnectSigner");
   /** The local client signer */
@@ -153,12 +157,22 @@ export class NostrConnectSigner implements Nip07Interface {
       }
     | undefined;
 
-  constructor(subscription: NostrSubscriptionMethod, publish: NostrPublishMethod, opts: NostrConnectSignerOptions) {
+  static subscriptionMethod: NostrSubscriptionMethod | undefined = undefined;
+  static publishMethod: NostrPublishMethod | undefined = undefined;
+
+  constructor(opts: NostrConnectSignerOptions) {
     this.relays = opts.relays;
     this.pubkey = opts.pubkey;
     this.remote = opts.remote;
-    this.subscription = subscription;
-    this.publish = publish;
+    const subscriptionMethod = opts.subscriptionMethod || NostrConnectSigner.subscriptionMethod;
+    if (!subscriptionMethod)
+      throw new Error("Missing subscriptionMethod, either pass a method or set NostrConnectSigner.subscriptionMethod");
+    const publishMethod = opts.publishMethod || NostrConnectSigner.publishMethod;
+    if (!publishMethod)
+      throw new Error("Missing publishMethod, either pass a method or set NostrConnectSigner.publishMethod");
+
+    this.subscriptionMethod = subscriptionMethod;
+    this.publishMethod = publishMethod;
 
     if (opts.onAuth) this.onAuth = opts.onAuth;
 
@@ -185,7 +199,7 @@ export class NostrConnectSigner implements Nip07Interface {
     const pubkey = await this.signer.getPublicKey();
 
     // Setup subscription
-    this.req = this.subscription(
+    this.req = this.subscriptionMethod(
       [
         {
           kinds: [kinds.NostrConnect],
@@ -287,7 +301,7 @@ export class NostrConnectSigner implements Nip07Interface {
     const p = createDefer<ResponseResults[T]>();
     this.requests.set(id, p);
 
-    await this.publish?.(event, this.relays);
+    await this.publishMethod?.(event, this.relays);
 
     return p;
   }
@@ -439,13 +453,11 @@ export class NostrConnectSigner implements Nip07Interface {
   /** Create a {@link NostrConnectSigner} from a bunker:// URI */
   static async fromBunkerURI(
     uri: string,
-    subscription: NostrSubscriptionMethod,
-    publish: NostrPublishMethod,
     options: Omit<NostrConnectSignerOptions, "relays"> & { permissions?: string[]; signer?: SimpleSigner },
   ) {
     const { remote, relays, secret } = NostrConnectSigner.parseBunkerURI(uri);
 
-    const client = new NostrConnectSigner(subscription, publish, { relays, remote, ...options });
+    const client = new NostrConnectSigner({ relays, remote, ...options });
     await client.connect(secret, options.permissions);
 
     return client;

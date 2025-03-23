@@ -12,10 +12,12 @@ describe("NostrConnectSigner", () => {
       const client = new SimpleSigner();
       const remote = new SimpleSigner();
 
-      const signer = new NostrConnectSigner(subscription, publish, {
+      const signer = new NostrConnectSigner({
         relays,
         remote: await remote.getPublicKey(),
         signer: client,
+        subscriptionMethod: subscription,
+        publishMethod: publish,
       });
 
       signer.connect();
