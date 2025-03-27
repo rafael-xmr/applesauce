@@ -1,17 +1,7 @@
 import { Filter, NostrEvent } from "nostr-tools";
 import { Observable } from "rxjs";
 
-export interface IEventStore {
-  inserts: Observable<NostrEvent>;
-  updates: Observable<NostrEvent>;
-  removes: Observable<NostrEvent>;
-
-  // management methods
-  add(event: NostrEvent, fromRelay?: string): NostrEvent;
-  remove(event: string | NostrEvent): boolean;
-  update(event: NostrEvent): NostrEvent;
-
-  // sync get methods
+export interface ISyncEventStore {
   hasEvent(id: string): boolean;
   hasReplaceable(kind: number, pubkey: string, identifier?: string): boolean;
 
@@ -21,8 +11,13 @@ export interface IEventStore {
 
   getAll(filters: Filter | Filter[]): Set<NostrEvent>;
   getTimeline(filters: Filter | Filter[]): NostrEvent[];
+}
 
-  // observable methods
+export interface IStreamEventStore {
+  inserts: Observable<NostrEvent>;
+  updates: Observable<NostrEvent>;
+  removes: Observable<NostrEvent>;
+
   filters(filters: Filter | Filter[]): Observable<NostrEvent>;
 
   updated(id: string | NostrEvent): Observable<NostrEvent>;
@@ -35,4 +30,10 @@ export interface IEventStore {
     pointers: { kind: number; pubkey: string; identifier?: string }[],
   ): Observable<Record<string, NostrEvent>>;
   timeline(filters: Filter | Filter[], includeOldVersion?: boolean): Observable<NostrEvent[]>;
+}
+
+export interface IEventStore extends ISyncEventStore, IStreamEventStore {
+  add(event: NostrEvent, fromRelay?: string): NostrEvent;
+  remove(event: string | NostrEvent): boolean;
+  update(event: NostrEvent): NostrEvent;
 }

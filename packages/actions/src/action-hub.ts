@@ -1,6 +1,6 @@
 import { from, isObservable, lastValueFrom, Observable, switchMap, toArray } from "rxjs";
 import { NostrEvent } from "nostr-tools";
-import { IEventStore } from "applesauce-core/event-store";
+import { ISyncEventStore } from "applesauce-core/event-store";
 import { EventFactory } from "applesauce-factory";
 
 /**
@@ -12,7 +12,7 @@ export type PublishMethod = (event: NostrEvent) => void | Promise<void>;
 /** The context that is passed to actions for them to use to preform actions */
 export type ActionContext = {
   /** The event store to load events from */
-  events: IEventStore;
+  events: ISyncEventStore;
   /** The pubkey of the signer in the event factory */
   self: string;
   /** The event factory used to build and modify events */
@@ -29,7 +29,7 @@ export type ActionConstructor<Args extends Array<any>> = (...args: Args) => Acti
 /** The main class that runs actions */
 export class ActionHub {
   constructor(
-    public events: IEventStore,
+    public events: ISyncEventStore,
     public factory: EventFactory,
     public publish?: PublishMethod,
   ) {}

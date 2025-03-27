@@ -8,11 +8,11 @@ import {
 } from "applesauce-factory/operations/tag";
 import { kinds, NostrEvent } from "nostr-tools";
 import { EventPointer } from "nostr-tools/nip19";
-import { IEventStore } from "applesauce-core";
+import { ISyncEventStore } from "applesauce-core/event-store";
 
 import { Action } from "../action-hub.js";
 
-function ensureMuteList(events: IEventStore, self: string) {
+function ensureMuteList(events: ISyncEventStore, self: string) {
   const mute = events.getReplaceable(kinds.Mutelist, self);
   if (!mute) throw new Error("No mute list found");
   return mute;

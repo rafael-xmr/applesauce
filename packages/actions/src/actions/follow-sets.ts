@@ -1,6 +1,6 @@
 import { kinds, NostrEvent } from "nostr-tools";
 import { addPubkeyTag, removePubkeyTag } from "applesauce-factory/operations/tag";
-import { IEventStore } from "applesauce-core";
+import { ISyncEventStore } from "applesauce-core/event-store";
 
 import { Action } from "../action-hub.js";
 import { ProfilePointer } from "nostr-tools/nip19";
@@ -12,7 +12,7 @@ import {
   setListTitle,
 } from "applesauce-factory/operations/event";
 
-function getFollowSetEvent(events: IEventStore, self: string, identifier: NostrEvent | string) {
+function getFollowSetEvent(events: ISyncEventStore, self: string, identifier: NostrEvent | string) {
   const set = typeof identifier === "string" ? events.getReplaceable(kinds.Followsets, self, identifier) : identifier;
   if (!set) throw new Error("Can't find follow set");
   if (set.kind !== kinds.Followsets) throw new Error("Event is not a follow set");
