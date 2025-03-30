@@ -453,12 +453,12 @@ export class NostrConnectSigner implements Nip07Interface {
   /** Create a {@link NostrConnectSigner} from a bunker:// URI */
   static async fromBunkerURI(
     uri: string,
-    options: Omit<NostrConnectSignerOptions, "relays"> & { permissions?: string[]; signer?: SimpleSigner },
+    options?: Omit<NostrConnectSignerOptions, "relays"> & { permissions?: string[]; signer?: SimpleSigner },
   ) {
     const { remote, relays, secret } = NostrConnectSigner.parseBunkerURI(uri);
 
     const client = new NostrConnectSigner({ relays, remote, ...options });
-    await client.connect(secret, options.permissions);
+    await client.connect(secret, options?.permissions);
 
     return client;
   }

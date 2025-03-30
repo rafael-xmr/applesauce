@@ -1,54 +1,45 @@
 import { NostrEvent, type Filter } from "nostr-tools";
-import { combineLatest, endWith, ignoreElements, merge, Observable, takeWhile } from "rxjs";
-import { nanoid } from "nanoid";
+import { Observable } from "rxjs";
 
-import { Relay, PublishResponse, SubscriptionResponse } from "./relay.js";
-import { onlyEvents } from "./operators/only-events.js";
+import { Relay, RelayOptions } from "./relay.js";
+import { PublishResponse, SubscriptionResponse } from "./types.js";
+import { RelayGroup } from "./group.js";
 
 export class RelayPool {
   relays = new Map<string, Relay>();
+  groups = new Map<string, RelayGroup>();
+
+  constructor(public options?: RelayOptions) {}
 
   /** Get or create a new relay connection */
   relay(url: string): Relay {
     let relay = this.relays.get(url);
     if (relay) return relay;
     else {
-      relay = new Relay(url);
+      relay = new Relay(url, this.options);
       this.relays.set(url, relay);
       return relay;
     }
   }
 
-  /** Make a REQ to multiple relays but does not deduplicate events */
-  req(relays: string[], filters: Filter[], id = nanoid()): Observable<SubscriptionResponse> {
-    // create a REQ observable for each relay
-    const requests = relays.map((url) => this.relay(url).req(filters, id));
+  /** Create a group of relays */
+  group(relays: string[]): RelayGroup {
+    const key = relays.sort().join(",");
+    let group = this.groups.get(key);
+    if (group) return group;
 
-    // create an observable that completes when all relays send EOSE
-    const eose = merge(
-      // create an array of observables for each relay that completes when EOSE
-      ...requests.map((o) =>
-        o.pipe(
-          // complete on EOSE message
-          takeWhile((m) => m !== "EOSE"),
-        ),
-      ),
-    ).pipe(
-      // ignore all messages
-      ignoreElements(),
-      // emit EOSE on complete
-      endWith("EOSE" as const),
-    );
+    group = new RelayGroup(relays.map((url) => this.relay(url)));
+    this.groups.set(key, group);
+    return group;
+  }
 
-    // create a stream that only emits events
-    const events = merge(...requests).pipe(onlyEvents());
-
-    // merge events and single EOSE streams
-    return merge(events, eose);
+  /** Make a REQ to multiple relays that does not deduplicate events */
+  req(relays: string[], filters: Filter | Filter[], id?: string): Observable<SubscriptionResponse> {
+    return this.group(relays).req(filters, id);
   }
 
   /** Send an EVENT message to multiple relays */
-  event(relays: string[], event: NostrEvent): Observable<PublishResponse[]> {
-    return combineLatest(relays.map((url) => this.relay(url).event(event)));
+  event(relays: string[], event: NostrEvent): Observable<PublishResponse> {
+    return this.group(relays).event(event);
   }
 }

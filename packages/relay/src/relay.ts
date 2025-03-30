@@ -1,7 +1,6 @@
 import {
   BehaviorSubject,
   combineLatest,
-  EMPTY,
   filter,
   map,
   merge,
@@ -19,31 +18,31 @@ import { webSocket, WebSocketSubject, WebSocketSubjectConfig } from "rxjs/webSoc
 import { type Filter, type NostrEvent } from "nostr-tools";
 import { nanoid } from "nanoid";
 import { logger } from "applesauce-core";
-import { markFromRelay } from "./operators/mark-from-relay.js";
 
-export type SubscriptionResponse = "EOSE" | NostrEvent;
-export type PublishResponse = { ok: boolean; message?: string; from: string };
+import { markFromRelay } from "./operators/mark-from-relay.js";
+import { IRelay, PublishResponse, SubscriptionResponse } from "./types.js";
 
 export type RelayOptions = {
   WebSocket?: WebSocketSubjectConfig<any>["WebSocketCtor"];
 };
 
-export class Relay {
-  log: typeof logger = logger.extend("Bakery");
+export class Relay implements IRelay {
+  protected log: typeof logger = logger.extend("Relay");
   public socket$: WebSocketSubject<any>;
 
   connected$ = new BehaviorSubject(false);
   challenge$: Observable<string>;
   authenticated$ = new BehaviorSubject(false);
-  notices$: Observable<string>;
+  notice$: Observable<string>;
 
   protected authRequiredForReq = new BehaviorSubject(false);
   protected authRequiredForPublish = new BehaviorSubject(false);
 
   protected reset() {
-    this.authenticated$.next(false);
-    this.authRequiredForReq.next(false);
-    this.authRequiredForPublish.next(false);
+    // NOTE: only update the values if they need to be changed, otherwise this will cause an infinite loop
+    if (this.authenticated$.value) this.authenticated$.next(false);
+    if (this.authRequiredForReq.value) this.authRequiredForReq.next(false);
+    if (this.authRequiredForPublish.value) this.authRequiredForPublish.next(false);
   }
 
   constructor(
@@ -81,7 +80,7 @@ export class Relay {
       shareReplay(1),
     );
 
-    this.notices$ = this.socket$.pipe(
+    this.notice$ = this.socket$.pipe(
       // listen for NOTICE messages
       filter((m) => m[0] === "NOTICE"),
       // pick the string out of the message
@@ -96,18 +95,22 @@ export class Relay {
     return combineLatest([requireAuth, this.authenticated$]).pipe(
       // return EMPTY if auth is required and not authenticated
       switchMap(([required, authenticated]) => {
-        if (required && !authenticated) return EMPTY;
+        if (required && !authenticated) return NEVER;
         else return observable;
       }),
     );
   }
 
-  req(filters: Filter[], id = nanoid()): Observable<SubscriptionResponse> {
+  multiplex<T>(open: () => any, close: () => any, filter: (message: any) => boolean): Observable<T> {
+    return this.socket$.multiplex(open, close, filter);
+  }
+
+  req(filters: Filter | Filter[], id = nanoid()): Observable<SubscriptionResponse> {
     return this.waitForAuth(
       this.authRequiredForReq,
       this.socket$
         .multiplex(
-          () => ["REQ", id, ...filters],
+          () => (Array.isArray(filters) ? ["REQ", id, ...filters] : ["REQ", id, filters]),
           () => ["CLOSE", id],
           (message) => (message[0] === "EVENT" || message[0] === "CLOSE" || message[0] === "EOSE") && message[1] === id,
         )
@@ -128,6 +131,7 @@ export class Relay {
           // mark events as from relays
           markFromRelay(this.url),
           // if no events are seen in 10s, emit EOSE
+          // TODO: this should emit EOSE event if events are seen, the timeout should be for only the EOSE message
           timeout({
             first: 10_000,
             with: () => merge(of<SubscriptionResponse>("EOSE"), NEVER),
