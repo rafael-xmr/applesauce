@@ -9,9 +9,9 @@ export type MultiplexWebSocket<T = any> = Pick<WebSocketSubject<T>, "multiplex">
 
 export interface IRelayState {
   connected$: Observable<boolean>;
-  challenge$: Observable<string>;
+  challenge$: Observable<string | null>;
   authenticated$: Observable<boolean>;
-  notice$: Observable<string>;
+  notices$: Observable<string[]>;
 }
 
 export interface Nip01Actions {
@@ -23,6 +23,14 @@ export interface Nip01Actions {
 
 export interface IRelay extends MultiplexWebSocket, Nip01Actions, IRelayState {
   url: string;
+
+  message$: Observable<any>;
+  notice$: Observable<string>;
+
+  readonly connected: boolean;
+  readonly authenticated: boolean;
+  readonly challenge: string | null;
+  readonly notices: string[];
 
   /** Send an AUTH message */
   auth(event: NostrEvent): Observable<{ ok: boolean; message?: string }>;

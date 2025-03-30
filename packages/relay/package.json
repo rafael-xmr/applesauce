@@ -27,6 +27,21 @@
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
+    "./pool": {
+      "import": "./dist/pool.js",
+      "require": "./dist/pool.js",
+      "types": "./dist/pool.d.ts"
+    },
+    "./relay": {
+      "import": "./dist/relay.js",
+      "require": "./dist/relay.js",
+      "types": "./dist/relay.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types.js",
+      "require": "./dist/types.js",
+      "types": "./dist/types.d.ts"
+    },
     "./operators": {
       "import": "./dist/operators/index.js",
       "require": "./dist/operators/index.js",
