@@ -13,9 +13,6 @@ export function truncateContent(tree: Root, maxLength = 256) {
         // guess user names are about 10 long
         length += 10;
         break;
-      case "cashu":
-        length += node.raw.length;
-        break;
       case "gallery":
         length += node.links.reduce((t, l) => t + l.length, 0);
         break;

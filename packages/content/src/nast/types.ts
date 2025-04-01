@@ -2,7 +2,6 @@ import { EventTemplate, NostrEvent } from "nostr-tools";
 import { DecodeResult } from "nostr-tools/nip19";
 import { Node as UnistNode, Parent } from "unist";
 
-import { type Token } from "@cashu/cashu-ts";
 import { type ParsedInvoice } from "applesauce-core/helpers/bolt11";
 
 export interface CommonData {
@@ -35,12 +34,6 @@ export interface Mention extends Node {
   encoded: string;
 }
 
-export interface CashuToken extends Node {
-  type: "cashu";
-  token: Token;
-  raw: string;
-}
-
 export interface LightningInvoice extends Node {
   type: "lightning";
   invoice: string;
@@ -68,7 +61,6 @@ export interface ContentMap {
   text: Text;
   link: Link;
   mention: Mention;
-  cashu: CashuToken;
   lightning: LightningInvoice;
   hashtag: Hashtag;
   emoji: Emoji;

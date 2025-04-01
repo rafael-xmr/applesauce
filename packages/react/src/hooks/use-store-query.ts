@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { of } from "rxjs";
 import { useObservableEagerState } from "observable-hooks";
-import { QueryConstructor } from "applesauce-core";
+import type { QueryConstructor } from "applesauce-core";
 
 import { useQueryStore } from "./use-query-store.js";
 
@@ -11,14 +11,19 @@ import { useQueryStore } from "./use-query-store.js";
  * const events = useStoreQuery(TimelineQuery, [{kinds: [1]}])
  */
 export function useStoreQuery<T extends unknown, Args extends Array<any>>(
-  queryConstructor: QueryConstructor<T, Args>,
-  args?: Args | null,
+	queryConstructor: QueryConstructor<T, Args>,
+	args?: Args | null,
 ): T | undefined {
-  const store = useQueryStore();
-  const observable = useMemo(() => {
-    if (args) return store.createQuery(queryConstructor, ...args);
-    else return of(undefined);
-  }, [args, store]);
+	const store = useQueryStore();
 
-  return useObservableEagerState(observable);
+	const argsString = args
+		? args.map((arg) => JSON.stringify(arg)).join(",")
+		: "";
+
+	const observable = useMemo(() => {
+		if (args) return store.createQuery(queryConstructor, ...args);
+		return of(undefined);
+	}, [argsString]);
+
+	return useObservableEagerState(observable);
 }
