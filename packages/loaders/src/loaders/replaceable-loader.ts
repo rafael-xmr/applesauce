@@ -101,7 +101,7 @@ export type ReplaceableLoaderOptions = {
   lookupRelays?: string[];
 };
 
-export class ReplaceableLoader extends Loader<LoadableAddressPointer, NostrResponse> {
+export class ReplaceableLoader extends Loader<LoadableAddressPointer, NostrEvent> {
   log: typeof logger = logger.extend("ReplaceableLoader");
 
   /** A method used to load events from a local cache */
@@ -125,7 +125,7 @@ export class ReplaceableLoader extends Loader<LoadableAddressPointer, NostrRespo
         // ignore empty buffer
         filter((buffer) => buffer.length > 0),
         // check cache, relays, lookup relays in that order
-        generatorSequence<LoadableAddressPointer[], NostrResponse>(
+        generatorSequence<LoadableAddressPointer[], NostrEvent>(
           (pointers) =>
             cacheFirstSequence(request, pointers, this.log, {
               cacheRequest: this.cacheRequest,
