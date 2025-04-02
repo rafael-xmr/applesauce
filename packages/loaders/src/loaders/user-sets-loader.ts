@@ -1,14 +1,15 @@
-import { tap, from, Observable, filter, map, mergeAll, bufferTime } from "rxjs";
-import { createRxOneshotReq, EventPacket, RxNostr } from "rx-nostr";
+import { bufferTime, filter, from, map, mergeAll, Observable, tap } from "rxjs";
 import { markFromCache } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
+import { NostrEvent } from "nostr-tools";
 import { nanoid } from "nanoid";
 
-import { CacheRequest, Loader } from "./loader.js";
+import { CacheRequest, Loader, NostrRequest } from "./loader.js";
 import { generatorSequence } from "../operators/generator-sequence.js";
 import { consolidateAddressPointers, createFiltersFromAddressPointers } from "../helpers/address-pointer.js";
 import { groupByRelay } from "../helpers/pointer.js";
 import { distinctRelaysBatch } from "../operators/distinct-relays.js";
+import { completeOnEOSE } from "../operators/complete-on-eose.js";
 
 export type LoadableSetPointer = {
   /** A replaceable kind >= 30000 & < 40000 */
@@ -22,11 +23,11 @@ export type LoadableSetPointer = {
 
 /** A generator that tries to load the address pointers from the cache first, then tries the relays */
 function* cacheFirstSequence(
-  rxNostr: RxNostr,
+  request: NostrRequest,
   pointers: LoadableSetPointer[],
   log: typeof logger,
   opts?: { cacheRequest?: CacheRequest },
-): Generator<Observable<EventPacket>, undefined, EventPacket[]> {
+): Generator<Observable<NostrEvent>, undefined, NostrEvent[]> {
   const id = nanoid(8);
   log = log.extend(id);
 
@@ -37,8 +38,6 @@ function* cacheFirstSequence(
     const results = yield opts.cacheRequest(filters).pipe(
       // mark the event as from the cache
       tap((event) => markFromCache(event)),
-      // convert to event packets
-      map((e) => ({ event: e, from: "", subId: "user-sets-loader", type: "EVENT" }) as EventPacket),
     );
 
     if (results.length > 0) {
@@ -54,16 +53,10 @@ function* cacheFirstSequence(
       let filters = createFiltersFromAddressPointers(pointers);
 
       let count = 0;
-      const req = createRxOneshotReq({ filters, rxReqId: id });
-
       log(`Requesting from ${relay}`, pointers);
 
-      let sub$: Observable<EventPacket>;
-      // don't specify relay if this is the "default" relay
-      if (relay === "default") sub$ = rxNostr.use(req);
-      else sub$ = rxNostr.use(req, { on: { relays: [relay] } });
-
-      return sub$.pipe(
+      return request([relay], filters, id).pipe(
+        completeOnEOSE(),
         tap({
           next: () => count++,
           complete: () => log(`Completed ${relay}, loaded ${count} events`),
@@ -89,10 +82,10 @@ export type UserSetsLoaderOptions = {
 };
 
 /** A loader that can be used to load users NIP-51 sets events ( kind >= 30000 < 40000) */
-export class UserSetsLoader extends Loader<LoadableSetPointer, EventPacket> {
+export class UserSetsLoader extends Loader<LoadableSetPointer, NostrEvent> {
   log: typeof logger = logger.extend("UserSetsLoader");
 
-  constructor(rxNostr: RxNostr, opts?: UserSetsLoaderOptions) {
+  constructor(request: NostrRequest, opts?: UserSetsLoaderOptions) {
     let options = opts || {};
 
     super((source) =>
@@ -106,8 +99,8 @@ export class UserSetsLoader extends Loader<LoadableSetPointer, EventPacket> {
         // deduplicate address pointers
         map(consolidateAddressPointers),
         // check cache, relays, lookup relays in that order
-        generatorSequence<LoadableSetPointer[], EventPacket>(
-          (pointers) => cacheFirstSequence(rxNostr, pointers, this.log, options),
+        generatorSequence<LoadableSetPointer[], NostrEvent>(
+          (pointers) => cacheFirstSequence(request, pointers, this.log, options),
           // there will always be more events, never complete
           false,
         ),

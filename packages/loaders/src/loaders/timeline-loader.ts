@@ -1,12 +1,12 @@
-import { EventPacket, RxNostr } from "rx-nostr";
 import { BehaviorSubject, combineLatest, connect, merge, tap } from "rxjs";
 import { logger } from "applesauce-core";
 import { mergeFilters } from "applesauce-core/helpers";
 import { nanoid } from "nanoid";
 
 import { RelayTimelineLoader, TimelessFilter } from "./relay-timeline-loader.js";
-import { CacheRequest, Loader, RelayFilterMap } from "./loader.js";
+import { CacheRequest, Loader, NostrRequest, RelayFilterMap } from "./loader.js";
 import { CacheTimelineLoader } from "./cache-timeline-loader.js";
+import { NostrEvent } from "nostr-tools";
 
 export type TimelineLoaderOptions = {
   limit?: number;
@@ -14,7 +14,7 @@ export type TimelineLoaderOptions = {
 };
 
 /** A multi-relay timeline loader that can be used to load a timeline from multiple relays */
-export class TimelineLoader extends Loader<number | undefined, EventPacket> {
+export class TimelineLoader extends Loader<number | undefined, NostrEvent> {
   id = nanoid(8);
   loading$ = new BehaviorSubject(false);
   get loading() {
@@ -27,7 +27,7 @@ export class TimelineLoader extends Loader<number | undefined, EventPacket> {
   protected cache?: CacheTimelineLoader;
   protected loaders: Map<string, RelayTimelineLoader>;
 
-  constructor(rxNostr: RxNostr, requests: RelayFilterMap<TimelessFilter>, opts?: TimelineLoaderOptions) {
+  constructor(request: NostrRequest, requests: RelayFilterMap<TimelessFilter>, opts?: TimelineLoaderOptions) {
     const loaders = new Map<string, RelayTimelineLoader>();
 
     // create cache loader
@@ -37,7 +37,7 @@ export class TimelineLoader extends Loader<number | undefined, EventPacket> {
 
     // create loaders
     for (const [relay, filters] of Object.entries(requests)) {
-      loaders.set(relay, new RelayTimelineLoader(rxNostr, relay, filters, opts));
+      loaders.set(relay, new RelayTimelineLoader(request, relay, filters, opts));
     }
 
     const allLoaders = cache ? [cache, ...loaders.values()] : Array.from(loaders.values());
@@ -60,7 +60,7 @@ export class TimelineLoader extends Loader<number | undefined, EventPacket> {
       );
 
       // observable that merges all the outputs of the loaders
-      const events$ = merge<EventPacket[]>(...allLoaders.map((l) => l.observable));
+      const events$ = merge<NostrEvent[]>(...allLoaders.map((l) => l.observable));
 
       // subscribe to all observables but only return the results of events$
       return merge(trigger$, loading$, events$).pipe(connect((_shared$) => events$));

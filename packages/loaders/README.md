@@ -1,24 +1,32 @@
 # applesauce-loaders
 
-A collection of observable based loaders built on top of [rx-nostr](https://penpenpng.github.io/rx-nostr/)
+A collection of loader classes to make loading common events from multiple relays easier.
 
 ## Replaceable event loader
 
 The `ReplaceableLoader` class can be used to load profiles (kind 0), contact lists (kind 3), and any other replaceable (1xxxx) or parameterized replaceable event (3xxxx)
 
 ```ts
+import { Observable } from "rxjs";
 import { EventStore } from "applesauce-core";
 import { ReplaceableLoader } from "applesauce-loaders/loaders";
-import { createRxNostr, nip07Signer } from "rx-nostr";
-import { verifier } from "rx-nostr-crypto";
 
 export const eventStore = new EventStore();
 
-export const rxNostr = createRxNostr({
-  verifier,
-  signer: nip07Signer(),
-  connectionStrategy: "lazy-keep",
-});
+// Create a method to let the loaders use nostr-tools relay pool
+function nostrRequest(relays: string[], filters: Filter[]) {
+  return new Observable((observer) => {
+    const sub = pool.subscribe(filters, {
+      onevent: (event) => observer.next(event),
+      oneose: () => {
+        sub.close();
+        observer.complete();
+      },
+    });
+
+    return () => sub.close();
+  });
+}
 
 // create method to load events from the cache relay
 function cacheRequest(filters: Filter[]) {

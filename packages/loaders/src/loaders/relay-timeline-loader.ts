@@ -1,11 +1,11 @@
-import { createRxOneshotReq, EventPacket, RxNostr } from "rx-nostr";
 import { BehaviorSubject, filter, map, Observable } from "rxjs";
 import { logger } from "applesauce-core";
 import { nanoid } from "nanoid";
 import { unixNow } from "applesauce-core/helpers";
-import { Filter } from "nostr-tools";
+import { Filter, NostrEvent } from "nostr-tools";
 
-import { Loader } from "./loader.js";
+import { Loader, NostrRequest } from "./loader.js";
+import { completeOnEOSE } from "../operators/complete-on-eose.js";
 
 export type TimelessFilter = Omit<Filter, "since" | "until">;
 
@@ -15,7 +15,7 @@ export type RelayTimelineLoaderOptions = {
 };
 
 /** A loader that can be used to load a timeline in chunks */
-export class RelayTimelineLoader extends Loader<number | void, EventPacket> {
+export class RelayTimelineLoader extends Loader<number | void, NostrEvent> {
   id = nanoid(8);
   loading$ = new BehaviorSubject(false);
   get loading() {
@@ -31,14 +31,14 @@ export class RelayTimelineLoader extends Loader<number | void, EventPacket> {
   protected log: typeof logger = logger.extend("RelayTimelineLoader");
 
   constructor(
-    rxNostr: RxNostr,
+    request: NostrRequest,
     public relay: string,
     public filters: TimelessFilter[],
     opts?: RelayTimelineLoaderOptions,
   ) {
     super(
       (source) =>
-        new Observable((observer) => {
+        new Observable<NostrEvent>((observer) => {
           return source
             .pipe(
               filter(() => !this.loading && !this.complete),
@@ -57,34 +57,35 @@ export class RelayTimelineLoader extends Loader<number | void, EventPacket> {
             .subscribe((filters) => {
               // make batch request
               let count = 0;
-              const req = createRxOneshotReq({ filters, rxReqId: this.id });
               this.loading$.next(true);
 
               this.log(`Next batch starting at ${filters[0].until} limit ${filters[0].limit}`);
 
-              rxNostr.use(req, { on: { relays: [relay] } }).subscribe({
-                next: (packet) => {
-                  // update cursor when event is received
-                  this.cursor = Math.min(packet.event.created_at - 1, this.cursor);
-                  count++;
+              request([relay], filters)
+                .pipe(completeOnEOSE())
+                .subscribe({
+                  next: (event) => {
+                    // update cursor when event is received
+                    this.cursor = Math.min(event.created_at - 1, this.cursor);
+                    count++;
 
-                  // forward packet
-                  observer.next(packet);
-                },
-                error: (err) => observer.error(err),
-                complete: () => {
-                  // set loading to false when batch completes
-                  this.loading$.next(false);
+                    // forward packet
+                    observer.next(event);
+                  },
+                  error: (err) => observer.error(err),
+                  complete: () => {
+                    // set loading to false when batch completes
+                    this.loading$.next(false);
 
-                  // set complete the observable if 0 events where returned
-                  if (count === 0) {
-                    observer.complete();
-                    this.log(`Got ${count} event, Complete`);
-                  } else {
-                    this.log(`Finished batch, got ${count} events`);
-                  }
-                },
-              });
+                    // set complete the observable if 0 events where returned
+                    if (count === 0) {
+                      observer.complete();
+                      this.log(`Got ${count} event, Complete`);
+                    } else {
+                      this.log(`Finished batch, got ${count} events`);
+                    }
+                  },
+                });
             });
         }),
     );

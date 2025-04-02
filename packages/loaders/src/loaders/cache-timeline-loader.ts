@@ -1,8 +1,7 @@
-import { EventPacket } from "rx-nostr";
 import { BehaviorSubject, filter, map, mergeMap, tap } from "rxjs";
 import { markFromCache, unixNow } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
-import { Filter } from "nostr-tools";
+import { Filter, NostrEvent } from "nostr-tools";
 import { nanoid } from "nanoid";
 
 import { CacheRequest, Loader } from "./loader.js";
@@ -14,7 +13,7 @@ export type CacheTimelineLoaderOptions = {
 };
 
 /** A loader that can be used to load a timeline in chunks */
-export class CacheTimelineLoader extends Loader<number | void, EventPacket> {
+export class CacheTimelineLoader extends Loader<number | void, NostrEvent> {
   id = nanoid(8);
   loading$ = new BehaviorSubject(false);
   get loading() {
@@ -78,7 +77,6 @@ export class CacheTimelineLoader extends Loader<number | void, EventPacket> {
                 }
               },
             }),
-            map((event) => ({ event, from: "", subId: "cache-timeline-loader", type: "EVENT" }) as EventPacket),
           );
         }),
       ),

@@ -232,6 +232,9 @@ importers:
       rx-nostr:
         specifier: ^3.5.0
         version: 3.5.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
     devDependencies:
       '@types/react':
         specifier: ^18.3.18
@@ -297,9 +300,6 @@ importers:
       nostr-tools:
         specifier: ^2.10.4
         version: 2.10.4(typescript@5.7.3)
-      rx-nostr:
-        specifier: ^3.5.0
-        version: 3.5.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
