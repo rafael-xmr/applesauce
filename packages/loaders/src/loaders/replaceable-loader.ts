@@ -4,7 +4,7 @@ import { logger } from "applesauce-core";
 import { nanoid } from "nanoid";
 import { NostrEvent } from "nostr-tools";
 
-import { CacheRequest, Loader, NostrRequest, NostrResponse } from "./loader.js";
+import { CacheRequest, Loader, NostrRequest } from "./loader.js";
 import { generatorSequence } from "../operators/generator-sequence.js";
 import {
   consolidateAddressPointers,
