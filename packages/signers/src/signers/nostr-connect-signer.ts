@@ -157,7 +157,9 @@ export class NostrConnectSigner implements Nip07Interface {
       }
     | undefined;
 
+  /** A fallback method to use for subscriptionMethod if none is pass in when creating the signer */
   static subscriptionMethod: NostrSubscriptionMethod | undefined = undefined;
+  /** A fallback method to use for publishMethod if none is pass in when creating the signer */
   static publishMethod: NostrPublishMethod | undefined = undefined;
 
   constructor(opts: NostrConnectSignerOptions) {
