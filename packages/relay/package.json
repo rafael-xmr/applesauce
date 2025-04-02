@@ -51,9 +51,15 @@
       "import": "./dist/operators/*.js",
       "require": "./dist/operators/*.js",
       "types": "./dist/operators/*.d.ts"
+    },
+    "./negentropy": {
+      "import": "./dist/negentropy.js",
+      "require": "./dist/negentropy.js",
+      "types": "./dist/negentropy.d.ts"
     }
   },
   "dependencies": {
+    "@noble/hashes": "^1.7.1",
     "applesauce-core": "^0.12.0",
     "nanoid": "^5.0.9",
     "nostr-tools": "^2.10.4",

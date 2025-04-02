@@ -138,20 +138,26 @@ export class Relay implements IRelay {
   }
 
   protected waitForAuth<T extends unknown = unknown>(
-    requireAuth: Observable<boolean>,
+    // require BehaviorSubject so it always has a value
+    requireAuth: BehaviorSubject<boolean>,
     observable: Observable<T>,
   ): Observable<T> {
     return combineLatest([requireAuth, this.authenticated$]).pipe(
-      // return EMPTY if auth is required and not authenticated
-      switchMap(([required, authenticated]) => {
-        if (required && !authenticated) return NEVER;
-        else return observable;
-      }),
+      // wait for auth not required or authenticated
+      filter(([required, authenticated]) => !required || authenticated),
+      // take the first value
+      take(1),
+      // switch to the observable
+      switchMap(() => observable),
     );
   }
 
   multiplex<T>(open: () => any, close: () => any, filter: (message: any) => boolean): Observable<T> {
     return this.socket.multiplex(open, close, filter);
+  }
+
+  next(message: any) {
+    this.socket.next(message);
   }
 
   req(filters: Filter | Filter[], id = nanoid()): Observable<SubscriptionResponse> {
@@ -192,7 +198,7 @@ export class Relay implements IRelay {
 
   /** send an Event message */
   event(event: NostrEvent, verb: "EVENT" | "AUTH" = "EVENT"): Observable<PublishResponse> {
-    const observable = this.socket
+    const base = this.socket
       .multiplex(
         () => [verb, event],
         () => void 0,
@@ -200,23 +206,28 @@ export class Relay implements IRelay {
       )
       .pipe(
         // format OK message
-        map((m) => ({ ok: m[2], message: m[3], from: this.url })),
-        // complete on first value
-        take(1),
-        // listen for OK auth-required
-        tap(({ ok, message }) => {
-          if (ok === false && message.startsWith("auth-required") && !this.authRequiredForPublish.value) {
-            this.log("Auth required for publish");
-            this.authRequiredForPublish.next(true);
-          }
-        }),
+        map((m) => ({ ok: m[2] as boolean, message: m[3] as string, from: this.url }) satisfies PublishResponse),
       );
 
-    const withWatchTower = merge(this.watchTower, observable);
+    // Start the watch tower with the observable
+    const withWatchTower = merge(this.watchTower, base);
+
+    // A complete operators
+    const observable = withWatchTower.pipe(
+      // complete on first value
+      take(1),
+      // listen for OK auth-required
+      tap(({ ok, message }) => {
+        if (ok === false && message.startsWith("auth-required") && !this.authRequiredForPublish.value) {
+          this.log("Auth required for publish");
+          this.authRequiredForPublish.next(true);
+        }
+      }),
+    );
 
     // skip wait for auth if verb is AUTH
-    if (verb === "AUTH") return withWatchTower;
-    else return this.waitForAuth(this.authRequiredForPublish, withWatchTower);
+    if (verb === "AUTH") return observable;
+    else return this.waitForAuth(this.authRequiredForPublish, observable);
   }
 
   /** send and AUTH message */
