@@ -1,6 +1,7 @@
 import {
   BehaviorSubject,
   combineLatest,
+  defer,
   filter,
   ignoreElements,
   map,
@@ -138,7 +139,7 @@ export class Relay implements IRelay {
   }
 
   protected waitForAuth<T extends unknown = unknown>(
-    // require BehaviorSubject so it always has a value
+    // NOTE: require BehaviorSubject so it always has a value
     requireAuth: BehaviorSubject<boolean>,
     observable: Observable<T>,
   ): Observable<T> {
@@ -156,10 +157,12 @@ export class Relay implements IRelay {
     return this.socket.multiplex(open, close, filter);
   }
 
+  /** Send a message to the relay */
   next(message: any) {
     this.socket.next(message);
   }
 
+  /** Create a REQ observable that emits events | "EOSE" or errors */
   req(filters: Filter | Filter[], id = nanoid()): Observable<SubscriptionResponse> {
     const request = this.socket
       .multiplex(
@@ -196,29 +199,29 @@ export class Relay implements IRelay {
     return this.waitForAuth(this.authRequiredForReq, merge(this.watchTower, request));
   }
 
-  /** send an Event message */
+  /** send an Event message and always return an observable of PublishResponse that completes or errors */
   event(event: NostrEvent, verb: "EVENT" | "AUTH" = "EVENT"): Observable<PublishResponse> {
-    const base = this.socket
-      .multiplex(
-        () => [verb, event],
-        () => void 0,
-        (m) => m[0] === "OK" && m[1] === event.id,
-      )
-      .pipe(
+    const base: Observable<PublishResponse> = defer(() => {
+      // Send event when subscription starts
+      this.socket.next([verb, event]);
+
+      return this.socket.pipe(
+        filter((m) => m[0] === "OK" && m[1] === event.id),
         // format OK message
-        map((m) => ({ ok: m[2] as boolean, message: m[3] as string, from: this.url }) satisfies PublishResponse),
+        map((m) => ({ ok: m[2] as boolean, message: m[3] as string, from: this.url })),
       );
+    });
 
     // Start the watch tower with the observable
     const withWatchTower = merge(this.watchTower, base);
 
-    // A complete operators
+    // Add complete operators
     const observable = withWatchTower.pipe(
       // complete on first value
       take(1),
       // listen for OK auth-required
       tap(({ ok, message }) => {
-        if (ok === false && message.startsWith("auth-required") && !this.authRequiredForPublish.value) {
+        if (ok === false && message?.startsWith("auth-required") && !this.authRequiredForPublish.value) {
           this.log("Auth required for publish");
           this.authRequiredForPublish.next(true);
         }

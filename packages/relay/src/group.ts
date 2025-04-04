@@ -1,17 +1,23 @@
 import { NostrEvent } from "nostr-tools";
-import { combineLatest, filter, map, merge, Observable } from "rxjs";
+import { catchError, combineLatest, EMPTY, filter, map, merge, Observable, of } from "rxjs";
 import { Filter } from "nostr-tools";
+import { nanoid } from "nanoid";
 
 import { IRelay, Nip01Actions, PublishResponse, SubscriptionResponse } from "./types.js";
 import { onlyEvents } from "./operators/only-events.js";
-import { nanoid } from "nanoid";
 
 export class RelayGroup implements Nip01Actions {
   constructor(public relays: IRelay[]) {}
 
-  req(filters: Filter | Filter[], id = nanoid()): Observable<SubscriptionResponse> {
+  req(filters: Filter | Filter[], id = nanoid(8)): Observable<SubscriptionResponse> {
     const requests = this.relays.reduce(
-      (acc, r) => ({ ...acc, [r.url]: r.req(filters, id) }),
+      (acc, relay) => ({
+        ...acc,
+        [relay.url]: relay.req(filters, id).pipe(
+          // Ignore connection errors
+          catchError(() => EMPTY),
+        ),
+      }),
       {} as Record<string, Observable<SubscriptionResponse>>,
     );
 
@@ -31,6 +37,15 @@ export class RelayGroup implements Nip01Actions {
   }
 
   event(event: NostrEvent): Observable<PublishResponse> {
-    return merge(...this.relays.map((r) => r.event(event)));
+    return merge(
+      ...this.relays.map((relay) =>
+        relay.event(event).pipe(
+          // Catch error and return as PublishResponse
+          catchError((err) =>
+            of({ ok: false, from: relay.url, message: err?.message || "Unknown error" } satisfies PublishResponse),
+          ),
+        ),
+      ),
+    );
   }
 }
