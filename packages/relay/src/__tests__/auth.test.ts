@@ -85,7 +85,7 @@ describe("req", () => {
   it("should wait for auth before sending REQ if auth-required received", async () => {
     // Create first REQ subscription
     const filters = [{ kinds: [1], limit: 10 }];
-    const spy1 = subscribeSpyTo(relay.req(filters, "sub1"));
+    subscribeSpyTo(relay.req(filters, "sub1"));
 
     // Verify REQ was sent
     const firstReqMessage = await mockServer.nextMessage;
@@ -98,7 +98,7 @@ describe("req", () => {
     await mockServer.nextMessage;
 
     // Create second REQ subscription - this should not send REQ yet
-    const spy2 = subscribeSpyTo(relay.req(filters, "sub2"));
+    subscribeSpyTo(relay.req(filters, "sub2"));
 
     // Should not have received any messages
     expect(mockServer.messages).not.toContain(JSON.stringify(["REQ", "sub2", ...filters]));
