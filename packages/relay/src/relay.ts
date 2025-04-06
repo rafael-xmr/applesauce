@@ -169,39 +169,42 @@ export class Relay implements IRelay {
 
   /** Create a REQ observable that emits events | "EOSE" or errors */
   req(filters: Filter | Filter[], id = nanoid()): Observable<SubscriptionResponse> {
-    const request = this.socket
-      .multiplex(
-        () => (Array.isArray(filters) ? ["REQ", id, ...filters] : ["REQ", id, filters]),
-        () => ["CLOSE", id],
-        (message) => (message[0] === "EVENT" || message[0] === "CLOSE" || message[0] === "EOSE") && message[1] === id,
-      )
-      .pipe(
-        // listen for CLOSE auth-required
-        tap((m) => {
-          if (m[0] === "CLOSE" && m[2] && m[2].startsWith("auth-required") && !this.authRequiredForReq.value) {
-            this.log("Auth required for REQ");
-            this.authRequiredForReq.next(true);
-          }
-        }),
-        // complete when CLOSE is sent
-        takeWhile((m) => m[0] !== "CLOSE"),
-        // pick event out of EVENT messages
-        map<any[], SubscriptionResponse>((message) => {
-          if (message[0] === "EOSE") return "EOSE";
-          else return message[2] as NostrEvent;
-        }),
-        // mark events as from relays
-        markFromRelay(this.url),
-        // if no events are seen in 10s, emit EOSE
-        // TODO: this should emit EOSE event if events are seen, the timeout should be for only the EOSE message
-        timeout({
-          first: this.eoseTimeout,
-          with: () => merge(of<SubscriptionResponse>("EOSE"), NEVER),
-        }),
-      );
+    const request = this.socket.multiplex(
+      () => (Array.isArray(filters) ? ["REQ", id, ...filters] : ["REQ", id, filters]),
+      () => ["CLOSE", id],
+      (message) => (message[0] === "EVENT" || message[0] === "CLOSED" || message[0] === "EOSE") && message[1] === id,
+    );
+
+    // Start the watch tower with the observable
+    const withWatchTower = merge(this.watchTower, request);
+
+    const observable = withWatchTower.pipe(
+      // listen for CLOSED auth-required
+      tap((m) => {
+        if (m[0] === "CLOSED" && m[2] && m[2].startsWith("auth-required") && !this.authRequiredForReq.value) {
+          this.log("Auth required for REQ");
+          this.authRequiredForReq.next(true);
+        }
+      }),
+      // complete when CLOSE is sent
+      takeWhile((m) => m[0] !== "CLOSED"),
+      // pick event out of EVENT messages
+      map<any[], SubscriptionResponse>((message) => {
+        if (message[0] === "EOSE") return "EOSE";
+        else return message[2] as NostrEvent;
+      }),
+      // mark events as from relays
+      markFromRelay(this.url),
+      // if no events are seen in 10s, emit EOSE
+      // TODO: this should emit EOSE event if events are seen, the timeout should be for only the EOSE message
+      timeout({
+        first: this.eoseTimeout,
+        with: () => merge(of<SubscriptionResponse>("EOSE"), NEVER),
+      }),
+    );
 
     // Wait for auth if required and make sure to start the watch tower
-    return this.waitForAuth(this.authRequiredForReq, merge(this.watchTower, request));
+    return this.waitForAuth(this.authRequiredForReq, observable);
   }
 
   /** send an Event message and always return an observable of PublishResponse that completes or errors */

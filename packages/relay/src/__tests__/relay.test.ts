@@ -92,6 +92,16 @@ describe("req", () => {
     // Verify the event was marked as seen from this relay
     expect(getSeenRelays(receivedEvent)).toContain("wss://test");
   });
+
+  it("should complete subscription when CLOSED message is received", async () => {
+    const spy = subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"));
+
+    // Send CLOSED message for the subscription
+    mockRelay.send(JSON.stringify(["CLOSED", "sub1", "reason"]));
+
+    // Verify the subscription completed
+    expect(spy.receivedComplete()).toBe(true);
+  });
 });
 
 describe("event", () => {

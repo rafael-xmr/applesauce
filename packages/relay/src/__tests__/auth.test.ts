@@ -92,7 +92,7 @@ describe("req", () => {
     expect(JSON.parse(firstReqMessage as string)).toEqual(["REQ", "sub1", ...filters]);
 
     // Send auth-required response
-    mockServer.send(JSON.stringify(["CLOSE", "sub1", "auth-required: need to authenticate"]));
+    mockServer.send(JSON.stringify(["CLOSED", "sub1", "auth-required: need to authenticate"]));
 
     // Consume the client CLOSE message for sub1
     await mockServer.nextMessage;
