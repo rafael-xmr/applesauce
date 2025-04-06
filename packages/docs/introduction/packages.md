@@ -142,6 +142,26 @@ pnpm install applesauce-actions
 
 :::
 
+## Relays
+
+The `applesauce-relay` package provides a flexible api for communicating with Nostr relays, built on top of [RxJS](https://rxjs.dev/).
+
+:::code-group
+
+```sh [npm]
+npm install applesauce-relay
+```
+
+```sh [yarn]
+yarn install applesauce-relay
+```
+
+```sh [pnpm]
+pnpm install applesauce-relay
+```
+
+:::
+
 ## React
 
 The `applesauce-react` package contains a bunch of useful react hooks for working with other applesauce packages. [see more](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_react.html)

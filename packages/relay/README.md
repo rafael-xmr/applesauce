@@ -2,8 +2,6 @@
 
 `applesauce-relay` is a nostr relay communication framework built on top of [RxJS](https://rxjs.dev/)
 
-> ⚠️ **Alpha Software Warning**: This package is in early alpha stage. It contains bugs, is not fully tested, and may undergo significant changes. Use with caution in production environments.
-
 ## Installation
 
 ```bash
@@ -15,10 +13,10 @@ npm install applesauce-relay
 - [x] NIP-01
 - [x] Client negentropy sync
 - [x] Relay pool and groups
-- [ ] Handle reconnects
 - [x] Write tests
-- [ ] Handle NIP-11 limitations
-- [ ] Add documentation to docs
+- [ ] Reconnection logic
+- [ ] NIP-11 limitations
+- [ ] NIP-45 COUNT
 
 ## Examples
 

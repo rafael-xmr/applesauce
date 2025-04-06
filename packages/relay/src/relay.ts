@@ -178,7 +178,7 @@ export class Relay implements IRelay {
       .pipe(
         // listen for CLOSE auth-required
         tap((m) => {
-          if (m[0] === "CLOSE" && m[1].startsWith("auth-required") && !this.authRequiredForReq.value) {
+          if (m[0] === "CLOSE" && m[2] && m[2].startsWith("auth-required") && !this.authRequiredForReq.value) {
             this.log("Auth required for REQ");
             this.authRequiredForReq.next(true);
           }

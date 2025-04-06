@@ -28,6 +28,7 @@ export default defineConfig({
           { text: "Queries", link: "/overview/queries" },
           { text: "Helpers", link: "/overview/helpers" },
           { text: "Factory", link: "/overview/factory" },
+          { text: "Relays", link: "/overview/relays" },
           { text: "Loaders", link: "/overview/loaders" },
           { text: "Actions", link: "/overview/actions" },
         ],
