@@ -1,10 +1,11 @@
 import { NostrEvent } from "nostr-tools";
-import { catchError, combineLatest, EMPTY, filter, map, merge, Observable, of } from "rxjs";
+import { catchError, endWith, ignoreElements, merge, Observable, of } from "rxjs";
 import { Filter } from "nostr-tools";
 import { nanoid } from "nanoid";
 
 import { IRelay, Nip01Actions, PublishResponse, SubscriptionResponse } from "./types.js";
 import { onlyEvents } from "./operators/only-events.js";
+import { completeOnEose } from "./operators/complete-on-eose.js";
 
 export class RelayGroup implements Nip01Actions {
   constructor(public relays: IRelay[]) {}
@@ -15,7 +16,7 @@ export class RelayGroup implements Nip01Actions {
         ...acc,
         [relay.url]: relay.req(filters, id).pipe(
           // Ignore connection errors
-          catchError(() => EMPTY),
+          catchError(() => of("EOSE" as const)),
         ),
       }),
       {} as Record<string, Observable<SubscriptionResponse>>,
@@ -25,12 +26,13 @@ export class RelayGroup implements Nip01Actions {
     const events = merge(...Object.values(requests)).pipe(onlyEvents());
 
     // Create stream that emits EOSE when all relays have sent EOSE
-    const eose = combineLatest(
+    const eose = merge(
       // Create a new map of requests that only emits EOSE
-      Object.fromEntries(
-        Object.entries(requests).map(([url, observable]) => [url, observable.pipe(filter((m) => m === "EOSE"))]),
-      ),
-    ).pipe(map(() => "EOSE" as const));
+      ...Object.values(requests).map((observable) => observable.pipe(completeOnEose(), ignoreElements())),
+    ).pipe(
+      // When all relays have sent EOSE, emit EOSE
+      endWith("EOSE" as const),
+    );
 
     // Merge events and the single EOSE stream
     return merge(events, eose);

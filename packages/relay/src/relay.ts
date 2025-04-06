@@ -58,6 +58,11 @@ export class Relay implements IRelay {
     return this.authenticated$.value;
   }
 
+  /** If an EOSE message is not seen in this time, emit one locally  */
+  eoseTimeout = 10_000;
+  /** How long to wait for an OK message from the relay */
+  eventTimeout = 10_000;
+
   protected authRequiredForReq = new BehaviorSubject(false);
   protected authRequiredForPublish = new BehaviorSubject(false);
 
@@ -190,7 +195,7 @@ export class Relay implements IRelay {
         // if no events are seen in 10s, emit EOSE
         // TODO: this should emit EOSE event if events are seen, the timeout should be for only the EOSE message
         timeout({
-          first: 10_000,
+          first: this.eoseTimeout,
           with: () => merge(of<SubscriptionResponse>("EOSE"), NEVER),
         }),
       );
@@ -225,6 +230,11 @@ export class Relay implements IRelay {
           this.log("Auth required for publish");
           this.authRequiredForPublish.next(true);
         }
+      }),
+      // if no message is seen in 10s, emit EOSE
+      timeout({
+        first: this.eventTimeout,
+        with: () => of<PublishResponse>({ ok: false, from: this.url, message: "Timeout" }),
       }),
     );
 

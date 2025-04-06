@@ -16,7 +16,7 @@ npm install applesauce-relay
 - [x] Client negentropy sync
 - [x] Relay pool and groups
 - [ ] Handle reconnects
-- [ ] Write tests
+- [x] Write tests
 - [ ] Handle NIP-11 limitations
 - [ ] Add documentation to docs
 

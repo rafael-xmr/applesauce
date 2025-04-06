@@ -8,8 +8,7 @@
 
 ### Patch Changes
 
-- Updated dependencies [fbaa2ab]
-- Updated dependencies [0867a50]
+- Updated dependencies
   - applesauce-signers@0.12.0
 
 ## 0.11.0

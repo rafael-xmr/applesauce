@@ -9,18 +9,7 @@
 ### Patch Changes
 
 - fbaa2ab: Fix nostr connect signer not rejecting with Error
-- Updated dependencies [6882991]
-- Updated dependencies [e176601]
-- Updated dependencies [06263df]
-- Updated dependencies [5e95ed5]
-- Updated dependencies [91621b5]
-- Updated dependencies [3780d5e]
-- Updated dependencies [91621b5]
-- Updated dependencies [06263df]
-- Updated dependencies [91621b5]
-- Updated dependencies [0c6251d]
-- Updated dependencies [f92f10c]
-- Updated dependencies [06263df]
+- Updated dependencies
   - applesauce-core@0.12.0
 
 ## 0.11.0
