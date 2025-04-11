@@ -42,7 +42,7 @@ describe("add", () => {
     );
   });
 
-  it("should ignore deleted events", () => {
+  it("should ignore old deleted events but not newer ones", () => {
     const deleteEvent: NostrEvent = {
       id: "delete event id",
       kind: kinds.EventDeletion,
@@ -59,13 +59,20 @@ describe("add", () => {
     // now event should be ignored
     eventStore.add(profile);
 
+    const newProfile = user.profile({ name: "new name" }, { created_at: profile.created_at + 1000 });
+    eventStore.add(newProfile);
+
     expect(eventStore.getEvent(profile.id)).toBeUndefined();
+    expect(eventStore.getEvent(newProfile.id)).toBeDefined();
   });
 
   it("should remove profile events when delete event is added", () => {
     // Add initial replaceable event
     eventStore.add(profile);
     expect(eventStore.getEvent(profile.id)).toBeDefined();
+
+    const newProfile = user.profile({ name: "new name" }, { created_at: profile.created_at + 1000 });
+    eventStore.add(newProfile);
 
     const deleteEvent: NostrEvent = {
       id: "delete event id",
@@ -82,7 +89,8 @@ describe("add", () => {
 
     // Profile should be removed since delete event is newer
     expect(eventStore.getEvent(profile.id)).toBeUndefined();
-    expect(eventStore.getReplaceable(profile.kind, profile.pubkey)).toBeUndefined();
+    expect(eventStore.getEvent(newProfile.id)).toBeDefined();
+    expect(eventStore.getReplaceable(profile.kind, profile.pubkey)).toBe(newProfile);
   });
 
   it("should remove addressable replaceable events when delete event is added", () => {
@@ -90,6 +98,12 @@ describe("add", () => {
     const event = user.event({ content: "test", kind: 30000, tags: [["d", "test"]] });
     eventStore.add(event);
     expect(eventStore.getEvent(event.id)).toBeDefined();
+
+    const newEvent = user.event({
+      ...event,
+      created_at: event.created_at + 500,
+    });
+    eventStore.add(newEvent);
 
     const deleteEvent: NostrEvent = {
       id: "delete event id",
@@ -106,7 +120,8 @@ describe("add", () => {
 
     // Profile should be removed since delete event is newer
     expect(eventStore.getEvent(event.id)).toBeUndefined();
-    expect(eventStore.getReplaceable(event.kind, event.pubkey)).toBeUndefined();
+    expect(eventStore.getEvent(newEvent.id)).toBeDefined();
+    expect(eventStore.getReplaceable(event.kind, event.pubkey, "test")).toBe(newEvent);
   });
 });
 
