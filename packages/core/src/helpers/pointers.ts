@@ -30,15 +30,15 @@ export function parseCoordinate(a: string, requireD: true, silent: true): Addres
 export function parseCoordinate(a: string, requireD: false, silent: true): AddressPointerWithoutD | null;
 export function parseCoordinate(a: string, requireD = false, silent = true): AddressPointerWithoutD | null {
   const parts = a.split(":") as (string | undefined)[];
-  const kind = parts[0] && parseInt(parts[0]);
+  const kind = parts[0] ? parseInt(parts[0]) : undefined;
   const pubkey = parts[1];
   const d = parts[2];
 
-  if (!kind) {
+  if (kind === undefined) {
     if (silent) return null;
     else throw new Error("Missing kind");
   }
-  if (!pubkey) {
+  if (pubkey === undefined || pubkey === "") {
     if (silent) return null;
     else throw new Error("Missing pubkey");
   }

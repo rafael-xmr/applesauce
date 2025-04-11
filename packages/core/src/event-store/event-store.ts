@@ -37,6 +37,7 @@ import { getDeleteCoordinates, getDeleteIds } from "../helpers/delete.js";
 import { claimEvents } from "../observable/claim-events.js";
 import { claimLatest } from "../observable/claim-latest.js";
 import { IEventStore } from "./interface.js";
+import { parseCoordinate } from "../helpers/pointers.js";
 
 export const EventStoreSymbol = Symbol.for("event-store");
 
@@ -117,9 +118,15 @@ export class EventStore implements IEventStore {
     for (const coord of coords) {
       this.deletedCoords.set(coord, Math.max(this.deletedCoords.get(coord) ?? 0, deleteEvent.created_at));
 
-      // remove deleted events in the database
-      const event = this.database.getEvent(coord);
-      if (event && event.created_at < deleteEvent.created_at) this.database.removeEvent(event);
+      // Parse the nostr address coordinate
+      const parsed = parseCoordinate(coord);
+      if (!parsed) continue;
+
+      // Remove older versions of replaceable events
+      const events = this.database.getReplaceable(parsed.kind, parsed.pubkey, parsed.identifier) ?? [];
+      for (const event of events) {
+        if (event.created_at < deleteEvent.created_at) this.database.removeEvent(event);
+      }
     }
   }
 

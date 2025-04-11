@@ -61,6 +61,53 @@ describe("add", () => {
 
     expect(eventStore.getEvent(profile.id)).toBeUndefined();
   });
+
+  it("should remove profile events when delete event is added", () => {
+    // Add initial replaceable event
+    eventStore.add(profile);
+    expect(eventStore.getEvent(profile.id)).toBeDefined();
+
+    const deleteEvent: NostrEvent = {
+      id: "delete event id",
+      kind: kinds.EventDeletion,
+      created_at: profile.created_at + 100,
+      pubkey: user.pubkey,
+      tags: [["a", `${profile.kind}:${profile.pubkey}`]],
+      sig: "this should be ignored for the test",
+      content: "test",
+    };
+
+    // Add delete event with coordinate
+    eventStore.add(deleteEvent);
+
+    // Profile should be removed since delete event is newer
+    expect(eventStore.getEvent(profile.id)).toBeUndefined();
+    expect(eventStore.getReplaceable(profile.kind, profile.pubkey)).toBeUndefined();
+  });
+
+  it("should remove addressable replaceable events when delete event is added", () => {
+    // Add initial replaceable event
+    const event = user.event({ content: "test", kind: 30000, tags: [["d", "test"]] });
+    eventStore.add(event);
+    expect(eventStore.getEvent(event.id)).toBeDefined();
+
+    const deleteEvent: NostrEvent = {
+      id: "delete event id",
+      kind: kinds.EventDeletion,
+      created_at: event.created_at + 100,
+      pubkey: user.pubkey,
+      tags: [["a", `${event.kind}:${event.pubkey}:test`]],
+      sig: "this should be ignored for the test",
+      content: "test",
+    };
+
+    // Add delete event with coordinate
+    eventStore.add(deleteEvent);
+
+    // Profile should be removed since delete event is newer
+    expect(eventStore.getEvent(event.id)).toBeUndefined();
+    expect(eventStore.getReplaceable(event.kind, event.pubkey)).toBeUndefined();
+  });
 });
 
 describe("inserts", () => {
