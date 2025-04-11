@@ -120,6 +120,19 @@ const { remote, relays, secret } = NostrConnectSigner.parseBunkerURI(uri);
 
 ## Permissions
 
+The `NostrConnectSigner` uses a set of predefined permissions that can be requested from the remote signer:
+
+```typescript
+enum Permission {
+  GetPublicKey = "get_pubic_key",
+  SignEvent = "sign_event",
+  Nip04Encrypt = "nip04_encrypt",
+  Nip04Decrypt = "nip04_decrypt",
+  Nip44Encrypt = "nip44_encrypt",
+  Nip44Decrypt = "nip44_decrypt",
+}
+```
+
 Use the static `NostrConnectSigner.buildSigningPermissions` method to create an array of signing permissions for specific event kinds:
 
 ```js
@@ -131,3 +144,32 @@ These permissions can be passed when:
 - Connecting to a remote signer via `connect(secret, permissions)`
 - Creating a nostr connect URI via `getNostrConnectURI({ permissions })`
 - Creating a signer from a bunker URI via `fromBunkerURI(uri, { permissions })`
+
+## App Metadata
+
+When creating a nostr connect URI, you can provide metadata about your application:
+
+```typescript
+type NostrConnectAppMetadata = {
+  name?: string;
+  image?: string;
+  url?: string | URL;
+  permissions?: string[];
+};
+```
+
+This metadata is used to display information about your application to the user when they connect their signer.
+
+## Encryption Methods
+
+The `NostrConnectSigner` supports both NIP-04 and NIP-44 encryption through the `nip04` and `nip44` properties:
+
+```typescript
+// NIP-04 encryption
+const encrypted = await signer.nip04.encrypt(pubkey, plaintext);
+const decrypted = await signer.nip04.decrypt(pubkey, ciphertext);
+
+// NIP-44 encryption
+const encrypted = await signer.nip44.encrypt(pubkey, plaintext);
+const decrypted = await signer.nip44.decrypt(pubkey, ciphertext);
+```
