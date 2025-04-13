@@ -2,7 +2,7 @@ import { Filter, NostrEvent } from "nostr-tools";
 import { Observable } from "rxjs";
 import { WebSocketSubject } from "rxjs/webSocket";
 
-export type SubscriptionResponse = "EOSE" | NostrEvent;
+export type SubscriptionResponse = NostrEvent | "EOSE";
 export type PublishResponse = { ok: boolean; message?: string; from: string };
 
 export type MultiplexWebSocket<T = any> = Pick<WebSocketSubject<T>, "multiplex">;

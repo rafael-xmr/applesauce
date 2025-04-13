@@ -184,3 +184,101 @@ relay.challenge$.subscribe(async (challenge) => {
   console.log(`Authenticated ${relay.authenticated}`);
 });
 ```
+
+## Operators
+
+The `applesauce-relay` package includes a set of rxjs operators for modifying the stream of events from subscriptions.
+
+### onlyEvents
+
+The `onlyEvents` operator filters the stream to only emit Nostr events.
+
+```typescript
+import { onlyEvents } from "applesauce-relay/operators";
+
+// Subscribe to events and only emit Nostr events
+pool
+  .req(relays, {
+    kinds: [1],
+    limit: 10,
+  })
+  .pipe(onlyEvents())
+  .subscribe((event) => console.log(event.id));
+```
+
+### markFromRelay
+
+The `markFromRelay` operator marks all events in the stream as being from a specific relay url.
+
+```typescript
+import { getSeenRelays } from "applesauce-core";
+import { markFromRelay } from "applesauce-relay/operators";
+
+// Create a new relay instance
+const relay = new Relay("wss://relay.example.com");
+
+// Subscribe to events and mark them as coming from a specific relay
+relay
+  .req({
+    kinds: [1],
+    limit: 10,
+  })
+  .pipe(markFromRelay(relay.url))
+  .subscribe((event) => console.log(getSeenRelays(event)));
+```
+
+### completeOnEose
+
+The `completeOnEose` operator completes the stream when the EOSE message is received. This is useful for fetching batches of events using [`lastValueFrom`](https://rxjs.dev/api/index/function/lastValueFrom) and [`toArray`](https://rxjs.dev/api/index/function/toArray) ( or `toEventStore`) operators.
+
+:::info
+
+The `RelayPool` and `RelayGroup` classes will wait for all relays to send an EOSE (or a timeout) before emitting an `"EOSE"` message.
+
+:::
+
+```typescript
+import { completeOnEose } from "applesauce-relay/operators";
+
+// Subscribe to events and complete the stream when EOSE is received
+pool
+  .req(relays, {
+    kinds: [1],
+    limit: 10,
+  })
+  .pipe(completeOnEose())
+  .subscribe((event) => console.log(event.id));
+
+// Fetch events, loop over them and wait for completion
+await pool
+  .req(relays, {
+    kinds: [1],
+    limit: 10,
+  })
+  .pipe(completeOnEose())
+  .forEach((event) => {
+    // Do something with the event
+    console.log(event.id);
+  });
+```
+
+### toEventStore
+
+The `toEventStore` operator adds all events to an [EventStore](./events.md) and returns a sorted array of events with duplicates removed.
+
+```typescript
+import { toEventStore } from "applesauce-relay/operators";
+
+// Create an event store
+const eventStore = new EventStore();
+
+// Subscribe, add the events to the event store, and return a deduplicated timeline
+const timeline = await lastValueFrom(
+  pool
+    .req(relays, {
+      kinds: [1],
+      limit: 10,
+    })
+    .pipe(toEventStore(eventStore)),
+);
+```

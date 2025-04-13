@@ -428,6 +428,49 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.1.1(msw@2.7.3(@types/node@22.13.1)(typescript@5.8.3))(playwright@1.51.1)(vite@6.2.5(@types/node@22.13.1)(yaml@2.7.1))(vitest@3.1.1))(msw@2.7.3(@types/node@22.13.1)(typescript@5.8.3))(yaml@2.7.1)
 
+  packages/solidjs:
+    dependencies:
+      applesauce-accounts:
+        specifier: ^0.12.0
+        version: link:../accounts
+      applesauce-actions:
+        specifier: ^0.12.0
+        version: link:../actions
+      applesauce-content:
+        specifier: ^0.12.0
+        version: link:../content
+      applesauce-core:
+        specifier: ^0.12.0
+        version: link:../core
+      applesauce-factory:
+        specifier: ^0.12.0
+        version: link:../factory
+      nostr-tools:
+        specifier: ^2.10.4
+        version: 2.10.4(typescript@5.8.3)
+      observable-hooks:
+        specifier: ^4.2.4
+        version: 4.2.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rxjs@7.8.1)
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      solid-js:
+        specifier: ^1.9.5
+        version: 1.9.5
+    devDependencies:
+      '@types/react':
+        specifier: ^18.3.18
+        version: 18.3.18
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+      vitest:
+        specifier: ^3.1.1
+        version: 3.1.1(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.1.1(msw@2.7.3(@types/node@22.13.1)(typescript@5.8.3))(playwright@1.51.1)(vite@6.2.5(@types/node@22.13.1)(yaml@2.7.1))(vitest@3.1.1))(msw@2.7.3(@types/node@22.13.1)(typescript@5.8.3))(yaml@2.7.1)
+
   packages/wallet:
     dependencies:
       '@cashu/cashu-ts':
@@ -3109,6 +3152,16 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  seroval-plugins@1.2.1:
+    resolution: {integrity: sha512-H5vs53+39+x4Udwp4J5rNZfgFuA+Lt+uU+09w1gYBVWomtAl98B+E9w7yC05Xc81/HgLvJdlyqJbU0fJCKCmdw==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      seroval: ^1.0
+
+  seroval@1.2.1:
+    resolution: {integrity: sha512-yBxFFs3zmkvKNmR0pFSU//rIsYjuX418TnlDmc2weaq5XFDqDIV/NOMPBoLrbxjLH42p4UzRuXHryXh9dYcKcw==}
+    engines: {node: '>=10'}
+
   set-harmonic-interval@1.0.1:
     resolution: {integrity: sha512-AhICkFV84tBP1aWqPwLZqFvAwqEoVA9kxNMniGEUvzOlm4vLmOFLiTT3UZ6bziJTy4bOVpzWGTfSCbmaayGx8g==}
     engines: {node: '>=6.9'}
@@ -3138,6 +3191,9 @@ packages:
   slash@3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
     engines: {node: '>=8'}
+
+  solid-js@1.9.5:
+    resolution: {integrity: sha512-ogI3DaFcyn6UhYhrgcyRAMbu/buBJitYQASZz5WzfQVPP10RD2AbCoRZ517psnezrasyCbWzIxZ6kVqet768xw==}
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
@@ -6549,6 +6605,12 @@ snapshots:
 
   semver@7.7.1: {}
 
+  seroval-plugins@1.2.1(seroval@1.2.1):
+    dependencies:
+      seroval: 1.2.1
+
+  seroval@1.2.1: {}
+
   set-harmonic-interval@1.0.1: {}
 
   shebang-command@2.0.0:
@@ -6579,6 +6641,12 @@ snapshots:
       totalist: 3.0.1
 
   slash@3.0.0: {}
+
+  solid-js@1.9.5:
+    dependencies:
+      csstype: 3.1.3
+      seroval: 1.2.1
+      seroval-plugins: 1.2.1(seroval@1.2.1)
 
   source-map-js@1.2.1: {}
 
@@ -6939,7 +7007,7 @@ snapshots:
     dependencies:
       '@vitest/utils': 3.1.1
       mock-socket: 9.3.1
-      vitest: 3.1.1(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.1.1)(msw@2.7.3(@types/node@22.13.1)(typescript@5.7.3))(yaml@2.7.1)
+      vitest: 3.1.1(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.1.1)(msw@2.7.3(@types/node@22.13.1)(typescript@5.8.3))(yaml@2.7.1)
 
   vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.13.1)(@vitest/browser@3.1.1(msw@2.7.3(@types/node@22.13.1)(typescript@5.8.3))(playwright@1.51.1)(vite@6.2.5(@types/node@22.13.1)(yaml@2.7.1))(vitest@3.1.1))(msw@2.7.3(@types/node@22.13.1)(typescript@5.8.3))(yaml@2.7.1):
     dependencies:
