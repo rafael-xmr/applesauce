@@ -8,11 +8,14 @@
       "applesauce-accounts",
       "applesauce-content",
       "applesauce-core",
+      "applesauce-dvm",
       "applesauce-factory",
       "applesauce-loaders",
       "applesauce-react",
       "applesauce-relay",
-      "applesauce-signers"
+      "applesauce-signers",
+      "applesauce-solidjs",
+      "applesauce-wallet"
     ]
   ],
   "access": "public",
