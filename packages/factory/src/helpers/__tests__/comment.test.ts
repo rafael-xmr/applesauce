@@ -10,7 +10,7 @@ describe("comment helpers", () => {
       ${false} | ${"a"} | ${"e"} | ${"k"} | ${"p"}
     `("root ($root)", ({ root, a, e, k, p }) => {
       it('should create "e" tag for event pointer', () => {
-        expect(createCommentTagsFromCommentPointer({ id: "event-id", kind: 1111 }, root)).toEqual(
+        expect(createCommentTagsFromCommentPointer({ type: "event", id: "event-id", kind: 1111 }, root)).toEqual(
           expect.arrayContaining([
             [e, "event-id"],
             [k, "1111"],
@@ -19,7 +19,9 @@ describe("comment helpers", () => {
       });
 
       it('should include relay hint in "e" tag', () => {
-        expect(createCommentTagsFromCommentPointer({ id: "event-id", kind: 1111, relay: "relay" }, root)).toEqual(
+        expect(
+          createCommentTagsFromCommentPointer({ type: "event", id: "event-id", kind: 1111, relay: "relay" }, root),
+        ).toEqual(
           expect.arrayContaining([
             [e, "event-id", "relay"],
             [k, "1111"],
@@ -29,7 +31,10 @@ describe("comment helpers", () => {
 
       it('should create an "a" tag for address pointer', () => {
         expect(
-          createCommentTagsFromCommentPointer({ kind: 30023, pubkey: "pubkey", identifier: "article" }, root),
+          createCommentTagsFromCommentPointer(
+            { type: "address", kind: 30023, pubkey: "pubkey", identifier: "article" },
+            root,
+          ),
         ).toEqual(
           expect.arrayContaining([
             [a, "30023:pubkey:article"],
@@ -42,7 +47,7 @@ describe("comment helpers", () => {
       it('should include relay hint in "a" tag', () => {
         expect(
           createCommentTagsFromCommentPointer(
-            { kind: 30023, pubkey: "pubkey", identifier: "article", relay: "relay" },
+            { type: "address", kind: 30023, pubkey: "pubkey", identifier: "article", relay: "relay" },
             root,
           ),
         ).toEqual(
@@ -57,7 +62,7 @@ describe("comment helpers", () => {
       it('should create "e" tag for address pointer with id', () => {
         expect(
           createCommentTagsFromCommentPointer(
-            { kind: 30023, pubkey: "pubkey", identifier: "article", id: "event-id" },
+            { type: "address", kind: 30023, pubkey: "pubkey", identifier: "article", id: "event-id" },
             root,
           ),
         ).toEqual(
@@ -73,7 +78,7 @@ describe("comment helpers", () => {
       it('should include relay hint in "e" tag for address pointer with id', () => {
         expect(
           createCommentTagsFromCommentPointer(
-            { kind: 30023, pubkey: "pubkey", identifier: "article", id: "event-id", relay: "relay" },
+            { type: "address", kind: 30023, pubkey: "pubkey", identifier: "article", id: "event-id", relay: "relay" },
             root,
           ),
         ).toEqual(

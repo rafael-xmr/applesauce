@@ -51,9 +51,16 @@ export function createCommentTagsForEvent(parent: NostrEvent, relayHint?: string
   if (isParameterizedReplaceableKind(parent.kind)) {
     const identifier = getTagValue(parent, "d");
     if (!identifier) throw new Error("Event missing identifier");
-    parentPointer = { id: parent.id, pubkey: parent.pubkey, kind: parent.kind, relay: relayHint, identifier };
+    parentPointer = {
+      type: "address",
+      id: parent.id,
+      pubkey: parent.pubkey,
+      kind: parent.kind,
+      relay: relayHint,
+      identifier,
+    };
   } else {
-    parentPointer = { id: parent.id, pubkey: parent.pubkey, kind: parent.kind, relay: relayHint };
+    parentPointer = { type: "event", id: parent.id, pubkey: parent.pubkey, kind: parent.kind, relay: relayHint };
   }
 
   // check if parent event is a comment

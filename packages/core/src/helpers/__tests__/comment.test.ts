@@ -37,6 +37,7 @@ describe("getCommentEventPointer", () => {
       ["e", "86c0b95589b016ffb703bfc080d49e54106e74e2d683295119c3453e494dbe6f"],
     ];
     expect(getCommentEventPointer(tags, true)).toEqual({
+      type: "event",
       id: "86c0b95589b016ffb703bfc080d49e54106e74e2d683295119c3453e494dbe6f",
       kind: 1621,
       pubkey: "e4336cd525df79fa4d3af364fd9600d4b10dce4215aa4c33ed77ea0842344b10",
@@ -56,6 +57,7 @@ describe("getCommentEventPointer", () => {
       ["P", "bad-pubkey"],
     ];
     expect(getCommentEventPointer(tags, true)).toEqual({
+      type: "event",
       id: "86c0b95589b016ffb703bfc080d49e54106e74e2d683295119c3453e494dbe6f",
       kind: 1621,
       pubkey: "e4336cd525df79fa4d3af364fd9600d4b10dce4215aa4c33ed77ea0842344b10",
@@ -74,6 +76,7 @@ describe("getCommentEventPointer", () => {
       ["K", "1621"],
     ];
     expect(getCommentEventPointer(tags, true)).toEqual({
+      type: "event",
       id: "86c0b95589b016ffb703bfc080d49e54106e74e2d683295119c3453e494dbe6f",
       kind: 1621,
       pubkey: "e4336cd525df79fa4d3af364fd9600d4b10dce4215aa4c33ed77ea0842344b10",
@@ -88,6 +91,7 @@ describe("getCommentEventPointer", () => {
       ["P", "e4336cd525df79fa4d3af364fd9600d4b10dce4215aa4c33ed77ea0842344b10"],
     ];
     expect(getCommentEventPointer(tags, true)).toEqual({
+      type: "event",
       id: "86c0b95589b016ffb703bfc080d49e54106e74e2d683295119c3453e494dbe6f",
       kind: 1621,
       pubkey: "e4336cd525df79fa4d3af364fd9600d4b10dce4215aa4c33ed77ea0842344b10",
@@ -129,6 +133,7 @@ describe("getCommentAddressPointer", () => {
         true,
       ),
     ).toEqual({
+      type: "address",
       id: "86c0b95589b016ffb703bfc080d49e54106e74e2d683295119c3453e494dbe6f",
       kind: 30000,
       pubkey: "e4336cd525df79fa4d3af364fd9600d4b10dce4215aa4c33ed77ea0842344b10",
@@ -143,6 +148,7 @@ describe("getCommentAddressPointer", () => {
         ["k", "30000"],
       ]),
     ).toEqual({
+      type: "address",
       id: "86c0b95589b016ffb703bfc080d49e54106e74e2d683295119c3453e494dbe6f",
       kind: 30000,
       pubkey: "e4336cd525df79fa4d3af364fd9600d4b10dce4215aa4c33ed77ea0842344b10",
@@ -161,6 +167,7 @@ describe("getCommentAddressPointer", () => {
         true,
       ),
     ).toEqual({
+      type: "address",
       kind: 30000,
       pubkey: "e4336cd525df79fa4d3af364fd9600d4b10dce4215aa4c33ed77ea0842344b10",
       identifier: "list",
@@ -174,6 +181,7 @@ describe("getCommentAddressPointer", () => {
         ["k", "30000"],
       ]),
     ).toEqual({
+      type: "address",
       kind: 30000,
       pubkey: "e4336cd525df79fa4d3af364fd9600d4b10dce4215aa4c33ed77ea0842344b10",
       identifier: "list",
@@ -193,6 +201,7 @@ describe("getCommentAddressPointer", () => {
         true,
       ),
     ).toEqual({
+      type: "address",
       id: "86c0b95589b016ffb703bfc080d49e54106e74e2d683295119c3453e494dbe6f",
       kind: 30000,
       pubkey: "e4336cd525df79fa4d3af364fd9600d4b10dce4215aa4c33ed77ea0842344b10",
@@ -208,6 +217,7 @@ describe("getCommentAddressPointer", () => {
         ["k", "30000"],
       ]),
     ).toEqual({
+      type: "address",
       id: "86c0b95589b016ffb703bfc080d49e54106e74e2d683295119c3453e494dbe6f",
       kind: 30000,
       pubkey: "e4336cd525df79fa4d3af364fd9600d4b10dce4215aa4c33ed77ea0842344b10",
@@ -227,6 +237,7 @@ describe("getCommentAddressPointer", () => {
         true,
       ),
     ).toEqual({
+      type: "address",
       kind: 30010,
       pubkey: "e4336cd525df79fa4d3af364fd9600d4b10dce4215aa4c33ed77ea0842344b10",
       identifier: "list",
@@ -239,6 +250,7 @@ describe("getCommentAddressPointer", () => {
         ["k", "30000"],
       ]),
     ).toEqual({
+      type: "address",
       kind: 30010,
       pubkey: "e4336cd525df79fa4d3af364fd9600d4b10dce4215aa4c33ed77ea0842344b10",
       identifier: "list",
@@ -283,6 +295,7 @@ describe("getCommentExternalPointer", () => {
         true,
       ),
     ).toEqual({
+      type: "external",
       identifier: "podcast:item:guid:d98d189b-dc7b-45b1-8720-d4b98690f31f",
       kind: "podcast:item:guid",
     });
@@ -294,6 +307,7 @@ describe("getCommentExternalPointer", () => {
         ["k", "podcast:item:guid"],
       ]),
     ).toEqual({
+      type: "external",
       identifier: "podcast:item:guid:d98d189b-dc7b-45b1-8720-d4b98690f31f",
       kind: "podcast:item:guid",
     });
