@@ -23,19 +23,21 @@ export type SingleEventLoaderOptions = {
    * @default 1000
    */
   bufferTime?: number;
-  /** A method used to load events from a local cache */
-  cacheRequest?: CacheRequest;
   /**
    * How long the loader should wait before it allows an event pointer to be refreshed from a relay
    * @default 60000
    */
   refreshTimeout?: number;
+  /** A method used to load events from a local cache */
+  cacheRequest?: CacheRequest;
+  /** An array of relays to always fetch from */
+  extraRelays?: string[];
 };
 
 function* cacheFirstSequence(
   request: NostrRequest,
   pointers: LoadableEventPointer[],
-  opts: SingleEventLoaderOptions,
+  opts: { cacheRequest?: CacheRequest; extraRelays?: string[] },
   log: typeof logger,
 ): Generator<Observable<NostrEvent>, undefined, NostrEvent[]> {
   let remaining = [...pointers];
@@ -64,7 +66,7 @@ function* cacheFirstSequence(
   // exit early if all pointers are loaded
   if (remaining.length === 0) return;
 
-  let byRelay = groupByRelay(remaining);
+  let byRelay = groupByRelay(remaining, opts.extraRelays);
 
   // load remaining pointers from the relays
   let results = yield from(
@@ -99,26 +101,39 @@ function* cacheFirstSequence(
 export class SingleEventLoader extends Loader<LoadableEventPointer, NostrEvent> {
   log: typeof logger = logger.extend("SingleEventLoader");
 
-  constructor(request: NostrRequest, opts?: SingleEventLoaderOptions) {
-    let options = opts || {};
+  /** A method used to load events from a local cache */
+  cacheRequest?: CacheRequest;
 
+  /** An array of relays to always fetch from */
+  extraRelays?: string[];
+
+  constructor(request: NostrRequest, opts?: SingleEventLoaderOptions) {
     super((source) =>
       source.pipe(
-        // load first from cache
+        // batch every second
         bufferTime(opts?.bufferTime ?? 1000),
         // ignore empty buffers
         filter((buffer) => buffer.length > 0),
         // only request events from relays once
-        distinctRelaysBatch((p) => p.id, options.refreshTimeout ?? 60_000),
+        distinctRelaysBatch((p) => p.id, opts?.refreshTimeout ?? 60_000),
         // ensure there is only one of each event pointer
         map(consolidateEventPointers),
         // run the loader sequence
         generatorSequence<LoadableEventPointer[], NostrEvent>(
-          (pointers) => cacheFirstSequence(request, pointers, options, this.log),
+          (pointers) =>
+            cacheFirstSequence(
+              request,
+              pointers,
+              { cacheRequest: this.cacheRequest, extraRelays: this.extraRelays },
+              this.log,
+            ),
           // there will always be more events, never complete
           false,
         ),
       ),
     );
+
+    this.cacheRequest = opts?.cacheRequest;
+    this.extraRelays = opts?.extraRelays;
   }
 }

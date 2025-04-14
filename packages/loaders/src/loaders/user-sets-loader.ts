@@ -26,7 +26,7 @@ function* cacheFirstSequence(
   request: NostrRequest,
   pointers: LoadableSetPointer[],
   log: typeof logger,
-  opts?: { cacheRequest?: CacheRequest },
+  opts?: { cacheRequest?: CacheRequest; extraRelays?: string[] },
 ): Generator<Observable<NostrEvent>, undefined, NostrEvent[]> {
   const id = nanoid(8);
   log = log.extend(id);
@@ -45,7 +45,7 @@ function* cacheFirstSequence(
     }
   }
 
-  let byRelay = groupByRelay(pointers, "default");
+  let byRelay = groupByRelay(pointers, opts?.extraRelays);
 
   // load sets from relays
   yield from(
@@ -84,6 +84,9 @@ export type UserSetsLoaderOptions = {
 /** A loader that can be used to load users NIP-51 sets events ( kind >= 30000 < 40000) */
 export class UserSetsLoader extends Loader<LoadableSetPointer, NostrEvent> {
   log: typeof logger = logger.extend("UserSetsLoader");
+
+  /** An array of relays to always fetch from */
+  extraRelays?: string[];
 
   constructor(request: NostrRequest, opts?: UserSetsLoaderOptions) {
     let options = opts || {};

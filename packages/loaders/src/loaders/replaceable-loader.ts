@@ -1,5 +1,5 @@
 import { tap, Observable, filter, bufferTime, map } from "rxjs";
-import { getEventUID, markFromCache } from "applesauce-core/helpers";
+import { getEventUID, markFromCache, mergeRelaySets } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
 import { nanoid } from "nanoid";
 import { NostrEvent } from "nostr-tools";
@@ -22,7 +22,7 @@ function* cacheFirstSequence(
   request: NostrRequest,
   pointers: LoadableAddressPointer[],
   log: typeof logger,
-  opts?: { cacheRequest?: CacheRequest; lookupRelays?: string[] },
+  opts?: { cacheRequest?: CacheRequest; lookupRelays?: string[]; extraRelays?: string[] },
 ): Generator<Observable<NostrEvent>, undefined, NostrEvent[]> {
   const id = nanoid(4);
 
@@ -64,12 +64,13 @@ function* cacheFirstSequence(
     if (handleResults(results)) return;
   }
 
-  // load from pointer relays
-  if (pointerRelays.length > 0) {
-    log(`[${id}] Requesting`, pointerRelays, remaining);
+  // load from pointer relays and extra relays
+  const mergedRelays = mergeRelaySets(pointerRelays, opts?.extraRelays);
+  if (mergedRelays.length > 0) {
+    log(`[${id}] Requesting`, mergedRelays, remaining);
 
     const filters = createFiltersFromAddressPointers(remaining);
-    const results = yield request(pointerRelays, filters).pipe(completeOnEOSE());
+    const results = yield request(mergedRelays, filters).pipe(completeOnEOSE());
 
     if (handleResults(results)) return;
   }
@@ -99,6 +100,8 @@ export type ReplaceableLoaderOptions = {
   cacheRequest?: CacheRequest;
   /** Fallback lookup relays to check when event cant be found */
   lookupRelays?: string[];
+  /** An array of relays to always fetch from */
+  extraRelays?: string[];
 };
 
 export class ReplaceableLoader extends Loader<LoadableAddressPointer, NostrEvent> {
@@ -108,6 +111,9 @@ export class ReplaceableLoader extends Loader<LoadableAddressPointer, NostrEvent
   cacheRequest?: CacheRequest;
   /** Fallback lookup relays to check when event cant be found */
   lookupRelays?: string[];
+
+  /** An array of relays to always fetch from */
+  extraRelays?: string[];
 
   constructor(request: NostrRequest, opts?: ReplaceableLoaderOptions) {
     super((source) => {
@@ -130,6 +136,7 @@ export class ReplaceableLoader extends Loader<LoadableAddressPointer, NostrEvent
             cacheFirstSequence(request, pointers, this.log, {
               cacheRequest: this.cacheRequest,
               lookupRelays: this.lookupRelays,
+              extraRelays: this.extraRelays,
             }),
           // there will always be more events, never complete
           false,
@@ -140,5 +147,6 @@ export class ReplaceableLoader extends Loader<LoadableAddressPointer, NostrEvent
     // set options
     this.cacheRequest = opts?.cacheRequest;
     this.lookupRelays = opts?.lookupRelays;
+    this.extraRelays = opts?.extraRelays;
   }
 }
