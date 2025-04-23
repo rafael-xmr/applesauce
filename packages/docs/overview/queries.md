@@ -58,18 +58,14 @@ const files = queryStore.createQuery(TimelineQuery, [{ kinds: [1063] }]);
 
 ## Prebuilt queries
 
-Queries are methods that construct complex observable pipelines off of the `EventStore`
+There a some useful pre-built queries that come with `applesauce-core`
 
-They are run inside the `QueryStore` which ensures there are not duplicate queries
-
-- The [`SingleEventQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.SingleEventQuery.html) can be used to subscribe to a single event.
-- The [`MultipleEventsQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.MultipleEventsQuery.html) can be used to subscribe to multiple events.
-- The [`ReplaceableQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.ReplaceableQuery.html) can be used to subscribe to the latest version of a replaceable event.
-- The [`ReplaceableSetQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.ReplaceableSetQuery.html) can be used to subscribe to an array of `AddressPointer`.
-- The [`TimelineQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.TimelineQuery.html) can be used to subscribe to a sorted array of events that match filters.
-- The [`ProfileQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.ProfileQuery.html) can be used to subscribe to a single pubkey's profile (kind 0).
-- The [`MailboxesQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.MailboxesQuery.html) can be used to subscribe to a single pubkey's mailboxes (kind 10002).
-- The [`ReactionsQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.ReactionsQuery.html) can be used to subscribe to all [NIP-25](https://github.com/nostr-protocol/nips/blob/master/25.md) reactions to an event.
+- [`ReplaceableQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.ReplaceableQuery.html) subscribes to the latest version of a replaceable event.
+- [`TimelineQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.TimelineQuery.html) subscribes to a sorted array of events that match filters.
+- [`ProfileQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.ProfileQuery.html) subscribes to a single pubkey's profile (kind 0).
+- [`ContactsQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.ContactsQuery.html) subscribes to a pubkeys contact list.
+- [`MailboxesQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.MailboxesQuery.html) subscribes to a single pubkey's mailboxes (kind 10002).
+- [`ReactionsQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.ReactionsQuery.html) subscribes to all [NIP-25](https://github.com/nostr-protocol/nips/blob/master/25.md) reactions to an event.
 
 ## Custom Queries
 
@@ -81,17 +77,13 @@ For example here is a custom query that will subscribe to and parse a [NIP-78](h
 import { map } from "rxjs/operators";
 
 function AppSettingsQuery<T>(pubkey: string): Query<T> {
-  return {
-    key: pubkey,
-    run: (eventStore) => {
-      return eventStore.replaceable(30078, pubkey, "app-settings").pipe(
-        map((event) => {
-          if (!event) return undefined;
-          return JSON.parse(event.content) as T;
-        }),
-      );
-    },
-  };
+  return (eventStore) =>
+    eventStore.replaceable(30078, pubkey, "app-settings").pipe(
+      map((event) => {
+        if (!event) return undefined;
+        return JSON.parse(event.content) as T;
+      }),
+    );
 }
 
 const sub = queryStore
