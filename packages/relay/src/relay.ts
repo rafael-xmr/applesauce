@@ -1,3 +1,6 @@
+import { logger } from "applesauce-core";
+import { nanoid } from "nanoid";
+import { type Filter, type NostrEvent } from "nostr-tools";
 import {
   BehaviorSubject,
   combineLatest,
@@ -16,11 +19,9 @@ import {
   takeWhile,
   tap,
   timeout,
+  timer
 } from "rxjs";
 import { webSocket, WebSocketSubject, WebSocketSubjectConfig } from "rxjs/webSocket";
-import { type Filter, type NostrEvent } from "nostr-tools";
-import { nanoid } from "nanoid";
-import { logger } from "applesauce-core";
 
 import { markFromRelay } from "./operators/mark-from-relay.js";
 import { IRelay, PublishResponse, SubscriptionResponse } from "./types.js";
@@ -62,6 +63,9 @@ export class Relay implements IRelay {
   eoseTimeout = 10_000;
   /** How long to wait for an OK message from the relay */
   eventTimeout = 10_000;
+
+  /** How long to keep the connection alive after nothing is subscribed */
+  keepAlive = 30_000;
 
   protected authRequiredForReq = new BehaviorSubject(false);
   protected authRequiredForPublish = new BehaviorSubject(false);
@@ -139,7 +143,7 @@ export class Relay implements IRelay {
       // Never emit any values
       ignoreElements(),
       // There should only be a single watch tower
-      share(),
+      share({ resetOnRefCountZero: () => timer(this.keepAlive) }),
     );
   }
 

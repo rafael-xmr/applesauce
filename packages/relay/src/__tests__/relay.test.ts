@@ -5,18 +5,20 @@ import { NostrEvent } from "nostr-tools";
 import { WS } from "vitest-websocket-mock";
 
 import { Relay } from "../relay.js";
+import { filter } from "rxjs/operators";
+import { firstValueFrom } from "rxjs";
 
 let mockRelay: WS;
 let relay: Relay;
 
 beforeEach(async () => {
-  mockRelay = new WS("wss://test");
+  mockRelay = new WS("wss://test", { jsonProtocol: true });
   relay = new Relay("wss://test");
+  relay.keepAlive = 0;
 });
 
+// Wait for server to close to prevent memory leaks
 afterEach(async () => {
-  mockRelay.close();
-  // Wait for server to close to prevent memory leaks
   await WS.clean();
 });
 
@@ -31,33 +33,40 @@ const mockEvent: NostrEvent = {
 };
 
 describe("req", () => {
+  it("should trigger connection to relay", async () => {
+    subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"));
+
+    // Wait for connection
+    await firstValueFrom(relay.connected$.pipe(filter(Boolean)));
+
+    expect(relay.connected).toBe(true);
+  });
+
   it("should send REQ and CLOSE messages", async () => {
     // Create subscription that completes after first EOSE
     const sub = relay.req([{ kinds: [1] }], "sub1").subscribe();
 
     // Verify REQ was sent
-    const reqMessage = await mockRelay.nextMessage;
-    expect(JSON.parse(reqMessage as string)).toEqual(["REQ", "sub1", { kinds: [1] }]);
+    expect(await mockRelay.nextMessage).toEqual(["REQ", "sub1", { kinds: [1] }]);
 
     // Send EOSE to complete subscription
-    mockRelay.send(JSON.stringify(["EOSE", "sub1"]));
+    mockRelay.send(["EOSE", "sub1"]);
 
     // Complete the subscription
     sub.unsubscribe();
 
     // Verify CLOSE was sent
-    const closeMessage = await mockRelay.nextMessage;
-    expect(JSON.parse(closeMessage as string)).toEqual(["CLOSE", "sub1"]);
+    expect(await mockRelay.nextMessage).toEqual(["CLOSE", "sub1"]);
   });
 
   it("should emit nostr event and EOSE", async () => {
     const spy = subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"));
 
     // Send EVENT message
-    mockRelay.send(JSON.stringify(["EVENT", "sub1", mockEvent]));
+    mockRelay.send(["EVENT", "sub1", mockEvent]);
 
     // Send EOSE message
-    mockRelay.send(JSON.stringify(["EOSE", "sub1"]));
+    mockRelay.send(["EOSE", "sub1"]);
 
     expect(spy.getValues()).toEqual([expect.objectContaining(mockEvent), "EOSE"]);
   });
@@ -66,16 +75,16 @@ describe("req", () => {
     const spy = subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"));
 
     // Send EVENT message with wrong subscription id
-    mockRelay.send(JSON.stringify(["EVENT", "wrong_sub", mockEvent]));
+    mockRelay.send(["EVENT", "wrong_sub", mockEvent]);
 
     // Send EOSE message with wrong subscription id
-    mockRelay.send(JSON.stringify(["EOSE", "wrong_sub"]));
+    mockRelay.send(["EOSE", "wrong_sub"]);
 
     // Send EVENT message with correct subscription id
-    mockRelay.send(JSON.stringify(["EVENT", "sub1", mockEvent]));
+    mockRelay.send(["EVENT", "sub1", mockEvent]);
 
     // Send EOSE message with correct subscription id
-    mockRelay.send(JSON.stringify(["EOSE", "sub1"]));
+    mockRelay.send(["EOSE", "sub1"]);
 
     expect(spy.getValues()).toEqual([expect.objectContaining(mockEvent), "EOSE"]);
   });
@@ -84,7 +93,7 @@ describe("req", () => {
     const spy = subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"));
 
     // Send EVENT message
-    mockRelay.send(JSON.stringify(["EVENT", "sub1", mockEvent]));
+    mockRelay.send(["EVENT", "sub1", mockEvent]);
 
     // Get the received event
     const receivedEvent = spy.getValues()[0];
@@ -97,7 +106,7 @@ describe("req", () => {
     const spy = subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"));
 
     // Send CLOSED message for the subscription
-    mockRelay.send(JSON.stringify(["CLOSED", "sub1", "reason"]));
+    mockRelay.send(["CLOSED", "sub1", "reason"]);
 
     // Verify the subscription completed
     expect(spy.receivedComplete()).toBe(true);
@@ -105,15 +114,23 @@ describe("req", () => {
 });
 
 describe("event", () => {
+  it("should trigger connection to relay", async () => {
+    subscribeSpyTo(relay.event(mockEvent));
+
+    // Wait for connection
+    await firstValueFrom(relay.connected$.pipe(filter(Boolean)));
+
+    expect(relay.connected).toBe(true);
+  });
+
   it("observable should complete when matching OK response received", async () => {
     const spy = subscribeSpyTo(relay.event(mockEvent));
 
     // Verify EVENT message was sent
-    const eventMessage = await mockRelay.nextMessage;
-    expect(JSON.parse(eventMessage as string)).toEqual(["EVENT", mockEvent]);
+    expect(await mockRelay.nextMessage).toEqual(["EVENT", mockEvent]);
 
     // Send matching OK response
-    mockRelay.send(JSON.stringify(["OK", mockEvent.id, true, ""]));
+    mockRelay.send(["OK", mockEvent.id, true, ""]);
 
     await spy.onComplete();
 
@@ -124,12 +141,12 @@ describe("event", () => {
     const spy = subscribeSpyTo(relay.event(mockEvent));
 
     // Send non-matching OK response
-    mockRelay.send(JSON.stringify(["OK", "different_id", true, ""]));
+    mockRelay.send(["OK", "different_id", true, ""]);
 
     expect(spy.receivedComplete()).toBe(false);
 
     // Send matching OK response
-    mockRelay.send(JSON.stringify(["OK", mockEvent.id, true, ""]));
+    mockRelay.send(["OK", mockEvent.id, true, ""]);
 
     expect(spy.receivedComplete()).toBe(true);
   });
@@ -137,8 +154,7 @@ describe("event", () => {
   it("should send EVENT message to relay", async () => {
     relay.event(mockEvent).subscribe();
 
-    const eventMessage = await mockRelay.nextMessage;
-    expect(JSON.parse(eventMessage as string)).toEqual(["EVENT", mockEvent]);
+    expect(await mockRelay.nextMessage).toEqual(["EVENT", mockEvent]);
   });
 
   it("should complete with error if no OK received within 10s", async () => {
@@ -154,13 +170,18 @@ describe("event", () => {
   });
 });
 
-describe("notice$", () => {
+describe("notices$", () => {
+  it("should not trigger connection to relay", async () => {
+    subscribeSpyTo(relay.notices$);
+    expect(relay.connected).toBe(false);
+  });
+
   it("should accumulate notices in notices$ state", async () => {
     subscribeSpyTo(relay.req({ kinds: [1] }));
     // Send multiple NOTICE messages
-    mockRelay.send(JSON.stringify(["NOTICE", "Notice 1"]));
-    mockRelay.send(JSON.stringify(["NOTICE", "Notice 2"]));
-    mockRelay.send(JSON.stringify(["NOTICE", "Notice 3"]));
+    mockRelay.send(["NOTICE", "Notice 1"]);
+    mockRelay.send(["NOTICE", "Notice 2"]);
+    mockRelay.send(["NOTICE", "Notice 3"]);
 
     // Verify the notices state contains all messages
     expect(relay.notices$.value).toEqual(["Notice 1", "Notice 2", "Notice 3"]);
@@ -169,8 +190,8 @@ describe("notice$", () => {
   it("should ignore non-NOTICE messages", async () => {
     subscribeSpyTo(relay.req({ kinds: [1] }));
 
-    mockRelay.send(JSON.stringify(["NOTICE", "Important notice"]));
-    mockRelay.send(JSON.stringify(["OTHER", "other message"]));
+    mockRelay.send(["NOTICE", "Important notice"]);
+    mockRelay.send(["OTHER", "other message"]);
 
     // Verify only NOTICE messages are in the state
     expect(relay.notices$.value).toEqual(["Important notice"]);
@@ -178,11 +199,16 @@ describe("notice$", () => {
 });
 
 describe("challenge$", () => {
+  it("should not trigger connection to relay", async () => {
+    subscribeSpyTo(relay.challenge$);
+    expect(relay.connected).toBe(false);
+  });
+
   it("should set challenge$ when AUTH message received", async () => {
     subscribeSpyTo(relay.req({ kinds: [1] }));
 
     // Send AUTH message with challenge string
-    mockRelay.send(JSON.stringify(["AUTH", "challenge-string-123"]));
+    mockRelay.send(["AUTH", "challenge-string-123"]);
 
     // Verify challenge$ was set
     expect(relay.challenge$.value).toBe("challenge-string-123");
@@ -191,10 +217,39 @@ describe("challenge$", () => {
   it("should ignore non-AUTH messages", async () => {
     subscribeSpyTo(relay.req({ kinds: [1] }));
 
-    mockRelay.send(JSON.stringify(["NOTICE", "Not a challenge"]));
-    mockRelay.send(JSON.stringify(["OTHER", "other message"]));
+    mockRelay.send(["NOTICE", "Not a challenge"]);
+    mockRelay.send(["OTHER", "other message"]);
 
     // Verify challenge$ remains null
     expect(relay.challenge$.value).toBe(null);
   });
 });
+
+// describe("keepAlive", () => {
+//   it("should close the socket connection after keepAlive timeout", async () => {
+//     vi.useFakeTimers();
+
+//     // Set a short keepAlive timeout for testing
+//     relay.keepAlive = 100; // 100ms for quick testing
+
+//     // Subscribe to the relay to ensure it is active
+//     const sub = subscribeSpyTo(relay.req([{ kinds: [1] }]));
+
+//     // Wait for connection
+//     await firstValueFrom(relay.connected$.pipe(filter(Boolean)));
+
+//     // Close the subscription
+//     sub.unsubscribe();
+
+//     // Fast-forward time by 10ms
+//     await vi.advanceTimersByTimeAsync(10);
+
+//     // should still be connected
+//     expect(relay.connected).toBe(true);
+
+//     // Wait for the keepAlive timeout to elapse
+//     await vi.advanceTimersByTimeAsync(150);
+
+//     expect(relay.connected).toBe(false);
+//   });
+// });
