@@ -1,19 +1,19 @@
-import { kinds } from "nostr-tools";
+import { QueryConstructor, QueryStore } from "applesauce-core";
+import { getObservableValue, simpleTimeout } from "applesauce-core/observable";
 import {
+  ContactsQuery,
   MailboxesQuery,
   ProfileQuery,
   ReplaceableQuery,
   UserBlossomServersQuery,
-  ContactsQuery,
 } from "applesauce-core/queries";
-import { getObservableValue, simpleTimeout } from "applesauce-core/observable";
-import { IEventStore, QueryStore } from "applesauce-core";
+import { kinds } from "nostr-tools";
 import { ProfilePointer } from "nostr-tools/nip19";
-import { filter, Observable } from "rxjs";
+import { filter } from "rxjs";
 
-import { ReplaceableLoader } from "./replaceable-loader.js";
-import { LoadableAddressPointer } from "../helpers/address-pointer.js";
 import { BLOSSOM_SERVER_LIST_KIND } from "applesauce-core/helpers";
+import { LoadableAddressPointer } from "../helpers/address-pointer.js";
+import { ReplaceableLoader } from "./replaceable-loader.js";
 
 /** A special Promised based loader built on the {@link QueryStore} */
 export class RequestLoader {
@@ -24,10 +24,7 @@ export class RequestLoader {
 
   // hacky method to run queries with timeouts
   protected async runWithTimeout<T extends unknown, Args extends Array<any>>(
-    queryConstructor: (...args: Args) => {
-      key: string;
-      run: (events: IEventStore, store: QueryStore) => Observable<T>;
-    },
+    queryConstructor: QueryConstructor<T, Args>,
     ...args: Args
   ): Promise<NonNullable<T>> {
     return getObservableValue(

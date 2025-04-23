@@ -7,37 +7,28 @@ import { listenLatestUpdates } from "../observable/index.js";
 
 /** A query that returns all the bookmarks of a user */
 export function UserBookmarkQuery(pubkey: string): Query<Bookmarks | undefined> {
-  return {
-    key: pubkey,
-    run: (events) =>
-      events.replaceable(kinds.Mutelist, pubkey).pipe(
-        // listen for event updates (hidden tags unlocked)
-        listenLatestUpdates(events),
-        // Get all bookmarks
-        map((event) => event && getBookmarks(event)),
-      ),
-  };
+  return (events) =>
+    events.replaceable(kinds.Mutelist, pubkey).pipe(
+      // listen for event updates (hidden tags unlocked)
+      listenLatestUpdates(events),
+      // Get all bookmarks
+      map((event) => event && getBookmarks(event)),
+    );
 }
 
 /** A query that returns all the public bookmarks of a user */
 export function UserPublicBookmarkQuery(pubkey: string): Query<Bookmarks | undefined> {
-  return {
-    key: pubkey,
-    run: (events) =>
-      events.replaceable(kinds.Mutelist, pubkey).pipe(map((event) => event && getPublicBookmarks(event))),
-  };
+  return (events) =>
+    events.replaceable(kinds.Mutelist, pubkey).pipe(map((event) => event && getPublicBookmarks(event)));
 }
 
 /** A query that returns all the hidden bookmarks of a user */
 export function UserHiddenBookmarkQuery(pubkey: string): Query<Bookmarks | null | undefined> {
-  return {
-    key: pubkey,
-    run: (events) =>
-      events.replaceable(kinds.Mutelist, pubkey).pipe(
-        // listen for event updates (hidden tags unlocked)
-        listenLatestUpdates(events),
-        // Get hidden bookmarks
-        map((event) => event && (getHiddenBookmarks(event) ?? null)),
-      ),
-  };
+  return (events) =>
+    events.replaceable(kinds.Mutelist, pubkey).pipe(
+      // listen for event updates (hidden tags unlocked)
+      listenLatestUpdates(events),
+      // Get hidden bookmarks
+      map((event) => event && (getHiddenBookmarks(event) ?? null)),
+    );
 }

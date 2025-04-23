@@ -1,4 +1,4 @@
-import { filter, finalize, Observable, ReplaySubject, share, timer } from "rxjs";
+import { filter, finalize, firstValueFrom, Observable, ReplaySubject, share, timer } from "rxjs";
 import { Filter, NostrEvent } from "nostr-tools";
 import hash_sum from "hash-sum";
 import type { AddressPointer, EventPointer } from "nostr-tools/nip19";
@@ -6,17 +6,13 @@ import type { AddressPointer, EventPointer } from "nostr-tools/nip19";
 import { IEventStore } from "../event-store/interface.js";
 
 import * as Queries from "../queries/index.js";
-import { getObservableValue } from "../observable/get-observable-value.js";
 import { withImmediateValueOrDefault } from "../observable/with-immediate-value.js";
 
-export type Query<T extends unknown> = {
-  /** A unique key for this query. this is used to detect duplicate queries */
-  key: string;
-  /** The meat of the query, this should return an Observables that subscribes to the eventStore in some way */
-  run: (events: IEventStore, store: QueryStore) => Observable<T>;
-};
+export type Query<T extends unknown> = (events: IEventStore, store: QueryStore) => Observable<T>;
 
-export type QueryConstructor<T extends unknown, Args extends Array<any>> = (...args: Args) => Query<T>;
+export type QueryConstructor<T extends unknown, Args extends Array<any>> = ((...args: Args) => Query<T>) & {
+  getKey?: (...args: Args) => string;
+};
 
 export class QueryStore {
   static Queries = Queries;
@@ -44,27 +40,25 @@ export class QueryStore {
       this.queries.set(queryConstructor, observables);
     }
 
-    const key = hash_sum(args);
+    const key = queryConstructor.getKey ? queryConstructor.getKey(...args) : hash_sum(args);
     let observable: Observable<T | undefined> | undefined = observables.get(key);
     if (!observable) {
       const cleanup = () => {
         if (observables.get(key) === observable) observables.delete(key);
       };
 
-      observable = queryConstructor(...args)
-        .run(this.store, this)
-        .pipe(
-          // always emit undefined so the observable is sync
-          withImmediateValueOrDefault(undefined),
-          // remove the observable when its subscribed
-          finalize(cleanup),
-          // only create a single observable for all components
-          share({
-            connector: () => new ReplaySubject(1),
-            resetOnComplete: () => timer(this.queryKeepWarmTimeout),
-            resetOnRefCountZero: () => timer(this.queryKeepWarmTimeout),
-          }),
-        );
+      observable = queryConstructor(...args)(this.store, this).pipe(
+        // always emit undefined so the observable is sync
+        withImmediateValueOrDefault(undefined),
+        // remove the observable when its unsubscribed
+        finalize(cleanup),
+        // only create a single observable for all components
+        share({
+          connector: () => new ReplaySubject(1),
+          resetOnComplete: () => timer(this.queryKeepWarmTimeout),
+          resetOnRefCountZero: () => timer(this.queryKeepWarmTimeout),
+        }),
+      );
 
       // set debug fields
       Reflect.set(observable, "queryArgs", args);
@@ -82,7 +76,7 @@ export class QueryStore {
   ): Promise<T> {
     const query = this.createQuery(queryConstructor, ...args).pipe(filter((v) => v !== undefined));
 
-    return getObservableValue(query);
+    return firstValueFrom(query);
   }
 
   /** Creates a SingleEventQuery */

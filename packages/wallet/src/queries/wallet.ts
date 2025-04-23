@@ -14,25 +14,22 @@ export type WalletInfo =
 
 /** A query to get the state of a NIP-60 wallet */
 export function WalletQuery(pubkey: string): Query<WalletInfo | undefined> {
-  return {
-    key: pubkey,
-    run: (events) =>
-      merge(
-        // get the latest replaceable event
-        events.replaceable(WALLET_KIND, pubkey),
-        // and listen for any updates to matching events
-        events.updates.pipe(filter((e) => e.kind === WALLET_KIND && e.pubkey === pubkey)),
-      ).pipe(
-        map((wallet) => {
-          if (!wallet) return;
+  return (events) =>
+    merge(
+      // get the latest replaceable event
+      events.replaceable(WALLET_KIND, pubkey),
+      // and listen for any updates to matching events
+      events.updates.pipe(filter((e) => e.kind === WALLET_KIND && e.pubkey === pubkey)),
+    ).pipe(
+      map((wallet) => {
+        if (!wallet) return;
 
-          if (isWalletLocked(wallet)) return { locked: true, event: wallet };
+        if (isWalletLocked(wallet)) return { locked: true, event: wallet };
 
-          const mints = getWalletMints(wallet);
-          const privateKey = getWalletPrivateKey(wallet);
+        const mints = getWalletMints(wallet);
+        const privateKey = getWalletPrivateKey(wallet);
 
-          return { locked: false, mints, privateKey, event: wallet };
-        }),
-      ),
-  };
+        return { locked: false, mints, privateKey, event: wallet };
+      }),
+    );
 }

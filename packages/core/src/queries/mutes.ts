@@ -7,37 +7,28 @@ import { Query } from "../query-store/index.js";
 
 /** A query that returns all a users muted things */
 export function MuteQuery(pubkey: string): Query<Mutes | undefined> {
-  return {
-    key: pubkey,
-    run: (events) =>
-      events.replaceable(kinds.Mutelist, pubkey).pipe(
-        // listen for event updates (hidden tags unlocked)
-        listenLatestUpdates(events),
-        // Get all muted things
-        map((event) => event && getMutedThings(event)),
-      ),
-  };
+  return (events) =>
+    events.replaceable(kinds.Mutelist, pubkey).pipe(
+      // listen for event updates (hidden tags unlocked)
+      listenLatestUpdates(events),
+      // Get all muted things
+      map((event) => event && getMutedThings(event)),
+    );
 }
 
 /** A query that returns all a users public muted things */
 export function PublicMuteQuery(pubkey: string): Query<Mutes | undefined> {
-  return {
-    key: pubkey,
-    run: (events) =>
-      events.replaceable(kinds.Mutelist, pubkey).pipe(map((event) => event && getPublicMutedThings(event))),
-  };
+  return (events) =>
+    events.replaceable(kinds.Mutelist, pubkey).pipe(map((event) => event && getPublicMutedThings(event)));
 }
 
 /** A query that returns all a users hidden muted things */
 export function HiddenMuteQuery(pubkey: string): Query<Mutes | null | undefined> {
-  return {
-    key: pubkey,
-    run: (events) =>
-      events.replaceable(kinds.Mutelist, pubkey).pipe(
-        // listen for event updates (hidden tags unlocked)
-        listenLatestUpdates(events),
-        // Get hidden muted things
-        map((event) => event && getHiddenMutedThings(event)),
-      ),
-  };
+  return (events) =>
+    events.replaceable(kinds.Mutelist, pubkey).pipe(
+      // listen for event updates (hidden tags unlocked)
+      listenLatestUpdates(events),
+      // Get hidden muted things
+      map((event) => event && getHiddenMutedThings(event)),
+    );
 }
