@@ -4,7 +4,7 @@ import {
   ProfileQuery,
   ReplaceableQuery,
   UserBlossomServersQuery,
-  UserContactsQuery,
+  ContactsQuery,
 } from "applesauce-core/queries";
 import { getObservableValue, simpleTimeout } from "applesauce-core/observable";
 import { IEventStore, QueryStore } from "applesauce-core";
@@ -66,7 +66,7 @@ export class RequestLoader {
   /** Loads a pubkeys profile */
   contacts(pointer: ProfilePointer, force?: boolean) {
     this.checkReplaceable().next({ kind: kinds.Contacts, pubkey: pointer.pubkey, relays: pointer.relays, force });
-    return this.runWithTimeout(UserContactsQuery, pointer.pubkey);
+    return this.runWithTimeout(ContactsQuery, pointer.pubkey);
   }
 
   /** Loads a pubkeys blossom servers */

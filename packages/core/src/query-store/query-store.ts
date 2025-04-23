@@ -115,6 +115,16 @@ export class QueryStore {
     return this.createQuery(Queries.ProfileQuery, pubkey);
   }
 
+  /** Creates a ContactsQuery */
+  contacts(pubkey: string) {
+    return this.createQuery(Queries.ContactsQuery, pubkey);
+  }
+
+  /** Creates a MuteQuery */
+  mutes(pubkey: string) {
+    return this.createQuery(Queries.MuteQuery, pubkey);
+  }
+
   /** Creates a ReactionsQuery */
   reactions(event: NostrEvent) {
     return this.createQuery(Queries.ReactionsQuery, event);
