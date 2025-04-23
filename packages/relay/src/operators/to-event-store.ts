@@ -1,13 +1,13 @@
 import { OperatorFunction, scan } from "rxjs";
 import { IEventStore } from "applesauce-core";
 import { NostrEvent } from "nostr-tools";
+import { insertEventIntoDescendingList } from "nostr-tools/utils";
 
 import { SubscriptionResponse } from "../types.js";
 
 import { completeOnEose } from "./complete-on-eose.js";
-import { insertEventIntoDescendingList } from "nostr-tools/utils";
 
-/** Adds all events to event store and returns a deduplicated timeline */
+/** Adds all events to event store and returns a deduplicated timeline when EOSE is received */
 export function toEventStore(eventStore: IEventStore): OperatorFunction<SubscriptionResponse, NostrEvent[]> {
   return (source) =>
     source.pipe(
