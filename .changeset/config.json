@@ -6,6 +6,7 @@
   "linked": [
     [
       "applesauce-accounts",
+      "applesauce-actions",
       "applesauce-content",
       "applesauce-core",
       "applesauce-dvm",
