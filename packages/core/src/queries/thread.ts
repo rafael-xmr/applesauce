@@ -6,7 +6,7 @@ import { map } from "rxjs/operators";
 import { Query } from "../query-store/index.js";
 import { getNip10References, interpretThreadTags, ThreadReferences } from "../helpers/threading.js";
 import { getCoordinateFromAddressPointer, isAddressPointer, isEventPointer } from "../helpers/pointers.js";
-import { getEventUID, getReplaceableUID, getTagValue, isEvent } from "../helpers/event.js";
+import { getEventUID, createReplaceableAddress, getTagValue, isEvent } from "../helpers/event.js";
 import { COMMENT_KIND } from "../helpers/comment.js";
 
 export type Thread = {
@@ -110,7 +110,7 @@ export function RepliesQuery(event: NostrEvent, overrideKinds?: number[]): Query
     if (isEvent(parent) || isEventPointer(event)) filter["#e"] = [event.id];
 
     const address = isAddressableKind(event.kind)
-      ? getReplaceableUID(event.kind, event.pubkey, getTagValue(event, "d"))
+      ? createReplaceableAddress(event.kind, event.pubkey, getTagValue(event, "d"))
       : undefined;
     if (address) {
       filter["#a"] = [address];

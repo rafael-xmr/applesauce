@@ -1,6 +1,6 @@
 import { Emoji, getHiddenContent, HiddenContentSymbol, unixNow } from "applesauce-core/helpers";
 import { AddressPointer } from "nostr-tools/nip19";
-import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
+import { isAddressableKind } from "nostr-tools/kinds";
 import { EventTemplate, NostrEvent, UnsignedEvent } from "nostr-tools";
 
 import { includeClientTag } from "./operations/event/client.js";
@@ -79,7 +79,7 @@ export class EventFactory {
     if (Reflect.has(template, HiddenContentSymbol)) Reflect.set(draft, HiddenContentSymbol, getHiddenContent(template));
 
     // make sure parameterized replaceable events have "d" tags
-    if (isParameterizedReplaceableKind(draft.kind)) draft = await includeReplaceableIdentifier()(draft, context);
+    if (isAddressableKind(draft.kind)) draft = await includeReplaceableIdentifier()(draft, context);
 
     // get the existing hidden content
     let hiddenContent = getHiddenContent(template);

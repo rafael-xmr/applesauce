@@ -1,6 +1,6 @@
 import { AddressPointerWithoutD, getReplaceableUID, mergeRelaySets } from "applesauce-core/helpers";
 import { Filter } from "nostr-tools";
-import { isParameterizedReplaceableKind, isReplaceableKind } from "nostr-tools/kinds";
+import { isAddressableKind, isReplaceableKind } from "nostr-tools/kinds";
 
 import { unique } from "./array.js";
 import { AddressPointer } from "nostr-tools/nip19";
@@ -31,7 +31,7 @@ export function createFilterFromAddressPointers(pointers: AddressPointerWithoutD
 /** Takes a set of address pointers, groups them, then returns filters for the groups */
 export function createFiltersFromAddressPointers(pointers: AddressPointerWithoutD[]): Filter[] {
   // split the points in to two groups so they they don't mix in the filters
-  const parameterizedReplaceable = pointers.filter((p) => isParameterizedReplaceableKind(p.kind));
+  const parameterizedReplaceable = pointers.filter((p) => isAddressableKind(p.kind));
   const replaceable = pointers.filter((p) => isReplaceableKind(p.kind));
 
   const filters: Filter[] = [];
@@ -51,7 +51,7 @@ export function createFiltersFromAddressPointers(pointers: AddressPointerWithout
 
 /** Checks if a relay will understand an address pointer */
 export function isLoadableAddressPointer<T extends AddressPointerWithoutD>(pointer: T): boolean {
-  if (isParameterizedReplaceableKind(pointer.kind)) return !!pointer.identifier;
+  if (isAddressableKind(pointer.kind)) return !!pointer.identifier;
   else return isReplaceableKind(pointer.kind);
 }
 

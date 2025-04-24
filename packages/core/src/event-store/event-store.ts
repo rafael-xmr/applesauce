@@ -1,6 +1,6 @@
 import { Filter, kinds, NostrEvent } from "nostr-tools";
 import { insertEventIntoDescendingList } from "nostr-tools/utils";
-import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
+import { isAddressableKind } from "nostr-tools/kinds";
 import {
   defer,
   distinctUntilChanged,
@@ -27,7 +27,7 @@ import {
   FromCacheSymbol,
   getEventUID,
   getReplaceableIdentifier,
-  getReplaceableUID,
+  createReplaceableAddress,
   getTagValue,
   isReplaceable,
 } from "../helpers/event.js";
@@ -94,7 +94,7 @@ export class EventStore implements IEventStore {
     else {
       if (this.deletedIds.has(event.id)) return true;
 
-      if (isParameterizedReplaceableKind(event.kind)) {
+      if (isAddressableKind(event.kind)) {
         const deleted = this.deletedCoords.get(getEventUID(event));
         if (deleted) return deleted > event.created_at;
       }
@@ -381,7 +381,7 @@ export class EventStore implements IEventStore {
   replaceableSet(
     pointers: { kind: number; pubkey: string; identifier?: string }[],
   ): Observable<Record<string, NostrEvent>> {
-    const uids = new Set(pointers.map((p) => getReplaceableUID(p.kind, p.pubkey, p.identifier)));
+    const uids = new Set(pointers.map((p) => createReplaceableAddress(p.kind, p.pubkey, p.identifier)));
 
     return merge(
       // start with existing events

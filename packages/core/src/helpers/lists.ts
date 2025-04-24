@@ -1,5 +1,5 @@
 import { AddressPointer, EventPointer, ProfilePointer } from "nostr-tools/nip19";
-import { isParameterizedReplaceableKind, isReplaceableKind } from "nostr-tools/kinds";
+import { isAddressableKind, isReplaceableKind } from "nostr-tools/kinds";
 import { NostrEvent } from "nostr-tools";
 
 import { getHiddenTags } from "./hidden-tags.js";
@@ -65,7 +65,7 @@ export function getProfilePointersFromList(list: NostrEvent): ProfilePointer[] {
 /** Returns if an event is a valid list or set */
 export function isValidList(event: NostrEvent): boolean {
   try {
-    if (isParameterizedReplaceableKind(event.kind)) {
+    if (isAddressableKind(event.kind)) {
       // event is a set
 
       // ensure the set has an identifier

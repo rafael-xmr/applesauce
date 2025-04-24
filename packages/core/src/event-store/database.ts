@@ -2,7 +2,7 @@ import { Filter, NostrEvent } from "nostr-tools";
 import { binarySearch, insertEventIntoDescendingList } from "nostr-tools/utils";
 import { Subject } from "rxjs";
 
-import { getEventUID, getIndexableTags, getReplaceableUID, isReplaceable } from "../helpers/event.js";
+import { getEventUID, getIndexableTags, createReplaceableAddress, isReplaceable } from "../helpers/event.js";
 import { INDEXABLE_TAGS } from "./common.js";
 import { logger } from "../logger.js";
 import { LRU } from "../helpers/lru.js";
@@ -88,12 +88,12 @@ export class Database {
 
   /** Checks if the database contains a replaceable event without touching it */
   hasReplaceable(kind: number, pubkey: string, d?: string): boolean {
-    const events = this.replaceable.get(getReplaceableUID(kind, pubkey, d));
+    const events = this.replaceable.get(createReplaceableAddress(kind, pubkey, d));
     return !!events && events.length > 0;
   }
   /** Gets an array of replaceable events */
   getReplaceable(kind: number, pubkey: string, d?: string): NostrEvent[] | undefined {
-    return this.replaceable.get(getReplaceableUID(kind, pubkey, d));
+    return this.replaceable.get(createReplaceableAddress(kind, pubkey, d));
   }
 
   /** Inserts an event into the database and notifies all subscriptions */

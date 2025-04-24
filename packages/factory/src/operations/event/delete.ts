@@ -1,5 +1,5 @@
 import { NostrEvent } from "nostr-tools";
-import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
+import { isAddressableKind } from "nostr-tools/kinds";
 import { getAddressPointerForEvent } from "applesauce-core/helpers";
 
 import { EventOperation } from "../../event-factory.js";
@@ -14,7 +14,7 @@ export function includeDeleteTags(events: NostrEvent[]): EventOperation {
       tags = ensureKTag(tags, event.kind);
       tags = ensureEventPointerTag(tags, event);
 
-      if (isParameterizedReplaceableKind(event.kind)) {
+      if (isAddressableKind(event.kind)) {
         tags = ensureAddressPointerTag(tags, getAddressPointerForEvent(event));
       }
     }

@@ -1,6 +1,6 @@
 import { getReplaceableUID, getTagValue } from "applesauce-core/helpers";
 import { NostrEvent } from "nostr-tools";
-import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
+import { isAddressableKind } from "nostr-tools/kinds";
 import {
   COMMENT_KIND,
   CommentPointer,
@@ -48,7 +48,7 @@ export function createCommentTagsForEvent(parent: NostrEvent, relayHint?: string
   const tags: string[][] = [];
 
   let parentPointer: CommentPointer;
-  if (isParameterizedReplaceableKind(parent.kind)) {
+  if (isAddressableKind(parent.kind)) {
     const identifier = getTagValue(parent, "d");
     if (!identifier) throw new Error("Event missing identifier");
     parentPointer = {
