@@ -1,7 +1,8 @@
-import { NostrEvent } from "nostr-tools";
+import { kinds, NostrEvent } from "nostr-tools";
 import { isETag, isPTag, isTTag } from "./tags.js";
 import { getOrComputeCachedValue } from "./cache.js";
 import { getHiddenTags, isHiddenTagsLocked } from "./hidden-tags.js";
+import { getIndexableTags, getNip10References } from "./index.js";
 
 export const MutePublicSymbol = Symbol.for("mute-public");
 export const MuteHiddenSymbol = Symbol.for("mute-hidden");
@@ -54,4 +55,44 @@ export function getHiddenMutedThings(mute: NostrEvent): Mutes | undefined {
   if (isHiddenTagsLocked(mute)) return undefined;
 
   return getOrComputeCachedValue(mute, MuteHiddenSymbol, () => parseMutedTags(getHiddenTags(mute)!));
+}
+
+/** Creates a RegExp for matching muted words */
+export function createMutedWordsRegExp(mutedWords: string[]): RegExp {
+  // Escape special characters and join with |
+  const escapedWords = mutedWords.map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+
+  // Create the RegExp with word boundaries and case insensitive flag
+  return new RegExp(`\\b(${escapedWords.join("|")})\\b`, "gi");
+}
+
+/** Returns true if the event matches the mutes */
+export function matchMutes(mutes: Mutes, event: NostrEvent): boolean {
+  // Filter on muted pubkeys
+  if (mutes.pubkeys) {
+    if (mutes.pubkeys.has(event.pubkey)) return true;
+  }
+
+  // Filter on muted hashtags`
+  if (mutes.hashtags) {
+    const tags = getIndexableTags(event);
+    for (let tag of mutes.hashtags) {
+      if (tags.has("t:" + tag)) return true;
+    }
+  }
+
+  // Filter on muted threads
+  if (mutes.threads && event.kind === kinds.ShortTextNote) {
+    const refs = getNip10References(event);
+    if (refs.root?.e && mutes.threads.has(refs.root.e.id)) return true;
+  }
+
+  // Filter on muted words
+  if (mutes.words) {
+    const regExp = createMutedWordsRegExp(Array.from(mutes.words));
+    if (regExp.test(event.content)) return true;
+  }
+
+  // Event does not match any mutes
+  return false;
 }
