@@ -69,12 +69,12 @@ export function createMutedWordsRegExp(mutedWords: string[]): RegExp {
 /** Returns true if the event matches the mutes */
 export function matchMutes(mutes: Mutes, event: NostrEvent): boolean {
   // Filter on muted pubkeys
-  if (mutes.pubkeys) {
+  if (mutes.pubkeys.size > 0) {
     if (mutes.pubkeys.has(event.pubkey)) return true;
   }
 
   // Filter on muted hashtags`
-  if (mutes.hashtags) {
+  if (mutes.hashtags.size > 0) {
     const tags = getIndexableTags(event);
     for (let tag of mutes.hashtags) {
       if (tags.has("t:" + tag)) return true;
@@ -82,13 +82,13 @@ export function matchMutes(mutes: Mutes, event: NostrEvent): boolean {
   }
 
   // Filter on muted threads
-  if (mutes.threads && event.kind === kinds.ShortTextNote) {
+  if (mutes.threads.size > 0 && event.kind === kinds.ShortTextNote) {
     const refs = getNip10References(event);
     if (refs.root?.e && mutes.threads.has(refs.root.e.id)) return true;
   }
 
   // Filter on muted words
-  if (mutes.words) {
+  if (mutes.words.size > 0) {
     const regExp = createMutedWordsRegExp(Array.from(mutes.words));
     if (regExp.test(event.content)) return true;
   }
