@@ -16,10 +16,14 @@ npm install applesauce-relay
 - [x] NIP-11 `auth_required` limitation
 - [ ] NIP-11 `max_subscriptions` limitation
 - [x] Client negentropy sync
-- [ ] Reconnection backoff logic
+- [x] Reconnection backoff logic
+- [x] republish event on reconnect and auth-required
+- [x] Resubscribe on reconnect and auth-required
 - [ ] NIP-45 COUNT
 
 ## Examples
+
+Read the [documentation](https://hzrd149.github.io/applesauce/overview/relays.html) for more detailed explanation of all methods
 
 ### Single Relay
 

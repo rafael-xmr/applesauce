@@ -6,7 +6,7 @@ import { WS } from "vitest-websocket-mock";
 
 import { Relay } from "../relay.js";
 import { filter } from "rxjs/operators";
-import { firstValueFrom, of, throwError } from "rxjs";
+import { firstValueFrom, of, throwError, timer } from "rxjs";
 import { RelayInformation } from "nostr-tools/nip11";
 
 const defaultMockInfo: RelayInformation = {
@@ -123,31 +123,31 @@ describe("req", () => {
     expect(getSeenRelays(receivedEvent)).toContain("wss://test");
   });
 
-  it("should complete subscription when CLOSED message is received", async () => {
-    const spy = subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"));
+  it("should error subscription when CLOSED message is received", async () => {
+    const spy = subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"), { expectErrors: true });
     await server.connected;
 
     // Send CLOSED message for the subscription
     server.send(["CLOSED", "sub1", "reason"]);
 
     // Verify the subscription completed
-    expect(spy.receivedComplete()).toBe(true);
+    expect(spy.receivedError()).toBe(true);
   });
 
   it("should wait for authentication if relay responds with auth-required", async () => {
     // First subscription to trigger auth-required
-    const firstSub = subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"));
+    const firstSub = subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"), { expectErrors: true });
     await server.nextMessage;
 
     // Send CLOSED message with auth-required reason
     server.send(["CLOSED", "sub1", "auth-required: need to authenticate"]);
 
     // wait for complete
-    await firstSub.onComplete();
+    await firstSub.onError();
     await server.nextMessage;
 
     // Create a second subscription that should wait for auth
-    const secondSub = subscribeSpyTo(relay.req([{ kinds: [1] }], "sub2"));
+    const secondSub = subscribeSpyTo(relay.req([{ kinds: [1] }], "sub2"), { expectErrors: true });
 
     // Verify no REQ message was sent yet (waiting for auth)
     expect(server).not.toHaveReceivedMessages(["REQ", "sub2", { kinds: [1] }]);
@@ -204,6 +204,54 @@ describe("req", () => {
 
     // Verify the subscription received the event and EOSE
     expect(sub.getValues()).toEqual([expect.objectContaining(mockEvent), "EOSE"]);
+  });
+
+  it("should throw error if relay closes connection with error", async () => {
+    const spy = subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"), { expectErrors: true });
+    await server.connected;
+
+    // Send CLOSE message with error
+    server.error({
+      reason: "error message",
+      code: 1000,
+      wasClean: false,
+    });
+
+    // Verify the subscription completed with an error
+    expect(spy.receivedError()).toBe(true);
+  });
+
+  it("should not return EOSE while waiting for the relay to be ready", async () => {
+    vi.useFakeTimers();
+
+    // @ts-expect-error
+    relay.ready$.next(false);
+
+    const spy = subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"), { expectErrors: true });
+
+    // Fast-forward time by 20 seconds
+    await vi.advanceTimersByTimeAsync(20000);
+
+    expect(spy.receivedComplete()).toBe(false);
+    expect(spy.receivedError()).toBe(false);
+    expect(spy.receivedNext()).toBe(false);
+  });
+
+  it("should wait when relay isn't ready", async () => {
+    // @ts-expect-error
+    relay.ready$.next(false);
+
+    subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"));
+
+    // Wait 10ms to ensure the relay didn't receive anything
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    expect(server.messages.length).toBe(0);
+
+    // @ts-expect-error
+    relay.ready$.next(true);
+
+    await expect(server).toReceiveMessage(["REQ", "sub1", { kinds: [1] }]);
   });
 });
 
@@ -276,6 +324,7 @@ describe("event", () => {
     await sub.onComplete();
     expect(sub.receivedComplete()).toBe(true);
   });
+
   it("should trigger connection to relay", async () => {
     subscribeSpyTo(relay.event(mockEvent));
 
@@ -330,6 +379,53 @@ describe("event", () => {
 
     expect(spy.receivedComplete()).toBe(true);
     expect(spy.getLastValue()).toEqual({ ok: false, from: "wss://test", message: "Timeout" });
+  });
+
+  it("should throw error if relay closes connection with error", async () => {
+    const spy = subscribeSpyTo(relay.event(mockEvent), { expectErrors: true });
+    await server.connected;
+
+    // Send CLOSE message with error
+    server.error({
+      reason: "error message",
+      code: 1000,
+      wasClean: false,
+    });
+
+    // Verify the subscription completed with an error
+    expect(spy.receivedError()).toBe(true);
+  });
+
+  it("should not throw a timeout error while waiting for the relay to be ready", async () => {
+    vi.useFakeTimers();
+
+    // @ts-expect-error
+    relay.ready$.next(false);
+
+    const spy = subscribeSpyTo(relay.event(mockEvent), { expectErrors: true });
+
+    // Fast-forward time by 20 seconds
+    await vi.advanceTimersByTimeAsync(20000);
+
+    expect(spy.receivedComplete()).toBe(false);
+    expect(spy.receivedError()).toBe(false);
+  });
+
+  it("should wait when relay isn't ready", async () => {
+    // @ts-expect-error
+    relay.ready$.next(false);
+
+    subscribeSpyTo(relay.event(mockEvent));
+
+    // Wait 10ms to ensure the relay didn't receive anything
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    expect(server.messages.length).toBe(0);
+
+    // @ts-expect-error
+    relay.ready$.next(true);
+
+    await expect(server).toReceiveMessage(["EVENT", mockEvent]);
   });
 });
 
@@ -437,6 +533,174 @@ describe("information$", () => {
 
     // Verify the internal state was updated
     expect(relay.information).toEqual(mockInfo);
+  });
+});
+
+describe("createReconnectTimer", () => {
+  it("should create a reconnect timer when relay closes with error", async () => {
+    const reconnectTimer = vi.fn().mockReturnValue(timer(1000));
+    vi.spyOn(Relay, "createReconnectTimer").mockReturnValue(reconnectTimer);
+
+    relay = new Relay("wss://test");
+    const spy = subscribeSpyTo(relay.req([{ kinds: [1] }]), { expectErrors: true });
+
+    // Send CLOSE message with error
+    server.error({
+      reason: "error message",
+      code: 1000,
+      wasClean: false,
+    });
+
+    // Verify the subscription errored
+    expect(spy.receivedError()).toBe(true);
+
+    expect(reconnectTimer).toHaveBeenCalledWith(expect.any(Error), 0);
+  });
+
+  it("should set ready$ to false until the reconnect timer completes", async () => {
+    vi.useFakeTimers();
+    const reconnectTimer = vi.fn().mockReturnValue(timer(1000));
+    vi.spyOn(Relay, "createReconnectTimer").mockReturnValue(reconnectTimer);
+    relay = new Relay("wss://test");
+
+    subscribeSpyTo(relay.req([{ kinds: [1] }]), { expectErrors: true });
+
+    // Send CLOSE message with error
+    server.error({
+      reason: "error message",
+      code: 1000,
+      wasClean: false,
+    });
+
+    // @ts-expect-error
+    expect(relay.ready$.value).toBe(false);
+
+    // Fast-forward time by 10ms
+    await vi.advanceTimersByTimeAsync(5000);
+
+    // @ts-expect-error
+    expect(relay.ready$.value).toBe(true);
+  });
+});
+
+describe("publish", () => {
+  it("should retry when auth-required is received and authentication is completed", async () => {
+    // First attempt to publish
+    const spy = subscribeSpyTo(relay.publish(mockEvent));
+
+    // Verify EVENT was sent
+    await expect(server).toReceiveMessage(["EVENT", mockEvent]);
+
+    // Send auth-required response
+    server.send(["AUTH", "challenge-string"]);
+    server.send(["OK", mockEvent.id, false, "auth-required: need to authenticate"]);
+
+    // Send auth event
+    const authEvent = { ...mockEvent, id: "auth-id" };
+    subscribeSpyTo(relay.auth(authEvent));
+
+    // Verify AUTH was sent
+    await expect(server).toReceiveMessage(["AUTH", authEvent]);
+
+    // Send successful auth response
+    server.send(["OK", authEvent.id, true, ""]);
+
+    // Wait for the event to be sent again
+    await expect(server).toReceiveMessage(["EVENT", mockEvent]);
+
+    // Send successful response for the retried event
+    server.send(["OK", mockEvent.id, true, ""]);
+
+    // Verify the final result is successful
+    expect(spy.getLastValue()).toEqual({ ok: true, message: "", from: "wss://test" });
+  });
+
+  it("should error after max retries", async () => {
+    const spy = subscribeSpyTo(relay.publish(mockEvent, { retries: 0 }), { expectErrors: true });
+
+    // Close with error
+    server.error({ reason: "error message", code: 1000, wasClean: false });
+
+    // Verify the subscription errored
+    expect(spy.receivedError()).toBe(true);
+  });
+});
+
+describe("request", () => {
+  it("should retry when auth-required is received and authentication is completed", async () => {
+    // First attempt to request
+    const spy = subscribeSpyTo(relay.request({ kinds: [1] }, { id: "sub1" }));
+
+    // Verify REQ was sent
+    await expect(server).toReceiveMessage(["REQ", "sub1", { kinds: [1] }]);
+
+    // Send auth-required response
+    server.send(["AUTH", "challenge-string"]);
+    server.send(["CLOSED", "sub1", "auth-required: need to authenticate"]);
+
+    // Wait for subscription to close
+    await expect(server).toReceiveMessage(["CLOSE", "sub1"]);
+
+    // Send auth event
+    const authEvent = { ...mockEvent, id: "auth-id" };
+    const authSpy = subscribeSpyTo(relay.auth(authEvent));
+
+    // Verify AUTH was sent
+    await expect(server).toReceiveMessage(["AUTH", authEvent]);
+    server.send(["OK", authEvent.id, true, ""]);
+
+    // Wait for auth to complete
+    await authSpy.onComplete();
+
+    // Wait for retry
+    await expect(server).toReceiveMessage(["REQ", "sub1", { kinds: [1] }]);
+
+    // Send response
+    server.send(["EVENT", "sub1", mockEvent]);
+    server.send(["EOSE", "sub1"]);
+
+    // Verify the final result is successful
+    expect(spy.getLastValue()).toEqual(expect.objectContaining(mockEvent));
+    expect(spy.receivedComplete()).toBe(true);
+  });
+});
+
+describe("subscription", () => {
+  it("should retry when auth-required is received and authentication is completed", async () => {
+    // First attempt to request
+    const spy = subscribeSpyTo(relay.subscription({ kinds: [1] }, { id: "sub1" }));
+
+    // Verify REQ was sent
+    await expect(server).toReceiveMessage(["REQ", "sub1", { kinds: [1] }]);
+
+    // Send auth-required response
+    server.send(["AUTH", "challenge-string"]);
+    server.send(["CLOSED", "sub1", "auth-required: need to authenticate"]);
+
+    // Wait for subscription to close
+    await expect(server).toReceiveMessage(["CLOSE", "sub1"]);
+
+    // Send auth event
+    const authEvent = { ...mockEvent, id: "auth-id" };
+    const authSpy = subscribeSpyTo(relay.auth(authEvent));
+
+    // Verify AUTH was sent
+    await expect(server).toReceiveMessage(["AUTH", authEvent]);
+    server.send(["OK", authEvent.id, true, ""]);
+
+    // Wait for auth to complete
+    await authSpy.onComplete();
+
+    // Wait for retry
+    await expect(server).toReceiveMessage(["REQ", "sub1", { kinds: [1] }]);
+
+    // Send response
+    server.send(["EVENT", "sub1", mockEvent]);
+    server.send(["EOSE", "sub1"]);
+
+    // Verify the final result is successful
+    expect(spy.getValues()).toEqual([expect.objectContaining(mockEvent), "EOSE"]);
+    expect(spy.receivedComplete()).toBe(false);
   });
 });
 

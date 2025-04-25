@@ -1,11 +1,18 @@
 import { NostrEvent, type Filter } from "nostr-tools";
 import { Observable } from "rxjs";
 
-import { Relay, RelayOptions } from "./relay.js";
-import { PublishResponse, SubscriptionResponse } from "./types.js";
 import { RelayGroup } from "./group.js";
+import { Relay, RelayOptions } from "./relay.js";
+import {
+  IPool,
+  PublishResponse,
+  PublishOptions,
+  RequestOptions,
+  SubscriptionOptions,
+  SubscriptionResponse,
+} from "./types.js";
 
-export class RelayPool {
+export class RelayPool implements IPool {
   relays = new Map<string, Relay>();
   groups = new Map<string, RelayGroup>();
 
@@ -41,5 +48,24 @@ export class RelayPool {
   /** Send an EVENT message to multiple relays */
   event(relays: string[], event: NostrEvent): Observable<PublishResponse> {
     return this.group(relays).event(event);
+  }
+
+  /** Publish an event to multiple relays */
+  publish(relays: string[], event: NostrEvent, opts?: PublishOptions): Observable<PublishResponse[]> {
+    return this.group(relays).publish(event, opts);
+  }
+
+  /** Request events from multiple relays */
+  request(relays: string[], filters: Filter | Filter[], opts?: RequestOptions): Observable<NostrEvent> {
+    return this.group(relays).request(filters, opts);
+  }
+
+  /** Open a subscription to multiple relays */
+  subscription(
+    relays: string[],
+    filters: Filter | Filter[],
+    opts?: SubscriptionOptions,
+  ): Observable<SubscriptionResponse> {
+    return this.group(relays).subscription(filters, opts);
   }
 }

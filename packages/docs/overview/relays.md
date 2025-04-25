@@ -1,4 +1,4 @@
-# Working with Relays
+# Connecting to Relays
 
 The `applesauce-relay` package provides a flexible api for communicating with Nostr relays, built on top of [RxJS](https://rxjs.dev/).
 
@@ -156,7 +156,7 @@ pool.event(relays, event).subscribe({
 
 ## Authentication
 
-The `Relay` class supports nip-24 authentication and exposes a `.challenge`, `.authenticated`, and `.auth()` method.
+The `Relay` class supports [NIP-42](https://github.com/nostr-protocol/nips/blob/master/42.md) authentication and exposes a `.challenge`, `.authenticated`, and `.auth()` method.
 
 :::info
 
@@ -183,6 +183,126 @@ relay.challenge$.subscribe(async (challenge) => {
 
   console.log(`Authenticated ${relay.authenticated}`);
 });
+```
+
+## Persistent subscriptions
+
+The `relay.subscription`, `group.subscription` and `pool.subscription` methods are identical to the `.req` methods but resubscribe on connection errors or after authentication.
+
+```ts
+import { firstValueFrom, lastValueFrom } from "rxjs";
+import { Relay } from "applesauce-relay";
+
+const relay = new Relay("wss://private.relay.com");
+
+// create a new persistent subscription
+relay.subscription({ kinds: [1] }, { id: "sub1" }).subscribe((response) => {
+  console.log(response);
+});
+
+// relay send ["CLOSED", "sub1", "auth-required: you must authenticate to read"]
+
+// wait for relay authentication request
+await firstValueFrom(relay.challenge$);
+
+// authenticate and wait for response
+await lastValueFrom(relay.authenticate(window.nostr));
+
+// Subscription should resubscribe and receive events
+```
+
+## Publishing with retires
+
+The `relay.publish`, `group.publish` and `pool.publish` methods can be used to send an event to a the relay and retry after reconnection or authentication.
+
+:::info
+Under the hood this is using the `.event` method with the [retry](https://rxjs.dev/api/index/function/retry) operator.
+:::
+
+```ts
+import { firstValueFrom, lastValueFrom } from "rxjs";
+import { Relay } from "applesauce-relay";
+
+const relay = new Relay("wss://private.relay.com");
+
+// create a new persistent subscription
+const sub = relay.publish({ kinds: [1] }, { id: "sub1" }).subscribe((response) => {
+  console.log(response);
+});
+
+// relay send ["OK", "<id>", false, "auth-required: you must authenticate to publish"]
+
+// wait for relay authentication request
+await firstValueFrom(relay.challenge$);
+
+// authenticate and wait for response
+await lastValueFrom(relay.authenticate(window.nostr));
+
+// The publish observable should retry and return the result
+```
+
+## One-off requests
+
+The `relay.request`, `group.request` and `pool.request` methods can be used to make a one-off request that retries a set number of times.
+
+```ts
+import { RelayPool } from "applesauce-relay";
+
+// Create a new connection pool
+const pool = new RelayPool();
+
+// Define relay URLs
+const relays = ["wss://relay1.example.com", "wss://relay2.example.com", "wss://relay3.example.com"];
+
+// Create a new request and subscribe
+pool.request(relays, { kinds: [1] }, { id: "optional-request-id", retries: 2 }).subscribe({
+  next: (event) => {
+    console.log(event);
+  },
+  complete: () => {
+    console.log("all requests have received EOSE");
+  },
+});
+```
+
+## Reconnection
+
+When a relay fails to connect or closes unexpectedly its put into a "disabled" state for some time until its allowed to try and connect again.
+
+This timeout is controlled by the `relay.reconnectTimer` method, which should return an observable that emits a value when the relay is allowed try to reconnect.
+
+```ts
+import { Relay } from "applesauce-relay";
+import { timer } from "rxjs/operators";
+
+// Create a new relay
+const relay = new Relay("wss://unstable.relay.com");
+
+// Override the default method with one that always waits 10s
+relay.reconnectTimer = (error: Error | CloseEvent, attempts: number) => {
+  return timer(10_000);
+};
+
+// Open a subscription
+const sub = relay.subscription({ kinds: [1] }, { retires: Infinity }).subscribe();
+
+// Now if the relay fails to connect
+// the .subscription will retry for Infinity
+// and the relay will wait 10s before reconnecting
+```
+
+You can override the reconnect timer globally by setting the `Relay.createReconnectTimer` method
+
+```ts
+import { Relay } from "applesauce-relay";
+import { timer } from "rxjs/operators";
+
+// The static method takes a relay url and returns a reconnectTimer method
+Relay.createReconnectTimer = (relay: string) => {
+  return (error: Error | CloseEvent, attempts: number) => {
+    return timer(10_000);
+  };
+};
 ```
 
 ## Operators

@@ -5,11 +5,11 @@ import { WS } from "vitest-websocket-mock";
 
 import { Relay } from "../relay.js";
 
-let mockServer: WS;
+let server: WS;
 let relay: Relay;
 
 beforeEach(async () => {
-  mockServer = new WS("wss://test");
+  server = new WS("wss://test", { jsonProtocol: true });
   relay = new Relay("wss://test");
 
   // Create a persistent subscription to keep the connection open
@@ -18,7 +18,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  mockServer.close();
+  server.close();
   // Wait for server to close to prevent memory leaks
   await WS.clean();
 });
@@ -39,38 +39,38 @@ describe("event", () => {
     const spy1 = subscribeSpyTo(relay.event(mockEvent));
 
     // Verify EVENT was sent
-    const firstEventMessage = await mockServer.nextMessage;
-    expect(JSON.parse(firstEventMessage as string)).toEqual(["EVENT", mockEvent]);
+    const firstEventMessage = await server.nextMessage;
+    expect(firstEventMessage).toEqual(["EVENT", mockEvent]);
 
     // Send auth-required response
-    mockServer.send(JSON.stringify(["OK", mockEvent.id, false, "auth-required: need to authenticate"]));
+    server.send(["OK", mockEvent.id, false, "auth-required: need to authenticate"]);
 
     // Create second event subscription - this should not send EVENT yet
     const spy2 = subscribeSpyTo(relay.event(mockEvent));
 
     // Should not have received any messages
-    expect(mockServer.messages.length).toBe(1);
+    expect(server.messages.length).toBe(1);
 
     // Send AUTH challenge
-    mockServer.send(JSON.stringify(["AUTH", "challenge-string"]));
+    server.send(["AUTH", "challenge-string"]);
 
     // Send auth event
     const authEvent = { ...mockEvent, id: "auth-id" };
     subscribeSpyTo(relay.auth(authEvent));
 
     // Verify AUTH was sent
-    const authMessage = await mockServer.nextMessage;
-    expect(JSON.parse(authMessage as string)).toEqual(["AUTH", authEvent]);
+    const authMessage = await server.nextMessage;
+    expect(authMessage).toEqual(["AUTH", authEvent]);
 
     // Send successful auth response
-    mockServer.send(JSON.stringify(["OK", authEvent.id, true, ""]));
+    server.send(["OK", authEvent.id, true, ""]);
 
     // Now the second EVENT should be sent
-    const secondEventMessage = await mockServer.nextMessage;
-    expect(JSON.parse(secondEventMessage as string)).toEqual(["EVENT", mockEvent]);
+    const secondEventMessage = await server.nextMessage;
+    expect(secondEventMessage).toEqual(["EVENT", mockEvent]);
 
     // Send OK response for second event
-    mockServer.send(JSON.stringify(["OK", mockEvent.id, true, ""]));
+    server.send(["OK", mockEvent.id, true, ""]);
 
     expect(spy1.getLastValue()).toEqual({
       ok: false,
@@ -85,63 +85,62 @@ describe("req", () => {
   it("should wait for auth before sending REQ if auth-required received", async () => {
     // Create first REQ subscription
     const filters = [{ kinds: [1], limit: 10 }];
-    subscribeSpyTo(relay.req(filters, "sub1"));
+    subscribeSpyTo(relay.req(filters, "sub1"), { expectErrors: true });
 
     // Verify REQ was sent
-    const firstReqMessage = await mockServer.nextMessage;
-    expect(JSON.parse(firstReqMessage as string)).toEqual(["REQ", "sub1", ...filters]);
+    const firstReqMessage = await server.nextMessage;
+    expect(firstReqMessage).toEqual(["REQ", "sub1", ...filters]);
 
     // Send auth-required response
-    mockServer.send(JSON.stringify(["CLOSED", "sub1", "auth-required: need to authenticate"]));
+    server.send(["CLOSED", "sub1", "auth-required: need to authenticate"]);
 
     // Consume the client CLOSE message for sub1
-    await mockServer.nextMessage;
+    await server.nextMessage;
 
     // Create second REQ subscription - this should not send REQ yet
-    subscribeSpyTo(relay.req(filters, "sub2"));
+    subscribeSpyTo(relay.req(filters, "sub2"), { expectErrors: true });
 
     // Should not have received any messages
-    expect(mockServer.messages).not.toContain(JSON.stringify(["REQ", "sub2", ...filters]));
+    expect(server.messages).not.toContain(["REQ", "sub2", ...filters]);
 
     // Send AUTH challenge
-    mockServer.send(JSON.stringify(["AUTH", "challenge-string"]));
+    server.send(["AUTH", "challenge-string"]);
 
     // Send auth event
     const authEvent = { ...mockEvent, id: "auth-id" };
     subscribeSpyTo(relay.auth(authEvent));
 
     // Verify AUTH was sent
-    const authMessage = await mockServer.nextMessage;
-    expect(JSON.parse(authMessage as string)).toEqual(["AUTH", authEvent]);
+    const authMessage = await server.nextMessage;
+    expect(authMessage).toEqual(["AUTH", authEvent]);
 
     // Send successful auth response
-    mockServer.send(JSON.stringify(["OK", authEvent.id, true, ""]));
+    server.send(["OK", authEvent.id, true, ""]);
 
     // Now the second REQ should be sent
-    const secondReqMessage = await mockServer.nextMessage;
-    expect(JSON.parse(secondReqMessage as string)).toEqual(["REQ", "sub2", ...filters]);
+    const secondReqMessage = await server.nextMessage;
+    expect(secondReqMessage).toEqual(["REQ", "sub2", ...filters]);
 
     // Send some events for the second subscription
-    mockServer.send(JSON.stringify(["EVENT", "sub2", mockEvent]));
-    mockServer.send(JSON.stringify(["EOSE", "sub2"]));
+    server.send(["EVENT", "sub2", mockEvent]);
+    server.send(["EOSE", "sub2"]);
   });
 });
 
 describe("auth", () => {
   it("should set authenticated state after successful AUTH challenge response", async () => {
     // Send AUTH challenge
-    mockServer.send(JSON.stringify(["AUTH", "challenge-string"]));
+    server.send(["AUTH", "challenge-string"]);
 
     // Send auth event response
     const authEvent = { ...mockEvent, id: "auth-id" };
     subscribeSpyTo(relay.auth(authEvent));
 
     // Verify AUTH was sent
-    const authMessage = await mockServer.nextMessage;
-    expect(JSON.parse(authMessage as string)).toEqual(["AUTH", authEvent]);
+    await expect(server).toReceiveMessage(["AUTH", authEvent]);
 
     // Send successful auth response
-    mockServer.send(JSON.stringify(["OK", authEvent.id, true, ""]));
+    server.send(["OK", authEvent.id, true, ""]);
 
     expect(relay.authenticated).toBe(true);
   });

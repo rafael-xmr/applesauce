@@ -1,6 +1,7 @@
 import { logger } from "applesauce-core";
+import { simpleTimeout } from "applesauce-core/observable";
 import { nanoid } from "nanoid";
-import { type Filter, type NostrEvent } from "nostr-tools";
+import { nip42, type Filter, type NostrEvent } from "nostr-tools";
 import {
   BehaviorSubject,
   catchError,
@@ -11,25 +12,38 @@ import {
   ignoreElements,
   map,
   merge,
+  mergeMap,
   NEVER,
   Observable,
   of,
+  retry,
   scan,
   share,
   shareReplay,
   switchMap,
   take,
-  takeWhile,
   tap,
+  throwError,
   timeout,
   timer,
 } from "rxjs";
 import { webSocket, WebSocketSubject, WebSocketSubjectConfig } from "rxjs/webSocket";
-import { simpleTimeout } from "applesauce-core/observable";
 
 import { RelayInformation } from "nostr-tools/nip11";
+import { completeOnEose } from "./operators/complete-on-eose.js";
 import { markFromRelay } from "./operators/mark-from-relay.js";
-import { IRelay, PublishResponse, SubscriptionResponse } from "./types.js";
+import {
+  AuthSigner,
+  IRelay,
+  PublishOptions,
+  PublishResponse,
+  RequestOptions,
+  SubscriptionOptions,
+  SubscriptionResponse,
+} from "./types.js";
+
+/** An error that is thrown when a REQ is closed from the relay side */
+export class ReqCloseError extends Error {}
 
 export type RelayOptions = {
   WebSocket?: WebSocketSubjectConfig<any>["WebSocketCtor"];
@@ -39,9 +53,21 @@ export class Relay implements IRelay {
   protected log: typeof logger = logger.extend("Relay");
   protected socket: WebSocketSubject<any>;
 
+  /** Whether the relay is ready for subscriptions or event publishing. setting this to false will cause all .req and .event observables to hang until the relay is ready */
+  protected ready$ = new BehaviorSubject(true);
+
+  /** A method that returns an Observable that emits when the relay should reconnect */
+  reconnectTimer: (error: CloseEvent | Error, attempts: number) => Observable<number>;
+
+  /** How many times the relay has tried to reconnect */
+  attempts$ = new BehaviorSubject(0);
+  /** Whether the relay is connected */
   connected$ = new BehaviorSubject(false);
+  /** The authentication challenge string from the relay */
   challenge$ = new BehaviorSubject<string | null>(null);
+  /** Whether the client is authenticated with the relay */
   authenticated$ = new BehaviorSubject(false);
+  /** The notices from the relay */
   notices$ = new BehaviorSubject<string[]>([]);
 
   /** An observable that emits the NIP-11 information document for the relay */
@@ -109,20 +135,28 @@ export class Relay implements IRelay {
   ) {
     this.log = this.log.extend(url);
 
+    /** Use the static method to create a new reconnect method for this relay */
+    this.reconnectTimer = Relay.createReconnectTimer(url);
+
     this.socket = webSocket({
       url,
       openObserver: {
         next: () => {
           this.log("Connected");
           this.connected$.next(true);
+          this.attempts$.next(0);
           this.resetState();
         },
       },
       closeObserver: {
-        next: () => {
+        next: (event) => {
           this.log("Disconnected");
           this.connected$.next(false);
+          this.attempts$.next(this.attempts$.value + 1);
           this.resetState();
+
+          // Start the reconnect timer if the connection was not closed cleanly
+          if (!event.wasClean) this.startReconnectTimer(event);
         },
       },
       WebSocketCtor: opts?.WebSocket,
@@ -185,14 +219,39 @@ export class Relay implements IRelay {
     );
 
     // Merge all watchers
-    this.watchTower = merge(notice, challenge, this.information$).pipe(
-      // Never emit any values
-      ignoreElements(),
+    this.watchTower = this.ready$.pipe(
+      switchMap((ready) => {
+        if (!ready) return NEVER;
+
+        // Only start the watch tower if the relay is ready
+        return merge(notice, challenge, this.information$).pipe(
+          // Never emit any values
+          ignoreElements(),
+          // Start the reconnect timer if the connection has an error
+          catchError((error) => {
+            this.startReconnectTimer(error instanceof Error ? error : new Error("Connection error"));
+            return NEVER;
+          }),
+          // Add keep alive timer to the connection
+          share({ resetOnRefCountZero: () => timer(this.keepAlive) }),
+        );
+      }),
       // There should only be a single watch tower
-      share({ resetOnRefCountZero: () => timer(this.keepAlive) }),
+      share(),
     );
   }
 
+  /** Set ready = false and start the reconnect timer */
+  protected startReconnectTimer(error: Error | CloseEvent) {
+    if (!this.ready$.value) return;
+
+    this.ready$.next(false);
+    this.reconnectTimer(error, this.attempts$.value)
+      .pipe(take(1))
+      .subscribe(() => this.ready$.next(true));
+  }
+
+  /** Wait for ready and authenticated */
   protected waitForAuth<T extends unknown = unknown>(
     // NOTE: require BehaviorSubject so it always has a value
     requireAuth: Observable<boolean>,
@@ -201,7 +260,19 @@ export class Relay implements IRelay {
     return combineLatest([requireAuth, this.authenticated$]).pipe(
       // wait for auth not required or authenticated
       filter(([required, authenticated]) => !required || authenticated),
-      // take the first value
+      // complete after the first value so this does not repeat
+      take(1),
+      // switch to the observable
+      switchMap(() => observable),
+    );
+  }
+
+  /** Wait for the relay to be ready to accept connections */
+  protected waitForReady<T extends unknown = unknown>(observable: Observable<T>): Observable<T> {
+    return this.ready$.pipe(
+      // wait for ready to be true
+      filter((ready) => ready),
+      // complete after the first value so this does not repeat
       take(1),
       // switch to the observable
       switchMap(() => observable),
@@ -217,7 +288,7 @@ export class Relay implements IRelay {
     this.socket.next(message);
   }
 
-  /** Create a REQ observable that emits events | "EOSE" or errors */
+  /** Create a REQ observable that emits events or "EOSE" or errors */
   req(filters: Filter | Filter[], id = nanoid()): Observable<SubscriptionResponse> {
     const request = this.socket.multiplex(
       () => (Array.isArray(filters) ? ["REQ", id, ...filters] : ["REQ", id, filters]),
@@ -229,19 +300,25 @@ export class Relay implements IRelay {
     const withWatchTower = merge(this.watchTower, request);
 
     const observable = withWatchTower.pipe(
-      // listen for CLOSED auth-required
-      tap((m) => {
-        if (m[0] === "CLOSED" && m[2] && m[2].startsWith("auth-required") && !this.receivedAuthRequiredForReq.value) {
+      // Map the messages to events, EOSE, or throw an error
+      map<any[], SubscriptionResponse>((message) => {
+        if (message[0] === "EOSE") return "EOSE";
+        else if (message[0] === "CLOSED") throw new ReqCloseError(message[2]);
+        else return message[2] as NostrEvent;
+      }),
+      catchError((error) => {
+        // Set REQ auth required if the REQ is closed with auth-required
+        if (
+          error instanceof ReqCloseError &&
+          error.message.startsWith("auth-required") &&
+          !this.receivedAuthRequiredForReq.value
+        ) {
           this.log("Auth required for REQ");
           this.receivedAuthRequiredForReq.next(true);
         }
-      }),
-      // complete when CLOSE is sent
-      takeWhile((m) => m[0] !== "CLOSED"),
-      // pick event out of EVENT messages
-      map<any[], SubscriptionResponse>((message) => {
-        if (message[0] === "EOSE") return "EOSE";
-        else return message[2] as NostrEvent;
+
+        // Pass the error through
+        return throwError(() => error);
       }),
       // mark events as from relays
       markFromRelay(this.url),
@@ -254,10 +331,10 @@ export class Relay implements IRelay {
     );
 
     // Wait for auth if required and make sure to start the watch tower
-    return this.waitForAuth(this.authRequiredForReq, observable);
+    return this.waitForReady(this.waitForAuth(this.authRequiredForReq, observable));
   }
 
-  /** send an Event message and always return an observable of PublishResponse that completes or errors */
+  /** Send an EVENT or AUTH message and return an observable of PublishResponse that completes or errors */
   event(event: NostrEvent, verb: "EVENT" | "AUTH" = "EVENT"): Observable<PublishResponse> {
     const base: Observable<PublishResponse> = defer(() => {
       // Send event when subscription starts
@@ -292,15 +369,58 @@ export class Relay implements IRelay {
     );
 
     // skip wait for auth if verb is AUTH
-    if (verb === "AUTH") return observable;
-    else return this.waitForAuth(this.authRequiredForEvent, observable);
+    if (verb === "AUTH") return this.waitForReady(observable);
+    else return this.waitForReady(this.waitForAuth(this.authRequiredForEvent, observable));
   }
 
   /** send and AUTH message */
-  auth(event: NostrEvent): Observable<{ ok: boolean; message?: string }> {
+  auth(event: NostrEvent): Observable<PublishResponse> {
     return this.event(event, "AUTH").pipe(
       // update authenticated
       tap((result) => this.authenticated$.next(result.ok)),
+    );
+  }
+
+  /** Authenticate with the relay using a signer */
+  authenticate(signer: AuthSigner): Observable<PublishResponse> {
+    if (!this.challenge) throw new Error("Have not received authentication challenge");
+
+    const p = signer.signEvent(nip42.makeAuthEvent(this.url, this.challenge));
+    const start = p instanceof Promise ? from(p) : of(p);
+
+    return start.pipe(switchMap((event) => this.auth(event)));
+  }
+
+  /** Creates a REQ that retries when relay errors ( default 3 retries ) */
+  subscription(filters: Filter | Filter[], opts?: SubscriptionOptions): Observable<SubscriptionResponse> {
+    return this.req(filters, opts?.id).pipe(
+      // Retry on connection errors
+      retry({ count: opts?.retries ?? 3, resetOnSuccess: true }),
+    );
+  }
+
+  /** Makes a single request that retires on errors and completes on EOSE */
+  request(filters: Filter | Filter[], opts?: RequestOptions): Observable<NostrEvent> {
+    return this.req(filters, opts?.id).pipe(
+      // Retry on connection errors
+      retry(opts?.retries ?? 3),
+      // Complete when EOSE is received
+      completeOnEose(),
+    );
+  }
+
+  /** Publishes an event to the relay and retries when relay errors or responds with auth-required ( default 3 retries ) */
+  publish(event: NostrEvent, opts?: PublishOptions): Observable<PublishResponse> {
+    return this.event(event).pipe(
+      mergeMap((result) => {
+        // If the relay responds with auth-required, throw an error for the retry operator to handle
+        if (result.ok === false && result.message?.startsWith("auth-required:"))
+          return throwError(() => new Error(result.message));
+
+        return of(result);
+      }),
+      // Retry the publish until it succeeds or the number of retries is reached
+      retry(opts?.retries ?? 3),
     );
   }
 
@@ -312,5 +432,17 @@ export class Relay implements IRelay {
       // timeout after 10s
       simpleTimeout(10_000),
     );
+  }
+
+  /** Static method to create a reconnection method for each relay */
+  static createReconnectTimer(_relay: string) {
+    return (_error?: Error | CloseEvent, tries = 0) => {
+      // Calculate delay with exponential backoff: 2^attempts * 1000ms
+      // with a maximum delay of 5 minutes (300000ms)
+      const delay = Math.min(Math.pow(1.5, tries) * 1000, 300000);
+
+      // Return a timer that will emit after the calculated delay
+      return timer(delay);
+    };
   }
 }
