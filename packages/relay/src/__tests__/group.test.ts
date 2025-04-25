@@ -1,10 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { subscribeSpyTo } from "@hirez_io/observer-spy";
 import { NostrEvent } from "nostr-tools";
 import { WS } from "vitest-websocket-mock";
 
 import { Relay } from "../relay.js";
 import { RelayGroup } from "../group.js";
+import { of } from "rxjs";
 
 let mockRelay1: WS;
 let mockRelay2: WS;
@@ -14,10 +15,18 @@ let group: RelayGroup;
 let mockEvent: NostrEvent;
 
 beforeEach(async () => {
-  mockRelay1 = new WS("wss://relay1.test");
-  mockRelay2 = new WS("wss://relay2.test");
+  // Create mock relays
+  mockRelay1 = new WS("wss://relay1.test", { jsonProtocol: true });
+  mockRelay2 = new WS("wss://relay2.test", { jsonProtocol: true });
+
+  // Mock empty information document
+  vi.spyOn(Relay, "fetchInformationDocument").mockImplementation(() => of(null));
+
+  // Create relays
   relay1 = new Relay("wss://relay1.test");
   relay2 = new Relay("wss://relay2.test");
+
+  // Create group
   group = new RelayGroup([relay1, relay2]);
 
   mockEvent = {
@@ -38,21 +47,21 @@ afterEach(async () => {
 });
 
 describe("req", () => {
-  it("should trigger connections to multiple relays", async () => {
+  it("should make requests to multiple relays", async () => {
     group.req([{ kinds: [1] }], "test-sub").subscribe();
 
-    const req1 = await mockRelay1.nextMessage;
-    const req2 = await mockRelay2.nextMessage;
-
-    expect(JSON.parse(req1 as string)).toEqual(["REQ", "test-sub", { kinds: [1] }]);
-    expect(JSON.parse(req2 as string)).toEqual(["REQ", "test-sub", { kinds: [1] }]);
+    await expect(mockRelay1).toReceiveMessage(["REQ", "test-sub", { kinds: [1] }]);
+    await expect(mockRelay2).toReceiveMessage(["REQ", "test-sub", { kinds: [1] }]);
   });
 
   it("should emit events from all relays", async () => {
     const spy = subscribeSpyTo(group.req([{ kinds: [1] }], "test-sub"));
 
-    mockRelay1.send(JSON.stringify(["EVENT", "test-sub", { ...mockEvent, id: "1" }]));
-    mockRelay2.send(JSON.stringify(["EVENT", "test-sub", { ...mockEvent, id: "2" }]));
+    await expect(mockRelay1).toReceiveMessage(["REQ", "test-sub", { kinds: [1] }]);
+    await expect(mockRelay2).toReceiveMessage(["REQ", "test-sub", { kinds: [1] }]);
+
+    mockRelay1.send(["EVENT", "test-sub", { ...mockEvent, id: "1" }]);
+    mockRelay2.send(["EVENT", "test-sub", { ...mockEvent, id: "2" }]);
 
     expect(spy.getValues()).toEqual([expect.objectContaining({ id: "1" }), expect.objectContaining({ id: "2" })]);
   });
@@ -60,10 +69,10 @@ describe("req", () => {
   it("should only emit EOSE once all relays have emitted EOSE", async () => {
     const spy = subscribeSpyTo(group.req([{ kinds: [1] }], "test-sub"));
 
-    mockRelay1.send(JSON.stringify(["EOSE", "test-sub"]));
+    mockRelay1.send(["EOSE", "test-sub"]);
     expect(spy.getValues()).not.toContain("EOSE");
 
-    mockRelay2.send(JSON.stringify(["EOSE", "test-sub"]));
+    mockRelay2.send(["EOSE", "test-sub"]);
     expect(spy.getValues()).toContain("EOSE");
   });
 
@@ -71,8 +80,8 @@ describe("req", () => {
     const spy = subscribeSpyTo(group.req([{ kinds: [1] }], "test-sub"));
 
     mockRelay1.error();
-    mockRelay2.send(JSON.stringify(["EVENT", "test-sub", mockEvent]));
-    mockRelay2.send(JSON.stringify(["EOSE", "test-sub"]));
+    mockRelay2.send(["EVENT", "test-sub", mockEvent]);
+    mockRelay2.send(["EOSE", "test-sub"]);
 
     expect(spy.getValues()).toEqual([expect.objectContaining(mockEvent), "EOSE"]);
   });
@@ -91,18 +100,15 @@ describe("event", () => {
   it("should send EVENT to all relays in the group", async () => {
     group.event(mockEvent).subscribe();
 
-    const event1 = await mockRelay1.nextMessage;
-    const event2 = await mockRelay2.nextMessage;
-
-    expect(JSON.parse(event1 as string)).toEqual(["EVENT", mockEvent]);
-    expect(JSON.parse(event2 as string)).toEqual(["EVENT", mockEvent]);
+    await expect(mockRelay1).toReceiveMessage(["EVENT", mockEvent]);
+    await expect(mockRelay2).toReceiveMessage(["EVENT", mockEvent]);
   });
 
   it("should emit OK messages from all relays", async () => {
     const spy = subscribeSpyTo(group.event(mockEvent));
 
-    mockRelay1.send(JSON.stringify(["OK", mockEvent.id, true, ""]));
-    mockRelay2.send(JSON.stringify(["OK", mockEvent.id, true, ""]));
+    mockRelay1.send(["OK", mockEvent.id, true, ""]);
+    mockRelay2.send(["OK", mockEvent.id, true, ""]);
 
     expect(spy.getValues()).toEqual([
       expect.objectContaining({ ok: true, from: "wss://relay1.test", message: "" }),
@@ -113,10 +119,10 @@ describe("event", () => {
   it("should complete when all relays have sent OK messages", async () => {
     const spy = subscribeSpyTo(group.event(mockEvent));
 
-    mockRelay1.send(JSON.stringify(["OK", mockEvent.id, true, ""]));
+    mockRelay1.send(["OK", mockEvent.id, true, ""]);
     expect(spy.receivedComplete()).toBe(false);
 
-    mockRelay2.send(JSON.stringify(["OK", mockEvent.id, true, ""]));
+    mockRelay2.send(["OK", mockEvent.id, true, ""]);
     expect(spy.receivedComplete()).toBe(true);
   });
 
@@ -124,7 +130,7 @@ describe("event", () => {
     const spy = subscribeSpyTo(group.event(mockEvent));
 
     mockRelay1.error();
-    mockRelay2.send(JSON.stringify(["OK", mockEvent.id, true, ""]));
+    mockRelay2.send(["OK", mockEvent.id, true, ""]);
 
     expect(spy.getValues()).toEqual([
       expect.objectContaining({ ok: false, from: "wss://relay1.test", message: "Unknown error" }),

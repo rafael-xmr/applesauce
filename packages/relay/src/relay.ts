@@ -3,9 +3,11 @@ import { nanoid } from "nanoid";
 import { type Filter, type NostrEvent } from "nostr-tools";
 import {
   BehaviorSubject,
+  catchError,
   combineLatest,
   defer,
   filter,
+  from,
   ignoreElements,
   map,
   merge,
@@ -14,15 +16,18 @@ import {
   of,
   scan,
   share,
+  shareReplay,
   switchMap,
   take,
   takeWhile,
   tap,
   timeout,
-  timer
+  timer,
 } from "rxjs";
 import { webSocket, WebSocketSubject, WebSocketSubjectConfig } from "rxjs/webSocket";
+import { simpleTimeout } from "applesauce-core/observable";
 
+import { RelayInformation } from "nostr-tools/nip11";
 import { markFromRelay } from "./operators/mark-from-relay.js";
 import { IRelay, PublishResponse, SubscriptionResponse } from "./types.js";
 
@@ -38,6 +43,13 @@ export class Relay implements IRelay {
   challenge$ = new BehaviorSubject<string | null>(null);
   authenticated$ = new BehaviorSubject(false);
   notices$ = new BehaviorSubject<string[]>([]);
+
+  /** An observable that emits the NIP-11 information document for the relay */
+  information$: Observable<RelayInformation | null>;
+  protected _nip11: RelayInformation | null = null;
+
+  /** An observable that emits the limitations for the relay */
+  limitations$: Observable<RelayInformation["limitation"] | null>;
 
   /** An observable of all messages from the relay */
   message$: Observable<any>;
@@ -58,6 +70,9 @@ export class Relay implements IRelay {
   get authenticated() {
     return this.authenticated$.value;
   }
+  get information() {
+    return this._nip11;
+  }
 
   /** If an EOSE message is not seen in this time, emit one locally  */
   eoseTimeout = 10_000;
@@ -67,8 +82,13 @@ export class Relay implements IRelay {
   /** How long to keep the connection alive after nothing is subscribed */
   keepAlive = 30_000;
 
-  protected authRequiredForReq = new BehaviorSubject(false);
-  protected authRequiredForPublish = new BehaviorSubject(false);
+  // subjects that track if an "auth-required" message has been received for REQ or EVENT
+  protected receivedAuthRequiredForReq = new BehaviorSubject(false);
+  protected receivedAuthRequiredForEvent = new BehaviorSubject(false);
+
+  // Computed observables that track if auth is required for REQ or EVENT
+  protected authRequiredForReq: Observable<boolean>;
+  protected authRequiredForEvent: Observable<boolean>;
 
   protected resetState() {
     // NOTE: only update the values if they need to be changed, otherwise this will cause an infinite loop
@@ -76,8 +96,8 @@ export class Relay implements IRelay {
     if (this.authenticated$.value) this.authenticated$.next(false);
     if (this.notices$.value.length > 0) this.notices$.next([]);
 
-    if (this.authRequiredForReq.value) this.authRequiredForReq.next(false);
-    if (this.authRequiredForPublish.value) this.authRequiredForPublish.next(false);
+    if (this.receivedAuthRequiredForReq.value) this.receivedAuthRequiredForReq.next(false);
+    if (this.receivedAuthRequiredForEvent.value) this.receivedAuthRequiredForEvent.next(false);
   }
 
   /** An internal observable that is responsible for watching all messages and updating state */
@@ -110,6 +130,32 @@ export class Relay implements IRelay {
 
     this.message$ = this.socket.asObservable();
 
+    // Create an observable to fetch the NIP-11 information document
+    this.information$ = defer(() => {
+      this.log("Fetching NIP-11 information document");
+      return Relay.fetchInformationDocument(this.url);
+    }).pipe(
+      // if the fetch fails, return null
+      catchError(() => of(null)),
+      // cache the result
+      shareReplay(1),
+      // update the internal state
+      tap((info) => (this._nip11 = info)),
+    );
+    this.limitations$ = this.information$.pipe(map((info) => info?.limitation));
+
+    // Create observables that track if auth is required for REQ or EVENT
+    this.authRequiredForReq = combineLatest([this.receivedAuthRequiredForReq, this.limitations$]).pipe(
+      map(([received, limitations]) => received || limitations?.auth_required === true),
+      tap((required) => required && this.log("Auth required for REQ")),
+      shareReplay(1),
+    );
+    this.authRequiredForEvent = combineLatest([this.receivedAuthRequiredForEvent, this.limitations$]).pipe(
+      map(([received, limitations]) => received || limitations?.auth_required === true),
+      tap((required) => required && this.log("Auth required for EVENT")),
+      shareReplay(1),
+    );
+
     this.notice$ = this.message$.pipe(
       // listen for NOTICE messages
       filter((m) => m[0] === "NOTICE"),
@@ -139,7 +185,7 @@ export class Relay implements IRelay {
     );
 
     // Merge all watchers
-    this.watchTower = merge(notice, challenge).pipe(
+    this.watchTower = merge(notice, challenge, this.information$).pipe(
       // Never emit any values
       ignoreElements(),
       // There should only be a single watch tower
@@ -149,7 +195,7 @@ export class Relay implements IRelay {
 
   protected waitForAuth<T extends unknown = unknown>(
     // NOTE: require BehaviorSubject so it always has a value
-    requireAuth: BehaviorSubject<boolean>,
+    requireAuth: Observable<boolean>,
     observable: Observable<T>,
   ): Observable<T> {
     return combineLatest([requireAuth, this.authenticated$]).pipe(
@@ -185,9 +231,9 @@ export class Relay implements IRelay {
     const observable = withWatchTower.pipe(
       // listen for CLOSED auth-required
       tap((m) => {
-        if (m[0] === "CLOSED" && m[2] && m[2].startsWith("auth-required") && !this.authRequiredForReq.value) {
+        if (m[0] === "CLOSED" && m[2] && m[2].startsWith("auth-required") && !this.receivedAuthRequiredForReq.value) {
           this.log("Auth required for REQ");
-          this.authRequiredForReq.next(true);
+          this.receivedAuthRequiredForReq.next(true);
         }
       }),
       // complete when CLOSE is sent
@@ -233,9 +279,9 @@ export class Relay implements IRelay {
       take(1),
       // listen for OK auth-required
       tap(({ ok, message }) => {
-        if (ok === false && message?.startsWith("auth-required") && !this.authRequiredForPublish.value) {
+        if (ok === false && message?.startsWith("auth-required") && !this.receivedAuthRequiredForEvent.value) {
           this.log("Auth required for publish");
-          this.authRequiredForPublish.next(true);
+          this.receivedAuthRequiredForEvent.next(true);
         }
       }),
       // if no message is seen in 10s, emit EOSE
@@ -247,7 +293,7 @@ export class Relay implements IRelay {
 
     // skip wait for auth if verb is AUTH
     if (verb === "AUTH") return observable;
-    else return this.waitForAuth(this.authRequiredForPublish, observable);
+    else return this.waitForAuth(this.authRequiredForEvent, observable);
   }
 
   /** send and AUTH message */
@@ -255,6 +301,16 @@ export class Relay implements IRelay {
     return this.event(event, "AUTH").pipe(
       // update authenticated
       tap((result) => this.authenticated$.next(result.ok)),
+    );
+  }
+
+  /** Static method to fetch the NIP-11 information document for a relay */
+  static fetchInformationDocument(url: string): Observable<RelayInformation | null> {
+    return from(fetch(url, { headers: { Accept: "application/nostr+json" } }).then((res) => res.json())).pipe(
+      // if the fetch fails, return null
+      catchError(() => of(null)),
+      // timeout after 10s
+      simpleTimeout(10_000),
     );
   }
 }
