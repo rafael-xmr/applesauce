@@ -4,19 +4,15 @@ Actions are common pre-built async operations apps can perform. they use the `Ev
 
 ## Action Hub
 
-The `ActionHub` class is a simple manager that combines the event store, event factory, and an optional publish method into a single place to make it easier to run actions
+The [ActionHub](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_actions.ActionHub.html) class is a simple manager that combines the event store, event factory, and an optional publish method into a single place to make it easier to run actions
 
 ```ts
 import { ActionHub } from "applesauce-actions";
 
 // Custom publish logic
-const publish = async (label: string, event: NostrEvent, explicitRelays?: string[]) => {
-  console.log("Publishing", label, event);
-  if (explicitRelays) {
-    await app.relayPool.publish(event, explicitRelays);
-  } else {
-    await app.relayPool.publish(event, app.defaultRelays);
-  }
+const publish = async (event: NostrEvent) => {
+  console.log("Publishing", event);
+  await app.relayPool.publish(event, app.defaultRelays);
 };
 
 // Create a new action hub with an event store, event factory, and custom publish method
@@ -98,6 +94,10 @@ const sub = hub
     complete: () => sub.unsubscribe(),
   });
 ```
+
+## Prebuilt actions
+
+The `applesauce-actions` package comes with some connect prebuilt actions for social clients, you can find them in the [typescript docs](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_actions.Actions.html)
 
 ## Custom actions
 

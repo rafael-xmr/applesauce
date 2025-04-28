@@ -1,4 +1,5 @@
 export * from "./blocked-relays.js";
+export * from "./blossom.js";
 export * from "./bookmarks.js";
 export * from "./contacts.js";
 export * from "./dm-relays.js";

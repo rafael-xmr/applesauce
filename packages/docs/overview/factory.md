@@ -135,6 +135,8 @@ const modified = await factory.modifyTags(list, {
 
 ## Quick helper methods
 
+The `EventFactory` class has a few helper methods on it for building common event types:
+
 - [`factory.note`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#note) is a shortcut for `NoteBlueprint`
 - [`factory.noteReply`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#noteReply) is a shortcut for `NoteReplyBlueprint`
 - [`factory.comment`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#comment) is a shortcut for `CommentBlueprint`
@@ -165,17 +167,4 @@ await factory.process(
 
 ## Prebuilt blueprints
 
-The [`NoteBlueprint`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_factory.Blueprints.NoteBlueprint.html) can be used to create top level text notes (kind 1) and supports, quotes, emojis, and hashtags
-
-The [`NoteReplyBlueprint`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_factory.Blueprints.NoteReplyBlueprint.html) can be used to create note replies (kind 1) to top level text note (kind 1)
-
-> [!IMPORTANT]
-> The `NoteReplyBlueprint` only supports replying to kind 1 notes. if you need replies to other kinds use [`CommentBlueprint`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_factory.Blueprints.CommentBlueprint.html)
-
-The [`CommentBlueprint`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_factory.Blueprints.CommentBlueprint.html) can be used to create [NIP-22](https://github.com/nostr-protocol/nips/blob/master/22.md) comments on any event kind
-
-The [`ReactionBlueprint`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_factory.Blueprints.ReactionBlueprint.html) can be used to create [NIP-25](https://github.com/nostr-protocol/nips/blob/master/25.md) reactions and supports the common `+` and `-` reactions along with unicode and [NIP-30](https://github.com/nostr-protocol/nips/blob/master/30.md) emojis
-
-The [`ShareBlueprint`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_factory.Blueprints.ShareBlueprint.html) can be used to create [NIP-18](https://github.com/nostr-protocol/nips/blob/master/18.md) repost / share event
-
-The [`DeleteBlueprint`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_factory.Blueprints.DeleteBlueprint.html) can be used to create [NIP-09](https://github.com/nostr-protocol/nips/blob/master/09.md) delete event
+The `applesauce-factory` package comes with common event blueprints for social clients. you can find them in the [typescript docs](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_factory.Blueprints.html)

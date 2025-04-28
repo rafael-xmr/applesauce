@@ -1,37 +1,55 @@
 # applesauce-core
 
-AppleSauce Core is an interpretation layer for nostr clients, Push events into the in-memory [database](https://hzrd149.github.io/applesauce/typedoc/classes/Database.html) and get nicely formatted data out with [queries](https://hzrd149.github.io/applesauce/typedoc/modules/Queries)
+AppleSauce is a collection of utilities for building reactive nostr applications. The core package provides an in-memory event database and reactive queries to help you build nostr UIs with less code.
 
-# Example
+## Key Components
+
+- **Helpers**: Core utility methods for parsing and extracting data from nostr events
+- **EventStore**: In-memory database for storing and subscribing to nostr events
+- **QueryStore**: Manages queries and ensures efficient subscription handling
+- **Queries**: Complex subscriptions for common nostr data patterns
+
+## Documentation
+
+For detailed documentation and guides, visit:
+
+- [Getting Started](https://hzrd149.github.io/applesauce/introduction/getting-started)
+- [API Reference](https://hzrd149.github.io/applesauce/typedoc/)
+
+## Example
 
 ```js
 import { EventStore, QueryStore } from "applesauce-core";
 import { Relay } from "nostr-tools/relay";
 
-// The EventStore handles all the events
+// Create a single EventStore instance for your app
 const eventStore = new EventStore();
 
-// The QueryStore handles queries and makes sure not to run multiple of the same query
+// Create a QueryStore to manage subscriptions efficiently
 const queryStore = new QueryStore(eventStore);
 
-// Use nostr-tools or anything else to talk to relays
+// Use any nostr library for relay connections (nostr-tools, ndk, nostrify, etc...)
 const relay = await Relay.connect("wss://relay.example.com");
 
-const sub = relay.subscribe([{ authors: ["266815e0c9210dfa324c6cba3573b14bee49da4209a9456f9484e5106cd408a5"] }], {
+// Subscribe to events and add them to the store
+const sub = relay.subscribe([{ authors: ["3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d"] }], {
   onevent(event) {
     eventStore.add(event);
   },
 });
 
-// This will return an Observable<ProfileContent | undefined> of the parsed metadata
-const profile = queryStore.profile("266815e0c9210dfa324c6cba3573b14bee49da4209a9456f9484e5106cd408a5");
+// Subscribe to profile changes using ProfileQuery
+const profile = queryStore.createQuery(
+  ProfileQuery,
+  "3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d",
+);
 
 profile.subscribe((parsed) => {
   if (parsed) console.log(parsed);
 });
 
-// This will return an Observable<NostrEvent[]> of all kind 1 events sorted by created_at
-const timeline = queryStore.timeline({ kinds: [1] });
+// Subscribe to a timeline of events
+const timeline = queryStore.createQuery(TimelineQuery, { kinds: [1] });
 
 timeline.subscribe((events) => {
   console.log(events);
