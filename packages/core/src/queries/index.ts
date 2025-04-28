@@ -3,6 +3,7 @@ export * from "./bookmarks.js";
 export * from "./channels.js";
 export * from "./comments.js";
 export * from "./contacts.js";
+export * from "./relays.js";
 export * from "./mailboxes.js";
 export * from "./mutes.js";
 export * from "./pins.js";
