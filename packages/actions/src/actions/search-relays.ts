@@ -1,6 +1,7 @@
 import { ISyncEventStore } from "applesauce-core/event-store";
-import { addRelayTag, removeRelayTag } from "applesauce-factory/operations/tag";
-import { modifyHiddenTags, modifyPublicTags, TagOperation } from "applesauce-factory/operations/tag/list";
+import { TagOperation } from "applesauce-factory";
+import { modifyHiddenTags, modifyPublicTags } from "applesauce-factory/operations/event";
+import { addRelayTag, removeRelayTag } from "applesauce-factory/operations/tag/relay";
 import { kinds } from "nostr-tools";
 
 import { Action } from "../action-hub.js";

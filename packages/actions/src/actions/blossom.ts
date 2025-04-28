@@ -1,8 +1,8 @@
 import { ISyncEventStore } from "applesauce-core/event-store";
 import { BLOSSOM_SERVER_LIST_KIND } from "applesauce-core/helpers/blossom";
+import { TagOperation } from "applesauce-factory";
 import { modifyPublicTags } from "applesauce-factory/operations/event";
 import { addBlossomServerTag, removeBlossomServerTag } from "applesauce-factory/operations/tag/blossom";
-import { TagOperation } from "applesauce-factory/operations/tag/list";
 
 import { Action } from "../action-hub.js";
 
