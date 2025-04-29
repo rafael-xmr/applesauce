@@ -98,8 +98,8 @@ type Subscribable<T extends unknown> = {
   subscribe: (observer: Partial<Observer<T>>) => Unsubscribable;
 };
 
-export type NostrSubscriptionMethod = (filters: Filter[], relays: string[]) => Subscribable<NostrEvent>;
-export type NostrPublishMethod = (event: NostrEvent, relays: string[]) => void | Promise<void>;
+export type NostrSubscriptionMethod = (relays: string[], filters: Filter[]) => Subscribable<NostrEvent>;
+export type NostrPublishMethod = (relays: string[], event: NostrEvent) => void | Promise<void>;
 
 export type NostrConnectAppMetadata = {
   name?: string;
@@ -201,15 +201,12 @@ export class NostrConnectSigner implements Nip07Interface {
     const pubkey = await this.signer.getPublicKey();
 
     // Setup subscription
-    this.req = this.subscriptionMethod(
-      [
-        {
-          kinds: [kinds.NostrConnect],
-          "#p": [pubkey],
-        },
-      ],
-      this.relays,
-    ).subscribe({
+    this.req = this.subscriptionMethod(this.relays, [
+      {
+        kinds: [kinds.NostrConnect],
+        "#p": [pubkey],
+      },
+    ]).subscribe({
       next: (event) => this.handleEvent(event),
     });
 
@@ -303,7 +300,7 @@ export class NostrConnectSigner implements Nip07Interface {
     const p = createDefer<ResponseResults[T]>();
     this.requests.set(id, p);
 
-    await this.publishMethod?.(event, this.relays);
+    await this.publishMethod?.(this.relays, event);
 
     return p;
   }

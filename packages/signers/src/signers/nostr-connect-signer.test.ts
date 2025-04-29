@@ -22,7 +22,7 @@ describe("NostrConnectSigner", () => {
 
       signer.connect();
 
-      expect(subscription).toHaveBeenCalledWith([{ "#p": [await client.getPublicKey()], kinds: [24133] }], relays);
+      expect(subscription).toHaveBeenCalledWith(relays, [{ "#p": [await client.getPublicKey()], kinds: [24133] }]);
     });
   });
 });

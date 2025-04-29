@@ -68,7 +68,7 @@ These methods can be set either through the constructor or globally on the class
 ```typescript
 import { Observable } from "rxjs";
 
-function subscriptionMethod(filters, relays) {
+function subscriptionMethod(relays, filters) {
   return new Observable((observer) => {
     // Create subscription to relays
     const cleanup = subscribeToRelays(relays, filters, (event) => {
@@ -79,7 +79,7 @@ function subscriptionMethod(filters, relays) {
   });
 }
 
-async function publishMethod(event, relays) {
+async function publishMethod(relays, event) {
   for (const relay of relays) {
     await publishToRelay(relay, event);
   }
