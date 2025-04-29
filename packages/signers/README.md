@@ -8,7 +8,7 @@ For detailed documentation and API reference, see:
 
 - [Signers Documentation](https://hzrd149.github.io/applesauce/signers/signers.html)
 - [Nostr Connect Documentation](https://hzrd149.github.io/applesauce/signers/nostr-connect.html)
-- [API Reference](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_signers.html)
+- [API Reference](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce-signers.html)
 
 ## Available Signers
 

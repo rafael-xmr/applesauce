@@ -4,4 +4,4 @@ The `applesauce-content` package exports some [remark](https://www.npmjs.com/pac
 
 ## Nostr Mentions
 
-The [`remarkNostrMentions`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_content.Markdown.remarkNostrMentions.html) transformer can be used to linkify [NIP-21](https://github.com/nostr-protocol/nips/blob/master/21.md) `nostr:` URIs
+The [`remarkNostrMentions`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-content.Markdown.remarkNostrMentions.html) transformer can be used to linkify [NIP-21](https://github.com/nostr-protocol/nips/blob/master/21.md) `nostr:` URIs

@@ -4,7 +4,7 @@ The `EventFactory` is a class is used to provide a [Signer](../signers/signers.m
 
 ## Creating a factory
 
-When creating a new event factory you can pass a [context](https://hzrd149.github.io/applesauce/typedoc/types/applesauce_factory.EventFactoryContext.html) object in that is used by all blueprints
+When creating a new event factory you can pass a [context](https://hzrd149.github.io/applesauce/typedoc/types/applesauce-factory.EventFactoryContext.html) object in that is used by all blueprints
 
 ```ts
 const signer = new SimpleSigner();
@@ -25,7 +25,7 @@ const factory = new EventFactory({
 
 ## Relay hints
 
-Relay hints can ge added to all event tags that support them by passing in `getEventRelayHint` and `getPubkeyRelayHint` methods into the [context](https://hzrd149.github.io/applesauce/typedoc/types/applesauce_factory.EventFactoryContext.html)
+Relay hints can ge added to all event tags that support them by passing in `getEventRelayHint` and `getPubkeyRelayHint` methods into the [context](https://hzrd149.github.io/applesauce/typedoc/types/applesauce-factory.EventFactoryContext.html)
 
 ```ts
 const factory = new EventFactory({
@@ -47,7 +47,7 @@ const factory = new EventFactory({
 
 ## Using a blueprint
 
-The [`factory.create`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#create) method can be used to create an event from a blueprint
+The [`factory.create`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-factory.EventFactory.html#create) method can be used to create an event from a blueprint
 
 ```ts
 await factory.create(NoteBlueprint, "hello world");
@@ -55,9 +55,9 @@ await factory.create(NoteBlueprint, "hello world");
 
 ## Modifying an event
 
-The [EventFactory.modify](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#modify) and [EventFactory.modifyTags](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#modifyTags) methods can be used to modify replaceable events
+The [EventFactory.modify](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-factory.EventFactory.html#modify) and [EventFactory.modifyTags](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-factory.EventFactory.html#modifyTags) methods can be used to modify replaceable events
 
-The first method `modify` takes a list of [EventOperations](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_factory.Operations.html) and is useful for modifying common properties of a list event like name, description, or image
+The first method `modify` takes a list of [EventOperations](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce-factory.Operations.html) and is useful for modifying common properties of a list event like name, description, or image
 
 ```js
 const list = {
@@ -76,7 +76,7 @@ const modified = await factory.modify(
 );
 ```
 
-The second method `modifyTags` takes of list of [TagOperations](https://hzrd149.github.io/applesauce/typedoc/types/applesauce_factory.Operations.TagOperation.html) and is useful for modifying the public (or hidden) `tags` array of a replaceable event
+The second method `modifyTags` takes of list of [TagOperations](https://hzrd149.github.io/applesauce/typedoc/types/applesauce-factory.Operations.TagOperation.html) and is useful for modifying the public (or hidden) `tags` array of a replaceable event
 
 For example, removing an `e` tag from a bookmark list
 
@@ -137,16 +137,16 @@ const modified = await factory.modifyTags(list, {
 
 The `EventFactory` class has a few helper methods on it for building common event types:
 
-- [`factory.note`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#note) is a shortcut for `NoteBlueprint`
-- [`factory.noteReply`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#noteReply) is a shortcut for `NoteReplyBlueprint`
-- [`factory.comment`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#comment) is a shortcut for `CommentBlueprint`
-- [`factory.reaction`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#reaction) is a shortcut for `ReactionBlueprint`
-- [`factory.share`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#share) is a shortcut for `ShareBlueprint`
-- [`factory.delete`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#delete) is a shortcut for `DeleteBlueprint`
+- [`factory.note`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-factory.EventFactory.html#note) is a shortcut for `NoteBlueprint`
+- [`factory.noteReply`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-factory.EventFactory.html#noteReply) is a shortcut for `NoteReplyBlueprint`
+- [`factory.comment`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-factory.EventFactory.html#comment) is a shortcut for `CommentBlueprint`
+- [`factory.reaction`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-factory.EventFactory.html#reaction) is a shortcut for `ReactionBlueprint`
+- [`factory.share`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-factory.EventFactory.html#share) is a shortcut for `ShareBlueprint`
+- [`factory.delete`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-factory.EventFactory.html#delete) is a shortcut for `DeleteBlueprint`
 
 ## Manually creating an event
 
-The [`factory.process`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_factory.EventFactory.html#process) method can be used to create an event from an `EventTemplate` and [EventOperations](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_factory.Operations.html)
+The [`factory.process`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-factory.EventFactory.html#process) method can be used to create an event from an `EventTemplate` and [EventOperations](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce-factory.Operations.html)
 
 ```ts
 import { includeSingletonTag, setContent, includeAltTag } from "applesauce-factory/operations";
@@ -167,4 +167,4 @@ await factory.process(
 
 ## Prebuilt blueprints
 
-The `applesauce-factory` package comes with common event blueprints for social clients. you can find them in the [typescript docs](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_factory.Blueprints.html)
+The `applesauce-factory` package comes with common event blueprints for social clients. you can find them in the [typescript docs](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce-factory.Blueprints.html)

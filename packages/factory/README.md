@@ -11,7 +11,7 @@ For detailed documentation and guides, visit:
 
 ## Creating a Factory
 
-When creating a new event factory you can pass a [context](https://hzrd149.github.io/applesauce/typedoc/types/applesauce_factory.EventFactoryContext.html) object that is used by all blueprints:
+When creating a new event factory you can pass a [context](https://hzrd149.github.io/applesauce/typedoc/types/applesauce-factory.EventFactoryContext.html) object that is used by all blueprints:
 
 ```ts
 const signer = new SimpleSigner();
@@ -38,7 +38,7 @@ import { NoteBlueprint } from "applesauce-factory/blueprints";
 
 const factory = new EventFactory({
   // config options,
-  // see https://hzrd149.github.io/applesauce/typedoc/types/applesauce_factory.EventFactoryContext.html
+  // see https://hzrd149.github.io/applesauce/typedoc/types/applesauce-factory.EventFactoryContext.html
 });
 
 const unsignedEvent = await factory.create(
@@ -105,4 +105,4 @@ const modified = await factory.modify(
 
 ## Prebuilt Blueprints
 
-The `applesauce-factory` package comes with common event blueprints for social clients. you can find them in the [typescript docs](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_factory.Blueprints.html)
+The `applesauce-factory` package comes with common event blueprints for social clients. you can find them in the [typescript docs](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce-factory.Blueprints.html)

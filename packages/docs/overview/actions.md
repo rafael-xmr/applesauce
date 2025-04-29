@@ -4,7 +4,7 @@ Actions are common pre-built async operations apps can perform. they use the `Ev
 
 ## Action Hub
 
-The [ActionHub](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_actions.ActionHub.html) class is a simple manager that combines the event store, event factory, and an optional publish method into a single place to make it easier to run actions
+The [ActionHub](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-actions.ActionHub.html) class is a simple manager that combines the event store, event factory, and an optional publish method into a single place to make it easier to run actions
 
 ```ts
 import { ActionHub } from "applesauce-actions";
@@ -28,9 +28,9 @@ For performance reasons, its recommended to only create a single `ActionHub` ins
 
 ## What is an action
 
-An [Action](https://hzrd149.github.io/applesauce/typedoc/types/applesauce_actions.Action.html) is an [AsyncIterator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncIterator) that reads from the `EventStore` and yields nostr events to be published using the `EventFactory`
+An [Action](https://hzrd149.github.io/applesauce/typedoc/types/applesauce-actions.Action.html) is an [AsyncIterator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncIterator) that reads from the `EventStore` and yields nostr events to be published using the `EventFactory`
 
-You can see the full list of built-in actions in the [reference](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_actions.Actions.html)
+You can see the full list of built-in actions in the [reference](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce-actions.Actions.html)
 
 :::warning
 To avoid overriding replaceable events, actions will throw if an existing replaceable event cant be found
@@ -38,7 +38,7 @@ To avoid overriding replaceable events, actions will throw if an existing replac
 
 ## Running using async/await
 
-[ActionHub.run](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_actions.ActionHub.html#run) can be used to run actions and `await` for them to complete
+[ActionHub.run](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-actions.ActionHub.html#run) can be used to run actions and `await` for them to complete
 
 :::warning
 `ActionHub.run` will throw an error if a `publish` method was not provided when creating the `new ActionHub`
@@ -64,7 +64,7 @@ await hub.run(
 
 ## Running using observables
 
-If your looking to manually handle publish events for each action run, then [ActionHub.exec](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_actions.ActionHub.html#exec) can be used to run an action and subscribe to a stream of nostr events to publish
+If your looking to manually handle publish events for each action run, then [ActionHub.exec](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-actions.ActionHub.html#exec) can be used to run an action and subscribe to a stream of nostr events to publish
 
 :::info
 The RxJS [Observable.forEach](https://rxjs.dev/api/index/class/Observable#foreach) method provides a clean way to pipe all the events to a single method an use `await` to wait for completion
@@ -97,7 +97,7 @@ const sub = hub
 
 ## Prebuilt actions
 
-The `applesauce-actions` package comes with some connect prebuilt actions for social clients, you can find them in the [typescript docs](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_actions.Actions.html)
+The `applesauce-actions` package comes with some connect prebuilt actions for social clients, you can find them in the [typescript docs](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce-actions.Actions.html)
 
 ## Custom actions
 
