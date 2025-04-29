@@ -26,7 +26,7 @@ importers:
         version: 3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2)
       '@vitest/coverage-v8':
         specifier: 2.1.8
-        version: 2.1.8(@vitest/browser@3.1.2)(vitest@3.1.2)
+        version: 2.1.8(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(vitest@3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1))
       playwright:
         specifier: ^1.52.0
         version: 1.52.0
@@ -41,7 +41,7 @@ importers:
         version: 5.8.3
       vitest:
         specifier: ^3.1.2
-        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
 
   packages/accounts:
     dependencies:
@@ -49,7 +49,7 @@ importers:
         specifier: ^1.7.1
         version: 1.8.0
       applesauce-signers:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../signers
       nanoid:
         specifier: ^5.1.5
@@ -66,15 +66,15 @@ importers:
         version: 5.8.3
       vitest:
         specifier: ^3.1.1
-        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
 
   packages/actions:
     dependencies:
       applesauce-core:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../core
       applesauce-factory:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../factory
       nostr-tools:
         specifier: ^2.10.4
@@ -90,7 +90,7 @@ importers:
         specifier: ^4.1.12
         version: 4.1.12
       applesauce-signers:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../signers
       nanoid:
         specifier: ^5.1.5
@@ -100,7 +100,7 @@ importers:
         version: 5.8.3
       vitest:
         specifier: ^3.1.1
-        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
 
   packages/content:
     dependencies:
@@ -117,7 +117,7 @@ importers:
         specifier: ^3.0.3
         version: 3.0.3
       applesauce-core:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../core
       mdast-util-find-and-replace:
         specifier: ^3.0.2
@@ -143,7 +143,7 @@ importers:
         version: 5.8.3
       vitest:
         specifier: ^3.1.1
-        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
 
   packages/core:
     dependencies:
@@ -189,7 +189,7 @@ importers:
         version: 5.8.3
       vitest:
         specifier: ^3.1.1
-        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
 
   packages/docs:
     devDependencies:
@@ -206,10 +206,10 @@ importers:
         specifier: ^1.7.1
         version: 1.8.0
       applesauce-core:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../core
       applesauce-factory:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../factory
       nostr-tools:
         specifier: ^2.10.4
@@ -225,17 +225,17 @@ importers:
         specifier: ^4.1.12
         version: 4.1.12
       applesauce-relay:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../relay
       applesauce-signers:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../signers
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
       vitest:
         specifier: ^3.1.1
-        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
 
   packages/examples:
     dependencies:
@@ -252,16 +252,16 @@ importers:
         specifier: ^6.4.4
         version: 6.4.11(@emotion/react@11.14.0(@types/react@18.3.20)(react@18.3.1))(@emotion/styled@11.14.0(@emotion/react@11.14.0(@types/react@18.3.20)(react@18.3.1))(@types/react@18.3.20)(react@18.3.1))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       applesauce-core:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../core
       applesauce-factory:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../factory
       applesauce-loaders:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../loaders
       applesauce-react:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../react
       nostr-tools:
         specifier: ^2.10.4
@@ -304,10 +304,10 @@ importers:
   packages/factory:
     dependencies:
       applesauce-content:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../content
       applesauce-core:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../core
       nanoid:
         specifier: ^5.0.9
@@ -324,21 +324,21 @@ importers:
         version: 22.14.1
       '@vitest/coverage-v8':
         specifier: 2.1.8
-        version: 2.1.8(@vitest/browser@3.1.2)(vitest@3.1.2)
+        version: 2.1.8(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(vitest@3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1))
       applesauce-signers:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../signers
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
       vitest:
         specifier: ^3.1.1
-        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
 
   packages/loaders:
     dependencies:
       applesauce-core:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../core
       nanoid:
         specifier: ^5.0.9
@@ -355,7 +355,7 @@ importers:
         version: 5.8.3
       vitest:
         specifier: ^3.1.1
-        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
       vitest-nostr:
         specifier: ^0.4.1
         version: 0.4.1(vitest-websocket-mock@0.5.0(vitest@3.1.2))(vitest@3.1.2)
@@ -366,19 +366,19 @@ importers:
   packages/react:
     dependencies:
       applesauce-accounts:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../accounts
       applesauce-actions:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../actions
       applesauce-content:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../content
       applesauce-core:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../core
       applesauce-factory:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../factory
       nostr-tools:
         specifier: ^2.10.4
@@ -401,7 +401,7 @@ importers:
         version: 5.8.3
       vitest:
         specifier: ^3.1.1
-        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
 
   packages/relay:
     dependencies:
@@ -409,7 +409,7 @@ importers:
         specifier: ^1.7.1
         version: 1.8.0
       applesauce-core:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../core
       nanoid:
         specifier: ^5.0.9
@@ -432,7 +432,7 @@ importers:
         version: 5.8.3
       vitest:
         specifier: ^3.1.1
-        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
       vitest-websocket-mock:
         specifier: ^0.5.0
         version: 0.5.0(vitest@3.1.2)
@@ -449,7 +449,7 @@ importers:
         specifier: ^1.2.4
         version: 1.2.4
       applesauce-core:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../core
       debug:
         specifier: ^4.4.0
@@ -472,12 +472,12 @@ importers:
         version: 5.8.3
       vitest:
         specifier: ^3.1.1
-        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
 
   packages/solidjs:
     dependencies:
       applesauce-core:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../core
       solid-js:
         specifier: ^1.9.5
@@ -488,7 +488,7 @@ importers:
         version: 5.8.3
       vitest:
         specifier: ^3.1.1
-        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
 
   packages/wallet:
     dependencies:
@@ -502,13 +502,13 @@ importers:
         specifier: ^1.7.1
         version: 1.8.0
       applesauce-actions:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../actions
       applesauce-core:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../core
       applesauce-factory:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../factory
       nostr-tools:
         specifier: ^2.10.4
@@ -524,14 +524,14 @@ importers:
         specifier: ^4.1.12
         version: 4.1.12
       applesauce-signers:
-        specifier: ^0.12.0
+        specifier: ^1.0.0
         version: link:../signers
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
       vitest:
         specifier: ^3.1.1
-        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
 
 packages:
 
@@ -4376,7 +4376,7 @@ snapshots:
       magic-string: 0.30.17
       sirv: 3.0.1
       tinyrainbow: 2.0.0
-      vitest: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+      vitest: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
       ws: 8.18.1
     optionalDependencies:
       playwright: 1.52.0
@@ -4386,7 +4386,7 @@ snapshots:
       - utf-8-validate
       - vite
 
-  '@vitest/coverage-v8@2.1.8(@vitest/browser@3.1.2)(vitest@3.1.2)':
+  '@vitest/coverage-v8@2.1.8(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(vitest@3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -4400,7 +4400,7 @@ snapshots:
       std-env: 3.9.0
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
-      vitest: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+      vitest: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
     optionalDependencies:
       '@vitest/browser': 3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2)
     transitivePeerDependencies:
@@ -6075,16 +6075,16 @@ snapshots:
 
   vitest-nostr@0.4.1(vitest-websocket-mock@0.5.0(vitest@3.1.2))(vitest@3.1.2):
     dependencies:
-      vitest: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+      vitest: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
       vitest-websocket-mock: 0.5.0(vitest@3.1.2)
 
   vitest-websocket-mock@0.5.0(vitest@3.1.2):
     dependencies:
       '@vitest/utils': 3.1.2
       mock-socket: 9.3.1
-      vitest: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1)
+      vitest: 3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1)
 
-  vitest@3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2)(yaml@2.7.1):
+  vitest@3.1.2(@types/debug@4.1.12)(@types/node@22.14.1)(@vitest/browser@3.1.2(playwright@1.52.0)(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))(vitest@3.1.2))(yaml@2.7.1):
     dependencies:
       '@vitest/expect': 3.1.2
       '@vitest/mocker': 3.1.2(vite@6.3.2(@types/node@22.14.1)(yaml@2.7.1))
