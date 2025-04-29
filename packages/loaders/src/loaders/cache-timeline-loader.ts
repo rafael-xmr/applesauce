@@ -1,8 +1,8 @@
-import { BehaviorSubject, filter, map, mergeMap, tap } from "rxjs";
-import { markFromCache, unixNow } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
-import { Filter, NostrEvent } from "nostr-tools";
+import { markFromCache, unixNow } from "applesauce-core/helpers";
 import { nanoid } from "nanoid";
+import { Filter, NostrEvent } from "nostr-tools";
+import { BehaviorSubject, filter, map, mergeMap, tap } from "rxjs";
 
 import { CacheRequest, Loader } from "./loader.js";
 import { TimelessFilter } from "./relay-timeline-loader.js";

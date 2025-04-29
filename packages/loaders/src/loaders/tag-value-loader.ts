@@ -1,12 +1,12 @@
-import { bufferTime, filter, merge, mergeMap, tap } from "rxjs";
-import { Filter, NostrEvent } from "nostr-tools";
-import { markFromCache, mergeRelaySets } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
+import { markFromCache, mergeRelaySets } from "applesauce-core/helpers";
+import { Filter, NostrEvent } from "nostr-tools";
+import { bufferTime, filter, merge, mergeMap, tap } from "rxjs";
 
-import { CacheRequest, Loader, NostrRequest, RelayFilterMap } from "./loader.js";
-import { distinctRelaysBatch } from "../operators/distinct-relays.js";
 import { unique } from "../helpers/array.js";
 import { completeOnEOSE } from "../operators/complete-on-eose.js";
+import { distinctRelaysBatch } from "../operators/distinct-relays.js";
+import { CacheRequest, Loader, NostrRequest, RelayFilterMap } from "./loader.js";
 
 export type TabValuePointer = {
   /** The value of the tag to load */

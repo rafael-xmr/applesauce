@@ -1,11 +1,9 @@
-import { tap, Observable, filter, bufferTime, map } from "rxjs";
-import { getEventUID, markFromCache, mergeRelaySets } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
+import { getEventUID, markFromCache, mergeRelaySets } from "applesauce-core/helpers";
 import { nanoid } from "nanoid";
 import { NostrEvent } from "nostr-tools";
+import { bufferTime, filter, map, Observable, tap } from "rxjs";
 
-import { CacheRequest, Loader, NostrRequest } from "./loader.js";
-import { generatorSequence } from "../operators/generator-sequence.js";
 import {
   consolidateAddressPointers,
   createFiltersFromAddressPointers,
@@ -14,8 +12,10 @@ import {
   isLoadableAddressPointer,
   LoadableAddressPointer,
 } from "../helpers/address-pointer.js";
-import { distinctRelaysBatch } from "../operators/distinct-relays.js";
 import { completeOnEOSE } from "../operators/complete-on-eose.js";
+import { distinctRelaysBatch } from "../operators/distinct-relays.js";
+import { generatorSequence } from "../operators/generator-sequence.js";
+import { CacheRequest, Loader, NostrRequest } from "./loader.js";
 
 /** A generator that tries to load the address pointers from the cache first, then tries the relays */
 function* cacheFirstSequence(

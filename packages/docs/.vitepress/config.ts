@@ -71,6 +71,14 @@ export default defineConfig({
           { text: "Markdown", link: "/content/markdown" },
         ],
       },
+      {
+        text: "Wallet",
+        items: [
+          { text: "Getting Started", link: "/wallet/getting-started" },
+          { text: "Actions", link: "/wallet/actions" },
+          { text: "Queries", link: "/wallet/queries" },
+        ],
+      },
     ],
 
     socialLinks: [{ icon: "github", link: "https://github.com/hzrd149/applesauce" }],

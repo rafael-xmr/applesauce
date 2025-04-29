@@ -1,12 +1,12 @@
-import { BehaviorSubject, combineLatest, connect, merge, tap } from "rxjs";
 import { logger } from "applesauce-core";
 import { mergeFilters } from "applesauce-core/helpers";
 import { nanoid } from "nanoid";
-
-import { RelayTimelineLoader, TimelessFilter } from "./relay-timeline-loader.js";
-import { CacheRequest, Loader, NostrRequest, RelayFilterMap } from "./loader.js";
-import { CacheTimelineLoader } from "./cache-timeline-loader.js";
 import { NostrEvent } from "nostr-tools";
+import { BehaviorSubject, combineLatest, connect, merge, tap } from "rxjs";
+
+import { CacheTimelineLoader } from "./cache-timeline-loader.js";
+import { CacheRequest, Loader, NostrRequest, RelayFilterMap } from "./loader.js";
+import { RelayTimelineLoader, TimelessFilter } from "./relay-timeline-loader.js";
 
 export type TimelineLoaderOptions = {
   limit?: number;

@@ -49,3 +49,9 @@ const sub = queryStore
     }
   });
 ```
+
+## Actions
+
+Actions are reusable functions that perform specific operations on nostr events. The `applesauce-actions` package provides a collection of pre-built actions that can be used in your application.
+
+Actions are typically executed in a [ActionHub](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_actions.ActionHub.html), which provides the `EventStore` and `EventFactory` to the actions.

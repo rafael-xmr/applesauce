@@ -1,15 +1,15 @@
-import { bufferTime, filter, from, map, mergeAll, Observable, tap } from "rxjs";
-import { markFromCache } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
-import { NostrEvent } from "nostr-tools";
+import { markFromCache } from "applesauce-core/helpers";
 import { nanoid } from "nanoid";
+import { NostrEvent } from "nostr-tools";
+import { bufferTime, filter, from, map, mergeAll, Observable, tap } from "rxjs";
 
-import { CacheRequest, Loader, NostrRequest } from "./loader.js";
-import { generatorSequence } from "../operators/generator-sequence.js";
 import { consolidateAddressPointers, createFiltersFromAddressPointers } from "../helpers/address-pointer.js";
 import { groupByRelay } from "../helpers/pointer.js";
-import { distinctRelaysBatch } from "../operators/distinct-relays.js";
 import { completeOnEOSE } from "../operators/complete-on-eose.js";
+import { distinctRelaysBatch } from "../operators/distinct-relays.js";
+import { generatorSequence } from "../operators/generator-sequence.js";
+import { CacheRequest, Loader, NostrRequest } from "./loader.js";
 
 export type LoadableSetPointer = {
   /** A replaceable kind >= 30000 & < 40000 */

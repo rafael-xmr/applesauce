@@ -181,3 +181,23 @@ pnpm install applesauce-react
 ```
 
 :::
+
+## Wallet
+
+The `applesauce-wallet` package provides queries and actions for [NIP-60](https://github.com/nostr-protocol/nips/blob/master/60.md) cashu wallets.
+
+:::code-group
+
+```sh [npm]
+npm install applesauce-wallet
+```
+
+```sh [yarn]
+yarn install applesauce-wallet
+```
+
+```sh [pnpm]
+pnpm install applesauce-wallet
+```
+
+:::

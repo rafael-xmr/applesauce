@@ -6,5 +6,4 @@ export * from "./timeline-loader.js";
 export * from "./relay-timeline-loader.js";
 export * from "./cache-timeline-loader.js";
 export * from "./tag-value-loader.js";
-export * from "./request-loader.js";
 export * from "./dns-identity-loader.js";

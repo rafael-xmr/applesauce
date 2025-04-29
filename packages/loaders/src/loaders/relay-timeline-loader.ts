@@ -1,11 +1,11 @@
-import { BehaviorSubject, filter, map, Observable } from "rxjs";
 import { logger } from "applesauce-core";
-import { nanoid } from "nanoid";
 import { unixNow } from "applesauce-core/helpers";
+import { nanoid } from "nanoid";
 import { Filter, NostrEvent } from "nostr-tools";
+import { BehaviorSubject, filter, map, Observable } from "rxjs";
 
-import { Loader, NostrRequest } from "./loader.js";
 import { completeOnEOSE } from "../operators/complete-on-eose.js";
+import { Loader, NostrRequest } from "./loader.js";
 
 export type TimelessFilter = Omit<Filter, "since" | "until">;
 
