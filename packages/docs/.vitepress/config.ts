@@ -9,7 +9,7 @@ export default defineConfig({
     nav: [
       { text: "Home", link: "/" },
       { text: "Examples", link: "https://hzrd149.github.io/applesauce/examples" },
-      { text: "Reference", link: "https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_core.html" },
+      { text: "Reference", link: "https://hzrd149.github.io/applesauce/typedoc/index.html" },
     ],
 
     sidebar: [
