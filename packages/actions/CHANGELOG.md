@@ -1,5 +1,27 @@
 # applesauce-actions
 
+## 1.0.0
+
+### Minor Changes
+
+- 1624ca1: Add search relays actions
+- 1624ca1: Add dm relays actions
+- 0bf55cb: Add mailbox actions
+- 3de9928: Support multiple pubkeys in follow set actions
+- 3de9928: Add `CreateFollowSet` and `UpdateFollowSetInformation` actions
+- 4e0943d: Add mute list actions
+- 1624ca1: Add relay sets actions
+- 1624ca1: Add blocked relays actions
+- d8dc5c2: Only provide sync event store methods to actions
+- 1624ca1: Add favorite relays actions
+- 61ac09a: Add blossom server list actions
+
+### Patch Changes
+
+- Updated dependencies
+  - applesauce-core@1.0.0
+  - applesauce-factory@1.0.0
+
 ## 0.12.0
 
 ### Minor Changes

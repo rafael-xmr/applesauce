@@ -14,17 +14,17 @@ export type UserStatus = UserStatusPointer & {
 export function UserStatusQuery(pubkey: string, type: string = "general"): Query<UserStatus | undefined | null> {
   return (events) =>
     events.replaceable(kinds.UserStatuses, pubkey, type).pipe(
-        map((event) => {
-          if (!event) return undefined;
+      map((event) => {
+        if (!event) return undefined;
 
-          const pointer = getUserStatusPointer(event);
-          if (!pointer) return null;
+        const pointer = getUserStatusPointer(event);
+        if (!pointer) return null;
 
-          return {
-            ...pointer,
-            event,
-            content: event.content,
-          };
+        return {
+          ...pointer,
+          event,
+          content: event.content,
+        };
       }),
     );
 }
@@ -33,15 +33,15 @@ export function UserStatusQuery(pubkey: string, type: string = "general"): Query
 export function UserStatusesQuery(pubkey: string): Query<Record<string, UserStatus>> {
   return (events) =>
     events.timeline([{ kinds: [kinds.UserStatuses], authors: [pubkey] }]).pipe(
-        map((events) => {
-          return events.reduce((dir, event) => {
-            try {
-              const d = getReplaceableIdentifier(event);
-              return { ...dir, [d]: { event, ...getUserStatusPointer(event), content: event.content } };
-            } catch (error) {
-              return dir;
-            }
-          }, {});
-        }),
+      map((events) => {
+        return events.reduce((dir, event) => {
+          try {
+            const d = getReplaceableIdentifier(event);
+            return { ...dir, [d]: { event, ...getUserStatusPointer(event), content: event.content } };
+          } catch (error) {
+            return dir;
+          }
+        }, {});
+      }),
     );
 }
