@@ -60,21 +60,44 @@ describe("req", () => {
     expect(relay.connected).toBe(true);
   });
 
-  it("should send REQ and CLOSE messages", async () => {
+  it("should send expected messages to relay", async () => {
+    subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"));
+
+    // Wait for all message to be sent
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    expect(server.messages).toEqual([["REQ", "sub1", { kinds: [1] }]]);
+  });
+
+  it("should not close the REQ when EOSE is received", async () => {
     // Create subscription that completes after first EOSE
-    const sub = relay.req([{ kinds: [1] }], "sub1").subscribe();
+    const sub = subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"));
 
     // Verify REQ was sent
-    expect(await server.nextMessage).toEqual(["REQ", "sub1", { kinds: [1] }]);
+    await expect(server).toReceiveMessage(["REQ", "sub1", { kinds: [1] }]);
 
     // Send EOSE to complete subscription
+    server.send(["EVENT", "sub1", mockEvent]);
     server.send(["EOSE", "sub1"]);
+
+    // Verify the subscription did not complete
+    expect(sub.receivedComplete()).toBe(false);
+
+    expect(sub.getValues()).toEqual([expect.objectContaining(mockEvent), "EOSE"]);
+  });
+
+  it("should send CLOSE when unsubscribed", async () => {
+    // Create subscription that completes after first EOSE
+    const sub = subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"));
+
+    // Verify REQ was sent
+    await expect(server).toReceiveMessage(["REQ", "sub1", { kinds: [1] }]);
 
     // Complete the subscription
     sub.unsubscribe();
 
     // Verify CLOSE was sent
-    expect(await server.nextMessage).toEqual(["CLOSE", "sub1"]);
+    await expect(server).toReceiveMessage(["CLOSE", "sub1"]);
   });
 
   it("should emit nostr event and EOSE", async () => {
@@ -132,6 +155,17 @@ describe("req", () => {
 
     // Verify the subscription completed
     expect(spy.receivedError()).toBe(true);
+  });
+
+  it("should not send multiple REQ messages for multiple subscriptions", async () => {
+    const sub = relay.req([{ kinds: [1] }], "sub1");
+    sub.subscribe();
+    sub.subscribe();
+
+    // Wait for all messages to be sent
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    expect(server.messages).toEqual([["REQ", "sub1", { kinds: [1] }]]);
   });
 
   it("should wait for authentication if relay responds with auth-required", async () => {
