@@ -458,9 +458,73 @@ describe("notices$", () => {
   });
 });
 
+describe("notice$", () => {
+  it("should not trigger connection to relay", async () => {
+    subscribeSpyTo(relay.notice$);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(relay.connected).toBe(false);
+  });
+
+  it("should emit NOTICE messages when they are received", async () => {
+    const spy = subscribeSpyTo(relay.notice$);
+
+    // Start connection
+    subscribeSpyTo(relay.req({ kinds: [1] }));
+
+    // Send multiple NOTICE messages
+    server.send(["NOTICE", "Notice 1"]);
+    server.send(["NOTICE", "Notice 2"]);
+    server.send(["NOTICE", "Notice 3"]);
+
+    // Verify the notices state contains all messages
+    expect(spy.getValues()).toEqual(["Notice 1", "Notice 2", "Notice 3"]);
+  });
+
+  it("should ignore non-NOTICE messages", async () => {
+    const spy = subscribeSpyTo(relay.notice$);
+
+    // Start connection
+    subscribeSpyTo(relay.req({ kinds: [1] }));
+
+    server.send(["NOTICE", "Important notice"]);
+    server.send(["OTHER", "other message"]);
+
+    // Verify only NOTICE messages are in the state
+    expect(spy.getValues()).toEqual(["Important notice"]);
+  });
+});
+
+describe("message$", () => {
+  it("should not trigger connection to relay", async () => {
+    subscribeSpyTo(relay.message$);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(relay.connected).toBe(false);
+  });
+
+  it("should emit all messages when they are received", async () => {
+    const spy = subscribeSpyTo(relay.message$);
+
+    // Start connection
+    subscribeSpyTo(relay.req({ kinds: [1] }));
+
+    // Send multiple NOTICE messages
+    server.send(["NOTICE", "Notice 1"]);
+    server.send(["EVENT", "sub1", mockEvent]);
+    server.send(["EOSE", "sub1"]);
+
+    // Verify the notices state contains all messages
+    expect(spy.getValues()).toEqual([
+      ["NOTICE", "Notice 1"],
+      ["EVENT", "sub1", mockEvent],
+      ["EOSE", "sub1"],
+    ]);
+  });
+});
+
 describe("challenge$", () => {
   it("should not trigger connection to relay", async () => {
     subscribeSpyTo(relay.challenge$);
+    await new Promise((resolve) => setTimeout(resolve, 10));
     expect(relay.connected).toBe(false);
   });
 

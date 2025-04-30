@@ -20,6 +20,7 @@ import {
   scan,
   share,
   shareReplay,
+  Subject,
   switchMap,
   take,
   tap,
@@ -72,24 +73,23 @@ export class Relay implements IRelay {
   /** The last connection error */
   error$ = new BehaviorSubject<Error | null>(null);
 
+  /**
+   * A passive observable of all messages from the relay
+   * @note Subscribing to this will not connect to the relay
+   */
+  message$: Observable<any>;
+  /**
+   * A passive observable of NOTICE messages from the relay
+   * @note Subscribing to this will not connect to the relay
+   */
+  notice$: Observable<string>;
+
   /** An observable that emits the NIP-11 information document for the relay */
   information$: Observable<RelayInformation | null>;
   protected _nip11: RelayInformation | null = null;
 
   /** An observable that emits the limitations for the relay */
   limitations$: Observable<RelayInformation["limitation"] | null>;
-
-  /**
-   * An observable of all messages from the relay
-   * @note Subscribing to this will cause the relay to connect
-   */
-  message$: Observable<any>;
-
-  /**
-   * An observable of NOTICE messages from the relay
-   * @note Subscribing to this will cause the relay to connect
-   */
-  notice$: Observable<string>;
 
   // sync state
   get connected() {
@@ -171,8 +171,6 @@ export class Relay implements IRelay {
       WebSocketCtor: opts?.WebSocket,
     });
 
-    this.message$ = this.socket.asObservable();
-
     // Create an observable to fetch the NIP-11 information document
     this.information$ = defer(() => {
       this.log("Fetching NIP-11 information document");
@@ -199,15 +197,12 @@ export class Relay implements IRelay {
       shareReplay(1),
     );
 
-    this.notice$ = this.message$.pipe(
+    // Update the notices state
+    const listenForNotice = this.socket.pipe(
       // listen for NOTICE messages
-      filter((m) => m[0] === "NOTICE"),
+      filter((m) => Array.isArray(m) && m[0] === "NOTICE"),
       // pick the string out of the message
       map((m) => m[1]),
-    );
-
-    // Update the notices state
-    const notice = this.notice$.pipe(
       // Track all notices
       scan((acc, notice) => [...acc, notice], [] as string[]),
       // Update the notices state
@@ -215,7 +210,7 @@ export class Relay implements IRelay {
     );
 
     // Update the challenge state
-    const challenge = this.message$.pipe(
+    const ListenForChallenge = this.socket.pipe(
       // listen for AUTH messages
       filter((message) => message[0] === "AUTH"),
       // pick the challenge string out
@@ -227,13 +222,25 @@ export class Relay implements IRelay {
       }),
     );
 
+    const allMessagesSubject = new Subject<any>();
+    const listenForAllMessages = this.socket.pipe(tap((message) => allMessagesSubject.next(message)));
+
+    // Create passive observables for messages and notices
+    this.message$ = allMessagesSubject.asObservable();
+    this.notice$ = this.message$.pipe(
+      // listen for NOTICE messages
+      filter((m) => Array.isArray(m) && m[0] === "NOTICE"),
+      // pick the string out of the message
+      map((m) => m[1]),
+    );
+
     // Merge all watchers
     this.watchTower = this.ready$.pipe(
       switchMap((ready) => {
         if (!ready) return NEVER;
 
         // Only start the watch tower if the relay is ready
-        return merge(notice, challenge, this.information$).pipe(
+        return merge(listenForAllMessages, listenForNotice, ListenForChallenge, this.information$).pipe(
           // Never emit any values
           ignoreElements(),
           // Start the reconnect timer if the connection has an error
