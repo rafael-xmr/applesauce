@@ -13,12 +13,12 @@ import {
 } from "./types.js";
 
 export class RelayPool implements IPool {
-  groups$ = new BehaviorSubject<Record<string, RelayGroup>>({});
+  groups$ = new BehaviorSubject<Map<string, RelayGroup>>(new Map());
   get groups() {
     return this.groups$.value;
   }
 
-  relays$ = new BehaviorSubject<Record<string, Relay>>({});
+  relays$ = new BehaviorSubject<Map<string, Relay>>(new Map());
   get relays() {
     return this.relays$.value;
   }
@@ -36,11 +36,11 @@ export class RelayPool implements IPool {
   relay(url: string): Relay {
     if (this.blacklist.has(url)) throw new Error("Relay is on blacklist");
 
-    let relay = this.relays[url];
+    let relay = this.relays.get(url);
     if (relay) return relay;
     else {
       relay = new Relay(url, this.options);
-      this.relays$.next({ ...this.relays, [url]: relay });
+      this.relays$.next(this.relays.set(url, relay));
       return relay;
     }
   }
@@ -50,11 +50,11 @@ export class RelayPool implements IPool {
     relays = this.filterBlacklist(relays);
 
     const key = relays.sort().join(",");
-    let group = this.groups[key];
+    let group = this.groups.get(key);
     if (group) return group;
 
     group = new RelayGroup(relays.map((url) => this.relay(url)));
-    this.groups$.next({ ...this.groups, [key]: group });
+    this.groups$.next(this.groups.set(key, group));
     return group;
   }
 
