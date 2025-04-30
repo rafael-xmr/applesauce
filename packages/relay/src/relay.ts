@@ -69,6 +69,8 @@ export class Relay implements IRelay {
   authenticated$ = new BehaviorSubject(false);
   /** The notices from the relay */
   notices$ = new BehaviorSubject<string[]>([]);
+  /** The last connection error */
+  error$ = new BehaviorSubject<Error | null>(null);
 
   /** An observable that emits the NIP-11 information document for the relay */
   information$: Observable<RelayInformation | null>;
@@ -77,10 +79,16 @@ export class Relay implements IRelay {
   /** An observable that emits the limitations for the relay */
   limitations$: Observable<RelayInformation["limitation"] | null>;
 
-  /** An observable of all messages from the relay */
+  /**
+   * An observable of all messages from the relay
+   * @note Subscribing to this will cause the relay to connect
+   */
   message$: Observable<any>;
 
-  /** An observable of NOTICE messages from the relay */
+  /**
+   * An observable of NOTICE messages from the relay
+   * @note Subscribing to this will cause the relay to connect
+   */
   notice$: Observable<string>;
 
   // sync state
@@ -145,6 +153,7 @@ export class Relay implements IRelay {
           this.log("Connected");
           this.connected$.next(true);
           this.attempts$.next(0);
+          this.error$.next(null);
           this.resetState();
         },
       },
@@ -245,6 +254,7 @@ export class Relay implements IRelay {
   protected startReconnectTimer(error: Error | CloseEvent) {
     if (!this.ready$.value) return;
 
+    this.error$.next(error instanceof Error ? error : new Error("Connection error"));
     this.ready$.next(false);
     this.reconnectTimer(error, this.attempts$.value)
       .pipe(take(1))

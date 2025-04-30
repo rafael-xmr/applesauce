@@ -51,7 +51,7 @@ export class RelayPool implements IPool {
   }
 
   /** Publish an event to multiple relays */
-  publish(relays: string[], event: NostrEvent, opts?: PublishOptions): Observable<PublishResponse[]> {
+  publish(relays: string[], event: NostrEvent, opts?: PublishOptions): Observable<PublishResponse> {
     return this.group(relays).publish(event, opts);
   }
 

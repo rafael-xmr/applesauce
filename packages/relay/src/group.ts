@@ -62,7 +62,7 @@ export class RelayGroup implements IGroup {
   }
 
   /** Publish an event to all relays with retries ( default 3 retries ) */
-  publish(event: NostrEvent, opts?: PublishOptions): Observable<PublishResponse[]> {
+  publish(event: NostrEvent, opts?: PublishOptions): Observable<PublishResponse> {
     return merge(
       ...this.relays.map((relay) =>
         relay.publish(event, opts).pipe(
@@ -72,7 +72,7 @@ export class RelayGroup implements IGroup {
           ),
         ),
       ),
-    ).pipe(toArray());
+    );
   }
 
   /** Request events from all relays with retries ( default 3 retries ) */
