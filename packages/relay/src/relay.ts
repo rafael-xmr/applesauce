@@ -286,14 +286,17 @@ export class Relay implements IRelay {
 
   /** Wait for the relay to be ready to accept connections */
   protected waitForReady<T extends unknown = unknown>(observable: Observable<T>): Observable<T> {
-    return this.ready$.pipe(
-      // wait for ready to be true
-      filter((ready) => ready),
-      // complete after the first value so this does not repeat
-      take(1),
-      // switch to the observable
-      switchMap(() => observable),
-    );
+    // Don't wait if the relay is already ready
+    if (this.ready$.value) return observable;
+    else
+      return this.ready$.pipe(
+        // wait for ready to be true
+        filter((ready) => ready),
+        // complete after the first value so this does not repeat
+        take(1),
+        // switch to the observable
+        switchMap(() => observable),
+      );
   }
 
   multiplex<T>(open: () => any, close: () => any, filter: (message: any) => boolean): Observable<T> {
@@ -345,6 +348,8 @@ export class Relay implements IRelay {
         first: this.eoseTimeout,
         with: () => merge(of<SubscriptionResponse>("EOSE"), NEVER),
       }),
+      // Only create one upstream subscription
+      share(),
     );
 
     // Wait for auth if required and make sure to start the watch tower
@@ -383,6 +388,8 @@ export class Relay implements IRelay {
         first: this.eventTimeout,
         with: () => of<PublishResponse>({ ok: false, from: this.url, message: "Timeout" }),
       }),
+      // Only create one upstream subscription
+      share(),
     );
 
     // skip wait for auth if verb is AUTH
