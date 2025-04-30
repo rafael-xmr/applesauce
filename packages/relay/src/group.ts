@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { Filter, NostrEvent } from "nostr-tools";
-import { catchError, EMPTY, endWith, ignoreElements, merge, Observable, of, toArray } from "rxjs";
+import { catchError, EMPTY, endWith, ignoreElements, merge, Observable, of } from "rxjs";
 
 import { completeOnEose } from "./operators/complete-on-eose.js";
 import { onlyEvents } from "./operators/only-events.js";

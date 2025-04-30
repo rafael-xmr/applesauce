@@ -16,10 +16,19 @@ export class RelayPool implements IPool {
   relays = new Map<string, Relay>();
   groups = new Map<string, RelayGroup>();
 
+  /** An array of relays to never connect to */
+  blacklist = new Set<string>();
+
   constructor(public options?: RelayOptions) {}
+
+  protected filterBlacklist(urls: string[]) {
+    return urls.filter((url) => !this.blacklist.has(url));
+  }
 
   /** Get or create a new relay connection */
   relay(url: string): Relay {
+    if (this.blacklist.has(url)) throw new Error("Relay is on blacklist");
+
     let relay = this.relays.get(url);
     if (relay) return relay;
     else {
@@ -31,6 +40,8 @@ export class RelayPool implements IPool {
 
   /** Create a group of relays */
   group(relays: string[]): RelayGroup {
+    relays = this.filterBlacklist(relays);
+
     const key = relays.sort().join(",");
     let group = this.groups.get(key);
     if (group) return group;
