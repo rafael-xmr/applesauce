@@ -1,5 +1,5 @@
 import { NostrEvent, type Filter } from "nostr-tools";
-import { Observable } from "rxjs";
+import { BehaviorSubject, Observable } from "rxjs";
 
 import { RelayGroup } from "./group.js";
 import { Relay, RelayOptions } from "./relay.js";
@@ -13,8 +13,15 @@ import {
 } from "./types.js";
 
 export class RelayPool implements IPool {
-  relays = new Map<string, Relay>();
-  groups = new Map<string, RelayGroup>();
+  groups$ = new BehaviorSubject<Record<string, RelayGroup>>({});
+  get groups() {
+    return this.groups$.value;
+  }
+
+  relays$ = new BehaviorSubject<Record<string, Relay>>({});
+  get relays() {
+    return this.relays$.value;
+  }
 
   /** An array of relays to never connect to */
   blacklist = new Set<string>();
@@ -29,11 +36,11 @@ export class RelayPool implements IPool {
   relay(url: string): Relay {
     if (this.blacklist.has(url)) throw new Error("Relay is on blacklist");
 
-    let relay = this.relays.get(url);
+    let relay = this.relays[url];
     if (relay) return relay;
     else {
       relay = new Relay(url, this.options);
-      this.relays.set(url, relay);
+      this.relays$.next({ ...this.relays, [url]: relay });
       return relay;
     }
   }
@@ -43,11 +50,11 @@ export class RelayPool implements IPool {
     relays = this.filterBlacklist(relays);
 
     const key = relays.sort().join(",");
-    let group = this.groups.get(key);
+    let group = this.groups[key];
     if (group) return group;
 
     group = new RelayGroup(relays.map((url) => this.relay(url)));
-    this.groups.set(key, group);
+    this.groups$.next({ ...this.groups, [key]: group });
     return group;
   }
 
