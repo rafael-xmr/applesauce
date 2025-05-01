@@ -1,9 +1,4 @@
-import { kinds, NostrEvent } from "nostr-tools";
-import { addPubkeyTag, removePubkeyTag } from "applesauce-factory/operations/tag";
 import { ISyncEventStore } from "applesauce-core/event-store";
-
-import { Action } from "../action-hub.js";
-import { ProfilePointer } from "nostr-tools/nip19";
 import {
   modifyHiddenTags,
   modifyPublicTags,
@@ -11,6 +6,11 @@ import {
   setListImage,
   setListTitle,
 } from "applesauce-factory/operations/event";
+import { addPubkeyTag, removePubkeyTag } from "applesauce-factory/operations/tag";
+import { kinds, NostrEvent } from "nostr-tools";
+import { ProfilePointer } from "nostr-tools/nip19";
+
+import { Action } from "../action-hub.js";
 
 function getFollowSetEvent(events: ISyncEventStore, self: string, identifier: NostrEvent | string) {
   const set = typeof identifier === "string" ? events.getReplaceable(kinds.Followsets, self, identifier) : identifier;
