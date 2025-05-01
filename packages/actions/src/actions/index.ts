@@ -5,6 +5,7 @@ export * from "./contacts.js";
 export * from "./dm-relays.js";
 export * from "./favorite-relays.js";
 export * from "./follow-sets.js";
+export * from "./lists.js";
 export * from "./mailboxes.js";
 export * from "./mute.js";
 export * from "./pins.js";

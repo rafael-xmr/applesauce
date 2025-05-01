@@ -13,7 +13,7 @@ describe("setListTitle", () => {
       created_at: unixNow(),
     };
 
-    expect(setListTitle("quotes")(list, {})).toEqual(expect.objectContaining({ tags: [["title", "quotes"]] }));
+    expect(await setListTitle("quotes")(list, {})).toEqual(expect.objectContaining({ tags: [["title", "quotes"]] }));
   });
 
   it("should add title tag", async () => {
@@ -24,7 +24,18 @@ describe("setListTitle", () => {
       created_at: unixNow(),
     };
 
-    expect(setListTitle("quotes")(list, {})).toEqual(expect.objectContaining({ tags: [["title", "quotes"]] }));
+    expect(await setListTitle("quotes")(list, {})).toEqual(expect.objectContaining({ tags: [["title", "quotes"]] }));
+  });
+
+  it("should remove title tag", async () => {
+    const list: EventTemplate = {
+      kind: kinds.Bookmarksets,
+      content: "",
+      tags: [["title", "inspirational quotes"]],
+      created_at: unixNow(),
+    };
+
+    expect(await setListTitle(null)(list, {})).toEqual(expect.objectContaining({ tags: [] }));
   });
 });
 
@@ -40,7 +51,7 @@ describe("setListDescription", () => {
       created_at: unixNow(),
     };
 
-    expect(setListDescription("all my favorite quotes")(list, {})).toEqual(
+    expect(await setListDescription("all my favorite quotes")(list, {})).toEqual(
       expect.objectContaining({
         tags: [
           ["title", "inspirational quotes"],
@@ -58,13 +69,29 @@ describe("setListDescription", () => {
       created_at: unixNow(),
     };
 
-    expect(setListDescription("all my favorite quotes")(list, {})).toEqual(
+    expect(await setListDescription("all my favorite quotes")(list, {})).toEqual(
       expect.objectContaining({
         tags: [
           ["title", "inspirational quotes"],
           ["description", "all my favorite quotes"],
         ],
       }),
+    );
+  });
+
+  it("should remove description tag", async () => {
+    const list: EventTemplate = {
+      kind: kinds.Bookmarksets,
+      content: "",
+      tags: [
+        ["title", "inspirational quotes"],
+        ["description", "all my favorite quotes"],
+      ],
+      created_at: unixNow(),
+    };
+
+    expect(await setListDescription(null)(list, {})).toEqual(
+      expect.objectContaining({ tags: [["title", "inspirational quotes"]] }),
     );
   });
 });

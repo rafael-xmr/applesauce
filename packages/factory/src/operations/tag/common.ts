@@ -6,7 +6,7 @@ import {
   createETagFromEventPointer,
   createPTagFromProfilePointer,
 } from "../../helpers/pointer.js";
-import { ensureNamedValueTag } from "../../helpers/tag.js";
+import { ensureNamedValueTag, ensureSingletonTag } from "../../helpers/tag.js";
 import { TagOperation } from "../../event-factory.js";
 
 /** Adds a single "p" tag for a ProfilePointer */
@@ -102,4 +102,14 @@ export function addNameValueTag(
 /** Removes all matching name / value tag */
 export function removeNameValueTag(tag: string[]): TagOperation {
   return (tags) => tags.filter((t) => !(t[0] === tag[0] && t[1] === tag[1]));
+}
+
+/** Sets a singleton tag */
+export function setSingletonTag(tag: [string, ...string[]], replace = true): TagOperation {
+  return (tags) => ensureSingletonTag(tags, tag, replace);
+}
+
+/** Removes all instances of a singleton tag */
+export function removeSingletonTag(tag: string): TagOperation {
+  return (tags) => tags.filter((t) => !(t[0] === tag));
 }

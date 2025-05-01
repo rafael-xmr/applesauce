@@ -1,5 +1,11 @@
 # applesauce-relay
 
+## 1.0.1
+
+### Patch Changes
+
+- e0f618b: Fix multiple `REQ` messages
+
 ## 1.0.0
 
 ### Minor Changes

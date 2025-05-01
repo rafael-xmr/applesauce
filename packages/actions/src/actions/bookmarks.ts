@@ -1,8 +1,4 @@
-import { kinds, NostrEvent } from "nostr-tools";
-import { addEventBookmarkTag, removeEventBookmarkTag } from "applesauce-factory/operations/tag";
 import { ISyncEventStore } from "applesauce-core/event-store";
-
-import { Action } from "../action-hub.js";
 import {
   modifyHiddenTags,
   modifyPublicTags,
@@ -10,6 +6,10 @@ import {
   setListImage,
   setListTitle,
 } from "applesauce-factory/operations/event";
+import { addEventBookmarkTag, removeEventBookmarkTag } from "applesauce-factory/operations/tag";
+import { kinds, NostrEvent } from "nostr-tools";
+
+import { Action } from "../action-hub.js";
 
 function getBookmarkEvent(events: ISyncEventStore, self: string, identifier?: string) {
   return events.getReplaceable(identifier ? kinds.Bookmarksets : kinds.BookmarkList, self, identifier);
