@@ -1,5 +1,16 @@
 # applesauce-actions
 
+## 1.1.0
+
+### Minor Changes
+
+- b7ff4f6: Add `SetListMetadata` action
+
+### Patch Changes
+
+- Updated dependencies
+  - applesauce-factory@1.1.0
+
 ## 1.0.0
 
 ### Minor Changes
