@@ -74,7 +74,7 @@ importers:
         specifier: ^1.0.0
         version: link:../core
       applesauce-factory:
-        specifier: ^1.0.0
+        specifier: ^1.1.0
         version: link:../factory
       nostr-tools:
         specifier: ^2.10.4
@@ -255,7 +255,7 @@ importers:
         specifier: ^1.0.0
         version: link:../core
       applesauce-factory:
-        specifier: ^1.0.0
+        specifier: ^1.1.0
         version: link:../factory
       applesauce-loaders:
         specifier: ^1.0.0

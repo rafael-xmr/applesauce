@@ -1,5 +1,18 @@
 # applesauce-relay
 
+## 1.1.0
+
+### Minor Changes
+
+- ed0737a: Add `RelayPool.relays# applesauce-relay and `RelayPool.groups# applesauce-relay observables
+- 589f7a2: Change type of `pool.publish` to be single results instead of an array
+- 6b9e4cd: Add `RelayPool.blacklist` set
+- 73f06ba: Add `Relay.notice# applesauce-relay observable
+
+### Patch Changes
+
+- 73f06ba: Make `Relay.message# applesauce-relay not trigger a connection
+
 ## 1.0.1
 
 ### Patch Changes

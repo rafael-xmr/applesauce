@@ -1,5 +1,15 @@
 # applesauce-factory
 
+## 1.1.0
+
+### Minor Changes
+
+- b7ff4f6: Add `removeSingletonTag` tag operation
+
+### Patch Changes
+
+- b7ff4f6: Fix `setListTitle`, `setListImage`, and `setListDescription` not removing tags
+
 ## 1.0.0
 
 ### Patch Changes
