@@ -60,7 +60,7 @@ export interface IRelay extends MultiplexWebSocket, Nip01Actions, IRelayState {
 
 export interface IGroup extends Nip01Actions {
   /** Send an EVENT message with retries */
-  publish(event: NostrEvent, opts?: { retries?: number }): Observable<PublishResponse[]>;
+  publish(event: NostrEvent, opts?: { retries?: number }): Observable<PublishResponse>;
   /** Send a REQ message with retries */
   request(filters: Filter | Filter[], opts?: { id?: string; retries?: number }): Observable<NostrEvent>;
   /** Open a subscription with retries */
@@ -77,7 +77,7 @@ export interface IPool {
   /** Create a relay group */
   group(relays: string[]): IGroup;
   /** Send an EVENT message to relays with retries */
-  publish(relays: string[], event: NostrEvent, opts?: { retries?: number }): Observable<PublishResponse[]>;
+  publish(relays: string[], event: NostrEvent, opts?: { retries?: number }): Observable<PublishResponse>;
   /** Send a REQ message to relays with retries */
   request(
     relays: string[],

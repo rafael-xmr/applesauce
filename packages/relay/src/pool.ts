@@ -1,5 +1,5 @@
 import { NostrEvent, type Filter } from "nostr-tools";
-import { Observable } from "rxjs";
+import { BehaviorSubject, Observable } from "rxjs";
 
 import { RelayGroup } from "./group.js";
 import { Relay, RelayOptions } from "./relay.js";
@@ -13,30 +13,48 @@ import {
 } from "./types.js";
 
 export class RelayPool implements IPool {
-  relays = new Map<string, Relay>();
-  groups = new Map<string, RelayGroup>();
+  groups$ = new BehaviorSubject<Map<string, RelayGroup>>(new Map());
+  get groups() {
+    return this.groups$.value;
+  }
+
+  relays$ = new BehaviorSubject<Map<string, Relay>>(new Map());
+  get relays() {
+    return this.relays$.value;
+  }
+
+  /** An array of relays to never connect to */
+  blacklist = new Set<string>();
 
   constructor(public options?: RelayOptions) {}
 
+  protected filterBlacklist(urls: string[]) {
+    return urls.filter((url) => !this.blacklist.has(url));
+  }
+
   /** Get or create a new relay connection */
   relay(url: string): Relay {
+    if (this.blacklist.has(url)) throw new Error("Relay is on blacklist");
+
     let relay = this.relays.get(url);
     if (relay) return relay;
     else {
       relay = new Relay(url, this.options);
-      this.relays.set(url, relay);
+      this.relays$.next(this.relays.set(url, relay));
       return relay;
     }
   }
 
   /** Create a group of relays */
   group(relays: string[]): RelayGroup {
+    relays = this.filterBlacklist(relays);
+
     const key = relays.sort().join(",");
     let group = this.groups.get(key);
     if (group) return group;
 
     group = new RelayGroup(relays.map((url) => this.relay(url)));
-    this.groups.set(key, group);
+    this.groups$.next(this.groups.set(key, group));
     return group;
   }
 
@@ -51,7 +69,7 @@ export class RelayPool implements IPool {
   }
 
   /** Publish an event to multiple relays */
-  publish(relays: string[], event: NostrEvent, opts?: PublishOptions): Observable<PublishResponse[]> {
+  publish(relays: string[], event: NostrEvent, opts?: PublishOptions): Observable<PublishResponse> {
     return this.group(relays).publish(event, opts);
   }
 

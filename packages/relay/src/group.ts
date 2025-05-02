@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { Filter, NostrEvent } from "nostr-tools";
-import { catchError, EMPTY, endWith, ignoreElements, merge, Observable, of, toArray } from "rxjs";
+import { catchError, EMPTY, endWith, ignoreElements, merge, Observable, of } from "rxjs";
 
 import { completeOnEose } from "./operators/complete-on-eose.js";
 import { onlyEvents } from "./operators/only-events.js";
@@ -62,7 +62,7 @@ export class RelayGroup implements IGroup {
   }
 
   /** Publish an event to all relays with retries ( default 3 retries ) */
-  publish(event: NostrEvent, opts?: PublishOptions): Observable<PublishResponse[]> {
+  publish(event: NostrEvent, opts?: PublishOptions): Observable<PublishResponse> {
     return merge(
       ...this.relays.map((relay) =>
         relay.publish(event, opts).pipe(
@@ -72,7 +72,7 @@ export class RelayGroup implements IGroup {
           ),
         ),
       ),
-    ).pipe(toArray());
+    );
   }
 
   /** Request events from all relays with retries ( default 3 retries ) */
