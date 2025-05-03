@@ -63,10 +63,7 @@ describe("req", () => {
   it("should send expected messages to relay", async () => {
     subscribeSpyTo(relay.req([{ kinds: [1] }], "sub1"));
 
-    // Wait for all message to be sent
-    await new Promise((resolve) => setTimeout(resolve, 10));
-
-    expect(server.messages).toEqual([["REQ", "sub1", { kinds: [1] }]]);
+    await expect(server).toReceiveMessage(["REQ", "sub1", { kinds: [1] }]);
   });
 
   it("should not close the REQ when EOSE is received", async () => {
