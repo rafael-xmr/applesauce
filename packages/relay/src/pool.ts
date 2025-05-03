@@ -11,6 +11,7 @@ import {
   SubscriptionOptions,
   SubscriptionResponse,
 } from "./types.js";
+import { normalizeURL } from "applesauce-core/helpers";
 
 export class RelayPool implements IPool {
   groups$ = new BehaviorSubject<Map<string, RelayGroup>>(new Map());
@@ -34,19 +35,28 @@ export class RelayPool implements IPool {
 
   /** Get or create a new relay connection */
   relay(url: string): Relay {
+    // Normalize the url
+    url = normalizeURL(url);
+
+    // Check if the url is blacklisted
     if (this.blacklist.has(url)) throw new Error("Relay is on blacklist");
 
+    // Check if the relay already exists
     let relay = this.relays.get(url);
     if (relay) return relay;
-    else {
-      relay = new Relay(url, this.options);
-      this.relays$.next(this.relays.set(url, relay));
-      return relay;
-    }
+
+    // Create a new relay
+    relay = new Relay(url, this.options);
+    this.relays$.next(this.relays.set(url, relay));
+    return relay;
   }
 
   /** Create a group of relays */
   group(relays: string[]): RelayGroup {
+    // Normalize all urls
+    relays = relays.map((url) => normalizeURL(url));
+
+    // Filter out any blacklisted relays
     relays = this.filterBlacklist(relays);
 
     const key = relays.sort().join(",");
