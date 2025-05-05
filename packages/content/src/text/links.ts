@@ -1,14 +1,14 @@
 import { Transformer } from "unified";
 
 import { Link, Root } from "../nast/types.js";
-import Expressions from "../helpers/regexp.js";
+import { Tokens } from "../helpers/regexp.js";
 import { findAndReplace } from "../nast/find-and-replace.js";
 
 export function links(): Transformer<Root> {
   return (tree) => {
     findAndReplace(tree, [
       [
-        Expressions.link,
+        Tokens.link,
         (_: string) => {
           try {
             return {

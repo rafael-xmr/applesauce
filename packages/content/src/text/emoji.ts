@@ -2,7 +2,7 @@ import { type Transformer } from "unified";
 import { getEmojiTag } from "applesauce-core/helpers/emoji";
 
 import { Emoji, Root } from "../nast/types.js";
-import Expressions from "../helpers/regexp.js";
+import { Tokens } from "../helpers/regexp.js";
 import { findAndReplace } from "../nast/find-and-replace.js";
 
 /** Adds emoji tags to text ATS */
@@ -13,7 +13,7 @@ export function emojis(): Transformer<Root> {
 
     findAndReplace(tree, [
       [
-        Expressions.emoji,
+        Tokens.emoji,
         (full: string, $1: string) => {
           try {
             const tag = getEmojiTag(event, $1);
