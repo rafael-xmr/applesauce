@@ -53,5 +53,5 @@ export function isValidProfile(profile?: NostrEvent) {
 
 /** Gets the display name from a profile with fallbacks */
 export function getDisplayName(metadata?: ProfileContent) {
-  return metadata?.display_name || metadata?.displayName || metadata?.name;
+  return metadata?.display_name?.trim() || metadata?.displayName?.trim() || metadata?.name?.trim();
 }
