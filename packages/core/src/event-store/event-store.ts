@@ -1,6 +1,6 @@
 import { type Filter, kinds, type NostrEvent } from "nostr-tools";
 import { insertEventIntoDescendingList } from "nostr-tools/utils";
-import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
+import { isAddressableKind } from "nostr-tools/kinds";
 import {
 	defer,
 	distinctUntilChanged,
@@ -24,9 +24,10 @@ import {
 
 import { Database } from "./database.js";
 import {
+	FromCacheSymbol,
 	getEventUID,
 	getReplaceableIdentifier,
-	getReplaceableUID,
+	createReplaceableAddress,
 	getTagValue,
 	isReplaceable,
 } from "../helpers/event.js";
@@ -35,7 +36,8 @@ import { addSeenRelay, getSeenRelays } from "../helpers/relays.js";
 import { getDeleteCoordinates, getDeleteIds } from "../helpers/delete.js";
 import { claimEvents } from "../observable/claim-events.js";
 import { claimLatest } from "../observable/claim-latest.js";
-import { IEventStore } from "./interface.js";
+import type { IEventStore } from "./interface.js";
+import { parseCoordinate } from "../helpers/pointers.js";
 
 export const EventStoreSymbol = Symbol.for("event-store");
 
@@ -52,8 +54,14 @@ export class EventStore implements IEventStore {
 	/** A method used to verify new events before added them */
 	verifyEvent?: (event: NostrEvent) => boolean;
 
+	/** A stream of new events added to the store */
+	inserts: Observable<NostrEvent>;
+
 	/** A stream of events that have been updated */
 	updates: Observable<NostrEvent>;
+
+	/** A stream of events that have been removed */
+	removes: Observable<NostrEvent>;
 
 	constructor() {
 		this.database = new Database();
@@ -74,7 +82,9 @@ export class EventStore implements IEventStore {
 			Reflect.deleteProperty(event, EventStoreSymbol);
 		});
 
+		this.inserts = this.database.inserted;
 		this.updates = this.database.updated;
+		this.removes = this.database.removed;
 	}
 
 	// delete state
@@ -82,16 +92,15 @@ export class EventStore implements IEventStore {
 	protected deletedCoords = new Map<string, number>();
 	protected checkDeleted(event: string | NostrEvent) {
 		if (typeof event === "string") return this.deletedIds.has(event);
-		else {
-			if (this.deletedIds.has(event.id)) return true;
 
-			if (isParameterizedReplaceableKind(event.kind)) {
-				const deleted = this.deletedCoords.get(getEventUID(event));
-				if (deleted) return deleted > event.created_at;
-			}
+		if (this.deletedIds.has(event.id)) return true;
 
-			return false;
+		if (isAddressableKind(event.kind)) {
+			const deleted = this.deletedCoords.get(getEventUID(event));
+			if (deleted) return deleted > event.created_at;
 		}
+
+		return false;
 	}
 
 	// handling delete events
@@ -112,10 +121,21 @@ export class EventStore implements IEventStore {
 				Math.max(this.deletedCoords.get(coord) ?? 0, deleteEvent.created_at),
 			);
 
-			// remove deleted events in the database
-			const event = this.database.getEvent(coord);
-			if (event && event.created_at < deleteEvent.created_at)
-				this.database.removeEvent(event);
+			// Parse the nostr address coordinate
+			const parsed = parseCoordinate(coord);
+			if (!parsed) continue;
+
+			// Remove older versions of replaceable events
+			const events =
+				this.database.getReplaceable(
+					parsed.kind,
+					parsed.pubkey,
+					parsed.identifier,
+				) ?? [];
+			for (const event of events) {
+				if (event.created_at < deleteEvent.created_at)
+					this.database.removeEvent(event);
+			}
 		}
 	}
 
@@ -125,6 +145,11 @@ export class EventStore implements IEventStore {
 		if (relays) {
 			for (const relay of relays) addSeenRelay(dest, relay);
 		}
+
+		// copy the from cache symbol only if its true
+		const fromCache = Reflect.get(source, FromCacheSymbol);
+		if (fromCache && !Reflect.get(dest, FromCacheSymbol))
+			Reflect.set(dest, FromCacheSymbol, fromCache);
 	}
 
 	/**
@@ -136,6 +161,35 @@ export class EventStore implements IEventStore {
 
 		// Ignore if the event was deleted
 		if (this.checkDeleted(event)) return event;
+
+		// Get the replaceable identifier
+		const d = isReplaceable(event.kind) ? getTagValue(event, "d") : undefined;
+
+		// Don't insert the event if there is already a newer version
+		if (!this.keepOldVersions && isReplaceable(event.kind)) {
+			const existing = this.database.getReplaceable(
+				event.kind,
+				event.pubkey,
+				d,
+			);
+
+			// If there is already a newer version, copy cached symbols and return existing event
+			if (
+				existing &&
+				existing.length > 0 &&
+				existing[0].created_at >= event.created_at
+			) {
+				EventStore.mergeDuplicateEvent(event, existing[0]);
+				return existing[0];
+			}
+		} else if (this.database.hasEvent(event.id)) {
+			// Duplicate event, copy symbols and return existing event
+			const existing = this.database.getEvent(event.id);
+			if (existing) {
+				EventStore.mergeDuplicateEvent(event, existing);
+				return existing;
+			}
+		}
 
 		// Insert event into database
 		const inserted = this.database.addEvent(event);
@@ -151,7 +205,7 @@ export class EventStore implements IEventStore {
 			const existing = this.database.getReplaceable(
 				event.kind,
 				event.pubkey,
-				getTagValue(event, "d"),
+				d,
 			);
 
 			if (existing) {
@@ -243,7 +297,7 @@ export class EventStore implements IEventStore {
 			// merge existing events
 			onlyNew ? EMPTY : from(this.getAll(filters)),
 			// subscribe to future events
-			this.database.inserted.pipe(filter((e) => matchFilters(filters, e))),
+			this.inserts.pipe(filter((e) => matchFilters(filters, e))),
 		);
 	}
 
@@ -252,7 +306,7 @@ export class EventStore implements IEventStore {
 		const deleted = this.checkDeleted(id);
 		if (deleted) return EMPTY;
 
-		return this.database.removed.pipe(
+		return this.removes.pipe(
 			// listen for removed events
 			filter((e) => e.id === id),
 			// complete as soon as we find a matching removed event
@@ -278,7 +332,7 @@ export class EventStore implements IEventStore {
 				return event ? of(event) : EMPTY;
 			}),
 			// subscribe to updates
-			this.database.inserted.pipe(filter((e) => e.id === id)),
+			this.inserts.pipe(filter((e) => e.id === id)),
 			// subscribe to updates
 			this.updated(id),
 			// emit undefined when deleted
@@ -295,9 +349,9 @@ export class EventStore implements IEventStore {
 			// lazily get existing events
 			defer(() => from(ids.map((id) => this.getEvent(id)))),
 			// subscribe to new events
-			this.database.inserted.pipe(filter((e) => ids.includes(e.id))),
+			this.inserts.pipe(filter((e) => ids.includes(e.id))),
 			// subscribe to updates
-			this.database.updated.pipe(filter((e) => ids.includes(e.id))),
+			this.updates.pipe(filter((e) => ids.includes(e.id))),
 		).pipe(
 			// ignore empty messages
 			filter((e) => !!e),
@@ -305,7 +359,7 @@ export class EventStore implements IEventStore {
 			claimEvents(this.database),
 			// watch for removed events
 			mergeWith(
-				this.database.removed.pipe(
+				this.removes.pipe(
 					filter((e) => ids.includes(e.id)),
 					map((e) => e.id),
 				),
@@ -343,7 +397,7 @@ export class EventStore implements IEventStore {
 				return event ? of(event) : EMPTY;
 			}),
 			// subscribe to new events
-			this.database.inserted.pipe(
+			this.inserts.pipe(
 				filter(
 					(e) =>
 						e.pubkey == pubkey &&
@@ -353,15 +407,14 @@ export class EventStore implements IEventStore {
 			),
 		).pipe(
 			// only update if event is newer
-			distinctUntilChanged(
-				(prev, event) => prev.created_at >= event.created_at,
-			),
+			distinctUntilChanged((prev, event) => {
+				// are the events the same? i.e. is the prev event older
+				return prev.created_at >= event.created_at;
+			}),
 			// Hacky way to extract the current event so takeUntil can access it
 			tap((event) => (current = event)),
 			// complete when event is removed
-			takeUntil(
-				this.database.removed.pipe(filter((e) => e.id === current?.id)),
-			),
+			takeUntil(this.removes.pipe(filter((e) => e.id === current?.id))),
 			// emit undefined when removed
 			endWith(undefined),
 			// keep the observable hot
@@ -376,7 +429,9 @@ export class EventStore implements IEventStore {
 		pointers: { kind: number; pubkey: string; identifier?: string }[],
 	): Observable<Record<string, NostrEvent>> {
 		const uids = new Set(
-			pointers.map((p) => getReplaceableUID(p.kind, p.pubkey, p.identifier)),
+			pointers.map((p) =>
+				createReplaceableAddress(p.kind, p.pubkey, p.identifier),
+			),
 		);
 
 		return merge(
@@ -389,7 +444,7 @@ export class EventStore implements IEventStore {
 				),
 			),
 			// subscribe to new events
-			this.database.inserted.pipe(
+			this.inserts.pipe(
 				filter((e) => isReplaceable(e.kind) && uids.has(getEventUID(e))),
 			),
 		).pipe(
@@ -401,7 +456,7 @@ export class EventStore implements IEventStore {
 			map((e) => ["add", e] as const),
 			// watch for removed events
 			mergeWith(
-				this.database.removed.pipe(
+				this.removes.pipe(
 					filter((e) => isReplaceable(e.kind) && uids.has(getEventUID(e))),
 					map((e) => ["remove", e] as const),
 				),
@@ -448,7 +503,7 @@ export class EventStore implements IEventStore {
 			claimEvents(this.database),
 			// subscribe to newer events
 			mergeWith(
-				this.database.inserted.pipe(
+				this.inserts.pipe(
 					filter((e) => matchFilters(filters, e)),
 					// claim all new events
 					claimEvents(this.database),
@@ -456,7 +511,7 @@ export class EventStore implements IEventStore {
 			),
 			// subscribe to delete events
 			mergeWith(
-				this.database.removed.pipe(
+				this.removes.pipe(
 					filter((e) => matchFilters(filters, e)),
 					map((e) => e.id),
 				),

@@ -6,12 +6,10 @@ import { map } from "rxjs/operators";
 import { isETag, processTags } from "../helpers/tags.js";
 import { getEventPointerFromETag } from "../helpers/pointers.js";
 
+/** A query that returns all pinned pointers for a user */
 export function UserPinnedQuery(pubkey: string): Query<EventPointer[] | undefined> {
-  return {
-    key: pubkey,
-    run: (store) =>
-      store
-        .replaceable(kinds.Pinlist, pubkey)
-        .pipe(map((event) => event && processTags(event.tags.filter(isETag), getEventPointerFromETag))),
-  };
+  return (events) =>
+    events
+      .replaceable(kinds.Pinlist, pubkey)
+      .pipe(map((event) => event && processTags(event.tags.filter(isETag), getEventPointerFromETag)));
 }

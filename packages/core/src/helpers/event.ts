@@ -1,8 +1,8 @@
-import { kinds, NostrEvent, VerifiedEvent, verifiedSymbol } from "nostr-tools";
+import { NostrEvent, VerifiedEvent, verifiedSymbol } from "nostr-tools";
 import { INDEXABLE_TAGS } from "../event-store/common.js";
 import { getHiddenTags } from "./hidden-tags.js";
 import { getOrComputeCachedValue } from "./cache.js";
-import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
+import { isAddressableKind, isReplaceableKind } from "nostr-tools/kinds";
 import { EventStoreSymbol } from "../event-store/event-store.js";
 import { IEventStore } from "../event-store/interface.js";
 
@@ -43,23 +43,21 @@ export function isEvent(event: any): event is NostrEvent {
  * or parameterized replaceable ( 30000 <= n < 40000 )
  */
 export function isReplaceable(kind: number) {
-  return kinds.isReplaceableKind(kind) || kinds.isParameterizedReplaceableKind(kind);
+  return isReplaceableKind(kind) || isAddressableKind(kind);
 }
 
 /**
  * Returns the events Unique ID
  * For normal or ephemeral events this is ( event.id )
- * For replaceable events this is ( event.kind + ":" + event.pubkey )
- * For parametrized replaceable events this is ( event.kind + ":" + event.pubkey + ":" + event.tags.d.1 )
+ * For replaceable events this is ( event.kind + ":" + event.pubkey + ":" )
+ * For parametrized replaceable events this is ( event.kind + ":" + event.pubkey + ":" + event.tags.d )
  */
 export function getEventUID(event: NostrEvent) {
   let uid = event[EventUIDSymbol];
 
   if (!uid) {
-    if (isReplaceable(event.kind)) {
-      let d = event.tags.find((t) => t[0] === "d")?.[1];
-      uid = getReplaceableUID(event.kind, event.pubkey, d);
-    } else uid = event.id;
+    if (isReplaceable(event.kind)) uid = getReplaceableAddress(event);
+    else uid = event.id;
 
     event[EventUIDSymbol] = uid;
   }
@@ -67,12 +65,24 @@ export function getEventUID(event: NostrEvent) {
   return uid;
 }
 
-export function getReplaceableUID(kind: number, pubkey: string, d?: string) {
-  return d ? kind + ":" + pubkey + ":" + d : kind + ":" + pubkey;
+/** Returns the replaceable event address for an addressable event */
+export function getReplaceableAddress(event: NostrEvent): string {
+  if (!isReplaceable(event.kind)) throw new Error("Event is not replaceable or addressable");
+
+  const identifier = isAddressableKind(event.kind) ? getReplaceableIdentifier(event) : undefined;
+  return createReplaceableAddress(event.kind, event.pubkey, identifier);
 }
 
+/** Creates a replaceable event address from a kind, pubkey, and identifier */
+export function createReplaceableAddress(kind: number, pubkey: string, identifier?: string): string {
+  return kind + ":" + pubkey + ":" + (identifier ?? "");
+}
+
+/** @deprecated use createReplaceableAddress instead */
+export const getReplaceableUID = createReplaceableAddress;
+
 /** Returns a Set of tag names and values that are indexable */
-export function getIndexableTags(event: NostrEvent) {
+export function getIndexableTags(event: NostrEvent): Set<string> {
   let indexable = event[EventIndexableTagsSymbol];
   if (!indexable) {
     const tags = new Set<string>();
@@ -96,7 +106,7 @@ export function getIndexableTags(event: NostrEvent) {
 export function getTagValue<T extends { kind: number; tags: string[][]; content: string; pubkey: string }>(
   event: T,
   name: string,
-) {
+): string | undefined {
   const hidden = getHiddenTags(event);
 
   const hiddenValue = hidden?.find((t) => t[0] === name)?.[1];
@@ -130,7 +140,7 @@ export function getParentEventStore<T extends object>(event: T): IEventStore | u
  * @throws
  */
 export function getReplaceableIdentifier(event: NostrEvent): string {
-  if (!isParameterizedReplaceableKind(event.kind)) throw new Error("Event is not replaceable");
+  if (!isAddressableKind(event.kind)) throw new Error("Event is not addressable");
 
   return getOrComputeCachedValue(event, ReplaceableIdentifierSymbol, () => {
     const d = getTagValue(event, "d");

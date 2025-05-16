@@ -6,7 +6,7 @@
 
 ## Queries
 
-The [RepliesQuery](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.RepliesQuery.html) can be used to subscribe to all comments on an event or all replies to a comment
+The [RepliesQuery](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-core.Queries.RepliesQuery.html) can be used to subscribe to all comments on an event or all replies to a comment
 
 ```ts
 queryStore.createQuery(RepliesQuery, event).subscribe((replies) => {
@@ -16,7 +16,7 @@ queryStore.createQuery(RepliesQuery, event).subscribe((replies) => {
 
 ## Loading
 
-Generally the best way to load comments is to use a [TimelineLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_loaders.TimelineLoader.html)
+Generally the best way to load comments is to use a [TimelineLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-loaders.TimelineLoader.html)
 
 ```ts
 const rootPointer: EventPointer = { id: "<event-id>", relays: ["wss://relay.eample.com"] };
@@ -34,7 +34,7 @@ thread.subscribe((packet) => {
 
 ## Factory
 
-The [CommentBlueprint](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_factory.Blueprints.CommentBlueprint.html) blueprint can be used to create a comment on any event or as a reply to another comment
+The [CommentBlueprint](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-factory.Blueprints.CommentBlueprint.html) blueprint can be used to create a comment on any event or as a reply to another comment
 
 ```ts
 import { CommentBlueprint } from "applesauce-factory/blueprints";

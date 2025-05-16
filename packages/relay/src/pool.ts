@@ -1,54 +1,99 @@
 import { NostrEvent, type Filter } from "nostr-tools";
-import { combineLatest, endWith, ignoreElements, merge, Observable, takeWhile } from "rxjs";
-import { nanoid } from "nanoid";
+import { BehaviorSubject, Observable } from "rxjs";
 
-import { Relay, PublishResponse, SubscriptionResponse } from "./relay.js";
-import { onlyEvents } from "./operators/only-events.js";
+import { RelayGroup } from "./group.js";
+import { Relay, RelayOptions } from "./relay.js";
+import {
+  IPool,
+  PublishResponse,
+  PublishOptions,
+  RequestOptions,
+  SubscriptionOptions,
+  SubscriptionResponse,
+} from "./types.js";
+import { normalizeURL } from "applesauce-core/helpers";
 
-export class RelayPool {
-  relays = new Map<string, Relay>();
+export class RelayPool implements IPool {
+  groups$ = new BehaviorSubject<Map<string, RelayGroup>>(new Map());
+  get groups() {
+    return this.groups$.value;
+  }
+
+  relays$ = new BehaviorSubject<Map<string, Relay>>(new Map());
+  get relays() {
+    return this.relays$.value;
+  }
+
+  /** An array of relays to never connect to */
+  blacklist = new Set<string>();
+
+  constructor(public options?: RelayOptions) {}
+
+  protected filterBlacklist(urls: string[]) {
+    return urls.filter((url) => !this.blacklist.has(url));
+  }
 
   /** Get or create a new relay connection */
   relay(url: string): Relay {
+    // Normalize the url
+    url = normalizeURL(url);
+
+    // Check if the url is blacklisted
+    if (this.blacklist.has(url)) throw new Error("Relay is on blacklist");
+
+    // Check if the relay already exists
     let relay = this.relays.get(url);
     if (relay) return relay;
-    else {
-      relay = new Relay(url);
-      this.relays.set(url, relay);
-      return relay;
-    }
+
+    // Create a new relay
+    relay = new Relay(url, this.options);
+    this.relays$.next(this.relays.set(url, relay));
+    return relay;
   }
 
-  /** Make a REQ to multiple relays but does not deduplicate events */
-  req(relays: string[], filters: Filter[], id = nanoid()): Observable<SubscriptionResponse> {
-    // create a REQ observable for each relay
-    const requests = relays.map((url) => this.relay(url).req(filters, id));
+  /** Create a group of relays */
+  group(relays: string[]): RelayGroup {
+    // Normalize all urls
+    relays = relays.map((url) => normalizeURL(url));
 
-    // create an observable that completes when all relays send EOSE
-    const eose = merge(
-      // create an array of observables for each relay that completes when EOSE
-      ...requests.map((o) =>
-        o.pipe(
-          // complete on EOSE message
-          takeWhile((m) => m !== "EOSE"),
-        ),
-      ),
-    ).pipe(
-      // ignore all messages
-      ignoreElements(),
-      // emit EOSE on complete
-      endWith("EOSE" as const),
-    );
+    // Filter out any blacklisted relays
+    relays = this.filterBlacklist(relays);
 
-    // create a stream that only emits events
-    const events = merge(...requests).pipe(onlyEvents());
+    const key = relays.sort().join(",");
+    let group = this.groups.get(key);
+    if (group) return group;
 
-    // merge events and single EOSE streams
-    return merge(events, eose);
+    group = new RelayGroup(relays.map((url) => this.relay(url)));
+    this.groups$.next(this.groups.set(key, group));
+    return group;
+  }
+
+  /** Make a REQ to multiple relays that does not deduplicate events */
+  req(relays: string[], filters: Filter | Filter[], id?: string): Observable<SubscriptionResponse> {
+    return this.group(relays).req(filters, id);
   }
 
   /** Send an EVENT message to multiple relays */
-  event(relays: string[], event: NostrEvent): Observable<PublishResponse[]> {
-    return combineLatest(relays.map((url) => this.relay(url).event(event)));
+  event(relays: string[], event: NostrEvent): Observable<PublishResponse> {
+    return this.group(relays).event(event);
+  }
+
+  /** Publish an event to multiple relays */
+  publish(relays: string[], event: NostrEvent, opts?: PublishOptions): Observable<PublishResponse> {
+    return this.group(relays).publish(event, opts);
+  }
+
+  /** Request events from multiple relays */
+  request(relays: string[], filters: Filter | Filter[], opts?: RequestOptions): Observable<NostrEvent> {
+    return this.group(relays).request(filters, opts);
+  }
+
+  /** Open a subscription to multiple relays */
+  subscription(
+    relays: string[],
+    filters: Filter | Filter[],
+    opts?: SubscriptionOptions,
+  ): Observable<SubscriptionResponse> {
+    return this.group(relays).subscription(filters, opts);
   }
 }

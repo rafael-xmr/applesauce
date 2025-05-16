@@ -2,7 +2,7 @@
 
 ## Queries
 
-The [ReactionsQuery](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Queries.ReactionsQuery.html) is a simple query that can be used to get all reaction events for an event
+The [ReactionsQuery](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-core.Queries.ReactionsQuery.html) is a simple query that can be used to get all reaction events for an event
 
 ```js
 // kind 1 short text note event
@@ -19,7 +19,7 @@ eventStore.add({kind: 7, ...})
 
 ## Loading
 
-The [TagValueLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_loaders.TagValueLoader.html) class can be used to load reactions in batches for an event.
+The [TagValueLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-loaders.TagValueLoader.html) class can be used to load reactions in batches for an event.
 
 ```ts
 import { TagValueLoader } from "applesauce-loaders";
@@ -44,7 +44,7 @@ loader.next({
 
 ## Factory
 
-The [ReactionBlueprint](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_factory.Blueprints.ReactionBlueprint.html) blueprint can be used to create a kind 7 reaction event.
+The [ReactionBlueprint](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-factory.Blueprints.ReactionBlueprint.html) blueprint can be used to create a kind 7 reaction event.
 
 ```ts
 import { ReactionBlueprint } from "applesauce-factory/blueprints";

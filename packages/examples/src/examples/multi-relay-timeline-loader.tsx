@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { map } from "rxjs/operators";
 import { Button, ButtonGroup, Stack } from "@mui/material";
-import { TimelineLoader } from "applesauce-loaders";
+import { NostrRequest, TimelineLoader } from "applesauce-loaders";
+import { createRxNostr, createRxOneshotReq } from "rx-nostr";
 import { EventStore } from "applesauce-core";
-import { unixNow } from "applesauce-core/helpers";
+import { getSeenRelays, unixNow } from "applesauce-core/helpers";
 import { verifyEvent } from "nostr-tools";
-import { createRxNostr } from "rx-nostr";
 
 const rxNostr = createRxNostr({
   disconnectTimeout: 120 * 1000,
@@ -16,6 +17,12 @@ const rxNostr = createRxNostr({
     }
   },
 });
+
+const loaderRequest: NostrRequest = (relays, filters, id) => {
+  return rxNostr
+    .use(createRxOneshotReq({ filters, rxReqId: id }), { on: { relays } })
+    .pipe(map((packet) => packet.event));
+};
 
 const COLORS = ["red", "green", "blue", "orange", "purple", "darkcyan"];
 
@@ -40,7 +47,7 @@ export default function TimelineExample() {
   const loader = useMemo(() => {
     console.log(`Creating filter with`, relays, limit);
 
-    return new TimelineLoader(rxNostr, TimelineLoader.simpleFilterMap(relays, [{ kinds: [1] }]), { limit });
+    return new TimelineLoader(loaderRequest, TimelineLoader.simpleFilterMap(relays, [{ kinds: [1] }]), { limit });
   }, [relays, limit]);
 
   // clear the canvas when loader
@@ -65,13 +72,14 @@ export default function TimelineExample() {
 
   useEffect(() => {
     console.log("Subscribing to loader");
-    const sub = loader.subscribe((packet) => {
-      const from = new URL(packet.from).toString();
-      store.add(packet.event, from);
+    const sub = loader.subscribe((event) => {
+      const from = Array.from(getSeenRelays(event) || [])[0];
+      if (!from) return;
+      store.add(event);
 
       if (ctx.current) {
         ctx.current.fillStyle = COLORS[relays.indexOf(from)] || "black";
-        ctx.current.fillRect(now - packet.event.created_at, relays.indexOf(from) * 32, 1, 32);
+        ctx.current.fillRect(now - event.created_at, relays.indexOf(from) * 32, 1, 32);
       }
     });
 

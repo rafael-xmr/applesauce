@@ -42,7 +42,7 @@ describe("add", () => {
     );
   });
 
-  it("should ignore deleted events", () => {
+  it("should ignore old deleted events but not newer ones", () => {
     const deleteEvent: NostrEvent = {
       id: "delete event id",
       kind: kinds.EventDeletion,
@@ -59,7 +59,96 @@ describe("add", () => {
     // now event should be ignored
     eventStore.add(profile);
 
+    const newProfile = user.profile({ name: "new name" }, { created_at: profile.created_at + 1000 });
+    eventStore.add(newProfile);
+
     expect(eventStore.getEvent(profile.id)).toBeUndefined();
+    expect(eventStore.getEvent(newProfile.id)).toBeDefined();
+  });
+
+  it("should remove profile events when delete event is added", () => {
+    // Add initial replaceable event
+    eventStore.add(profile);
+    expect(eventStore.getEvent(profile.id)).toBeDefined();
+
+    const newProfile = user.profile({ name: "new name" }, { created_at: profile.created_at + 1000 });
+    eventStore.add(newProfile);
+
+    const deleteEvent: NostrEvent = {
+      id: "delete event id",
+      kind: kinds.EventDeletion,
+      created_at: profile.created_at + 100,
+      pubkey: user.pubkey,
+      tags: [["a", `${profile.kind}:${profile.pubkey}`]],
+      sig: "this should be ignored for the test",
+      content: "test",
+    };
+
+    // Add delete event with coordinate
+    eventStore.add(deleteEvent);
+
+    // Profile should be removed since delete event is newer
+    expect(eventStore.getEvent(profile.id)).toBeUndefined();
+    expect(eventStore.getEvent(newProfile.id)).toBeDefined();
+    expect(eventStore.getReplaceable(profile.kind, profile.pubkey)).toBe(newProfile);
+  });
+
+  it("should remove addressable replaceable events when delete event is added", () => {
+    // Add initial replaceable event
+    const event = user.event({ content: "test", kind: 30000, tags: [["d", "test"]] });
+    eventStore.add(event);
+    expect(eventStore.getEvent(event.id)).toBeDefined();
+
+    const newEvent = user.event({
+      ...event,
+      created_at: event.created_at + 500,
+    });
+    eventStore.add(newEvent);
+
+    const deleteEvent: NostrEvent = {
+      id: "delete event id",
+      kind: kinds.EventDeletion,
+      created_at: event.created_at + 100,
+      pubkey: user.pubkey,
+      tags: [["a", `${event.kind}:${event.pubkey}:test`]],
+      sig: "this should be ignored for the test",
+      content: "test",
+    };
+
+    // Add delete event with coordinate
+    eventStore.add(deleteEvent);
+
+    // Profile should be removed since delete event is newer
+    expect(eventStore.getEvent(event.id)).toBeUndefined();
+    expect(eventStore.getEvent(newEvent.id)).toBeDefined();
+    expect(eventStore.getReplaceable(event.kind, event.pubkey, "test")).toBe(newEvent);
+  });
+});
+
+describe("inserts", () => {
+  it("should emit newer replaceable events", () => {
+    const spy = subscribeSpyTo(eventStore.inserts);
+    eventStore.add(profile);
+    const newer = user.profile({ name: "new name" }, { created_at: profile.created_at + 100 });
+    eventStore.add(newer);
+    expect(spy.getValues()).toEqual([profile, newer]);
+  });
+
+  it("should not emit when older replaceable event is added", () => {
+    const spy = subscribeSpyTo(eventStore.inserts);
+    eventStore.add(profile);
+    eventStore.add(user.profile({ name: "new name" }, { created_at: profile.created_at - 1000 }));
+    expect(spy.getValues()).toEqual([profile]);
+  });
+});
+
+describe("removes", () => {
+  it("should emit older replaceable events when the newest replaceable event is added", () => {
+    const spy = subscribeSpyTo(eventStore.removes);
+    eventStore.add(profile);
+    const newer = user.profile({ name: "new name" }, { created_at: profile.created_at + 1000 });
+    eventStore.add(newer);
+    expect(spy.getValues()).toEqual([profile]);
   });
 });
 
@@ -225,6 +314,14 @@ describe("replaceable", () => {
     eventStore.add(user.profile({ name: "old name" }, { created_at: profile.created_at - 500 }));
     eventStore.add(user.profile({ name: "really old name" }, { created_at: profile.created_at - 1000 }));
     expect(spy.getValues()).toEqual([profile]);
+  });
+
+  it("should emit newer events", () => {
+    const spy = subscribeSpyTo(eventStore.replaceable(0, user.pubkey));
+    eventStore.add(profile);
+    const newProfile = user.profile({ name: "new name" }, { created_at: profile.created_at + 500 });
+    eventStore.add(newProfile);
+    expect(spy.getValues()).toEqual([profile, newProfile]);
   });
 });
 

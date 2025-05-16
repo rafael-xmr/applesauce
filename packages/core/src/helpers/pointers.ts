@@ -13,7 +13,7 @@ import {
 import { getPublicKey, kinds, NostrEvent } from "nostr-tools";
 
 import { getReplaceableIdentifier } from "./event.js";
-import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
+import { isAddressableKind } from "nostr-tools/kinds";
 import { isSafeRelayURL } from "./relays.js";
 
 export type AddressPointerWithoutD = Omit<AddressPointer, "identifier"> & {
@@ -30,15 +30,15 @@ export function parseCoordinate(a: string, requireD: true, silent: true): Addres
 export function parseCoordinate(a: string, requireD: false, silent: true): AddressPointerWithoutD | null;
 export function parseCoordinate(a: string, requireD = false, silent = true): AddressPointerWithoutD | null {
   const parts = a.split(":") as (string | undefined)[];
-  const kind = parts[0] && parseInt(parts[0]);
+  const kind = parts[0] ? parseInt(parts[0]) : undefined;
   const pubkey = parts[1];
   const d = parts[2];
 
-  if (!kind) {
+  if (kind === undefined) {
     if (silent) return null;
     else throw new Error("Missing kind");
   }
-  if (!pubkey) {
+  if (pubkey === undefined || pubkey === "") {
     if (silent) return null;
     else throw new Error("Missing pubkey");
   }
@@ -183,7 +183,7 @@ export function getCoordinateFromAddressPointer(pointer: AddressPointer) {
  * @throws
  */
 export function getAddressPointerForEvent(event: NostrEvent, relays?: string[]): AddressPointer {
-  if (!isParameterizedReplaceableKind(event.kind)) throw new Error("Cant get AddressPointer for non-replaceable event");
+  if (!isAddressableKind(event.kind)) throw new Error("Cant get AddressPointer for non-replaceable event");
 
   const d = getReplaceableIdentifier(event);
   return {
@@ -209,7 +209,7 @@ export function getEventPointerForEvent(event: NostrEvent, relays?: string[]): E
 
 /** Returns a pointer for a given event */
 export function getPointerForEvent(event: NostrEvent, relays?: string[]): DecodeResult {
-  if (kinds.isParameterizedReplaceableKind(event.kind)) {
+  if (kinds.isAddressableKind(event.kind)) {
     const d = getReplaceableIdentifier(event);
 
     return {

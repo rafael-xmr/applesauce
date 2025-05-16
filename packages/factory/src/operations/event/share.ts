@@ -1,6 +1,6 @@
 import { kinds, NostrEvent } from "nostr-tools";
 import { getAddressPointerForEvent, getEventPointerForEvent } from "applesauce-core/helpers";
-import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
+import { isAddressableKind } from "nostr-tools/kinds";
 
 import { EventOperation } from "../../event-factory.js";
 import {
@@ -21,7 +21,7 @@ export function includeShareTags(event: NostrEvent): EventOperation {
     tags = ensureEventPointerTag(tags, getEventPointerForEvent(event, hint ? [hint] : undefined));
 
     // add "a" tag
-    if (isParameterizedReplaceableKind(event.kind)) {
+    if (isAddressableKind(event.kind)) {
       tags = ensureAddressPointerTag(tags, getAddressPointerForEvent(event, hint ? [hint] : undefined));
     }
 

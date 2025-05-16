@@ -1,57 +1,73 @@
 {
-  "name": "applesauce-relay",
-  "version": "0.12.0",
-  "description": "A collection of observable based loaders built on rx-nostr",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsc",
-    "watch:build": "tsc --watch > /dev/null",
-    "test": "vitest run --passWithNoTests",
-    "watch:test": "vitest"
-  },
-  "keywords": [
-    "nostr",
-    "applesauce"
-  ],
-  "author": "hzrd149",
-  "license": "MIT",
-  "files": [
-    "dist",
-    "applesauce"
-  ],
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./operators": {
-      "import": "./dist/operators/index.js",
-      "require": "./dist/operators/index.js",
-      "types": "./dist/operators/index.d.ts"
-    },
-    "./operators/*": {
-      "import": "./dist/operators/*.js",
-      "require": "./dist/operators/*.js",
-      "types": "./dist/operators/*.d.ts"
-    }
-  },
-  "dependencies": {
-    "applesauce-core": "^0.12.0",
-    "nanoid": "^5.0.9",
-    "nostr-tools": "^2.11.0",
-    "rxjs": "^7.8.2"
-  },
-  "devDependencies": {
-    "typescript": "^5.8.2",
-    "vitest": "^3.0.5",
-    "vitest-nostr": "^0.4.1",
-    "vitest-websocket-mock": "^0.4.0"
-  },
-  "funding": {
-    "type": "lightning",
-    "url": "lightning:nostrudel@geyser.fund"
-  }
+	"name": "applesauce-relay",
+	"version": "1.1.0",
+	"description": "nostr relay communication framework built on rxjs",
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"watch:build": "tsc --watch > /dev/null",
+		"test": "vitest run --passWithNoTests",
+		"watch:test": "vitest"
+	},
+	"keywords": ["nostr", "applesauce"],
+	"author": "hzrd149",
+	"license": "MIT",
+	"files": ["dist", "applesauce"],
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		},
+		"./pool": {
+			"import": "./dist/pool.js",
+			"require": "./dist/pool.js",
+			"types": "./dist/pool.d.ts"
+		},
+		"./relay": {
+			"import": "./dist/relay.js",
+			"require": "./dist/relay.js",
+			"types": "./dist/relay.d.ts"
+		},
+		"./types": {
+			"import": "./dist/types.js",
+			"require": "./dist/types.js",
+			"types": "./dist/types.d.ts"
+		},
+		"./operators": {
+			"import": "./dist/operators/index.js",
+			"require": "./dist/operators/index.js",
+			"types": "./dist/operators/index.d.ts"
+		},
+		"./operators/*": {
+			"import": "./dist/operators/*.js",
+			"require": "./dist/operators/*.js",
+			"types": "./dist/operators/*.d.ts"
+		},
+		"./negentropy": {
+			"import": "./dist/negentropy.js",
+			"require": "./dist/negentropy.js",
+			"types": "./dist/negentropy.d.ts"
+		}
+	},
+	"dependencies": {
+		"@noble/hashes": "^1.7.1",
+		"applesauce-core": "^1.0.0",
+		"nanoid": "^5.0.9",
+		"nostr-tools": "^2.11.0",
+		"rxjs": "^7.8.2"
+	},
+	"devDependencies": {
+		"@hirez_io/observer-spy": "^2.2.0",
+		"@vitest/expect": "^3.1.1",
+		"typescript": "^5.7.3",
+		"vitest": "^3.1.1",
+		"vitest-websocket-mock": "^0.5.0"
+	},
+	"funding": {
+		"type": "lightning",
+		"url": "lightning:nostrudel@geyser.fund"
+	}
 }

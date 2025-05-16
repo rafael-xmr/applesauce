@@ -12,42 +12,36 @@ export type UserStatus = UserStatusPointer & {
 
 /** Creates a Query that returns a parsed {@link UserStatus} for a certain type */
 export function UserStatusQuery(pubkey: string, type: string = "general"): Query<UserStatus | undefined | null> {
-  return {
-    key: pubkey,
-    run: (events) =>
-      events.replaceable(kinds.UserStatuses, pubkey, type).pipe(
-        map((event) => {
-          if (!event) return undefined;
+  return (events) =>
+    events.replaceable(kinds.UserStatuses, pubkey, type).pipe(
+      map((event) => {
+        if (!event) return undefined;
 
-          const pointer = getUserStatusPointer(event);
-          if (!pointer) return null;
+        const pointer = getUserStatusPointer(event);
+        if (!pointer) return null;
 
-          return {
-            ...pointer,
-            event,
-            content: event.content,
-          };
-        }),
-      ),
-  };
+        return {
+          ...pointer,
+          event,
+          content: event.content,
+        };
+      }),
+    );
 }
 
 /** Creates a Query that returns a directory of parsed {@link UserStatus} for a pubkey */
 export function UserStatusesQuery(pubkey: string): Query<Record<string, UserStatus>> {
-  return {
-    key: pubkey,
-    run: (events) =>
-      events.timeline([{ kinds: [kinds.UserStatuses], authors: [pubkey] }]).pipe(
-        map((events) => {
-          return events.reduce((dir, event) => {
-            try {
-              const d = getReplaceableIdentifier(event);
-              return { ...dir, [d]: { event, ...getUserStatusPointer(event), content: event.content } };
-            } catch (error) {
-              return dir;
-            }
-          }, {});
-        }),
-      ),
-  };
+  return (events) =>
+    events.timeline([{ kinds: [kinds.UserStatuses], authors: [pubkey] }]).pipe(
+      map((events) => {
+        return events.reduce((dir, event) => {
+          try {
+            const d = getReplaceableIdentifier(event);
+            return { ...dir, [d]: { event, ...getUserStatusPointer(event), content: event.content } };
+          } catch (error) {
+            return dir;
+          }
+        }, {});
+      }),
+    );
 }

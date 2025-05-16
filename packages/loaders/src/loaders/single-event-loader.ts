@@ -1,15 +1,15 @@
 import { bufferTime, filter, from, map, mergeAll, Observable, tap } from "rxjs";
-import { createRxOneshotReq, EventPacket, RxNostr } from "rx-nostr";
 import { markFromCache } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
-import { Filter } from "nostr-tools";
+import { Filter, NostrEvent } from "nostr-tools";
 import { nanoid } from "nanoid";
 
-import { CacheRequest, Loader } from "./loader.js";
+import { CacheRequest, Loader, NostrRequest } from "./loader.js";
 import { generatorSequence } from "../operators/generator-sequence.js";
 import { distinctRelaysBatch } from "../operators/distinct-relays.js";
 import { groupByRelay } from "../helpers/pointer.js";
 import { consolidateEventPointers } from "../helpers/event-pointer.js";
+import { completeOnEOSE } from "../operators/complete-on-eose.js";
 
 export type LoadableEventPointer = {
   id: string;
@@ -23,27 +23,29 @@ export type SingleEventLoaderOptions = {
    * @default 1000
    */
   bufferTime?: number;
-  /** A method used to load events from a local cache */
-  cacheRequest?: CacheRequest;
   /**
    * How long the loader should wait before it allows an event pointer to be refreshed from a relay
    * @default 60000
    */
   refreshTimeout?: number;
+  /** A method used to load events from a local cache */
+  cacheRequest?: CacheRequest;
+  /** An array of relays to always fetch from */
+  extraRelays?: string[];
 };
 
 function* cacheFirstSequence(
-  rxNostr: RxNostr,
+  request: NostrRequest,
   pointers: LoadableEventPointer[],
-  opts: SingleEventLoaderOptions,
+  opts: { cacheRequest?: CacheRequest; extraRelays?: string[] },
   log: typeof logger,
-): Generator<Observable<EventPacket>, undefined, EventPacket[]> {
+): Generator<Observable<NostrEvent>, undefined, NostrEvent[]> {
   let remaining = [...pointers];
   const id = nanoid(8);
   log = log.extend(id);
 
-  const loaded = (packets: EventPacket[]) => {
-    const ids = new Set(packets.map((p) => p.event.id));
+  const loaded = (packets: NostrEvent[]) => {
+    const ids = new Set(packets.map((p) => p.id));
     remaining = remaining.filter((p) => !ids.has(p.id));
   };
 
@@ -53,8 +55,6 @@ function* cacheFirstSequence(
     const results = yield opts.cacheRequest([filter]).pipe(
       // mark the event as from the cache
       tap((event) => markFromCache(event)),
-      // convert to event packets
-      map((e) => ({ event: e, from: "", subId: "single-event-loader", type: "EVENT" }) as EventPacket),
     );
 
     if (results.length > 0) {
@@ -66,7 +66,7 @@ function* cacheFirstSequence(
   // exit early if all pointers are loaded
   if (remaining.length === 0) return;
 
-  let byRelay = groupByRelay(remaining, "default");
+  let byRelay = groupByRelay(remaining, opts.extraRelays);
 
   // load remaining pointers from the relays
   let results = yield from(
@@ -74,21 +74,16 @@ function* cacheFirstSequence(
       let filter: Filter = { ids: pointers.map((e) => e.id) };
 
       let count = 0;
-      const req = createRxOneshotReq({ filters: [filter], rxReqId: id });
-
       log(`Requesting from ${relay}`, filter.ids);
 
-      let sub$: Observable<EventPacket>;
-      // don't specify relay if this is the "default" relay
-      if (relay === "default") sub$ = rxNostr.use(req);
-      else sub$ = rxNostr.use(req, { on: { relays: [relay] } });
-
-      return sub$.pipe(
-        tap({
-          next: () => count++,
-          complete: () => log(`Completed ${relay}, loaded ${count} events`),
-        }),
-      );
+      return request([relay], [filter], id)
+        .pipe(completeOnEOSE())
+        .pipe(
+          tap({
+            next: () => count++,
+            complete: () => log(`Completed ${relay}, loaded ${count} events`),
+          }),
+        );
     }),
   ).pipe(mergeAll());
 
@@ -103,29 +98,42 @@ function* cacheFirstSequence(
   }
 }
 
-export class SingleEventLoader extends Loader<LoadableEventPointer, EventPacket> {
+export class SingleEventLoader extends Loader<LoadableEventPointer, NostrEvent> {
   log: typeof logger = logger.extend("SingleEventLoader");
 
-  constructor(rxNostr: RxNostr, opts?: SingleEventLoaderOptions) {
-    let options = opts || {};
+  /** A method used to load events from a local cache */
+  cacheRequest?: CacheRequest;
 
+  /** An array of relays to always fetch from */
+  extraRelays?: string[];
+
+  constructor(request: NostrRequest, opts?: SingleEventLoaderOptions) {
     super((source) =>
       source.pipe(
-        // load first from cache
+        // batch every second
         bufferTime(opts?.bufferTime ?? 1000),
         // ignore empty buffers
         filter((buffer) => buffer.length > 0),
         // only request events from relays once
-        distinctRelaysBatch((p) => p.id, options.refreshTimeout ?? 60_000),
+        distinctRelaysBatch((p) => p.id, opts?.refreshTimeout ?? 60_000),
         // ensure there is only one of each event pointer
         map(consolidateEventPointers),
         // run the loader sequence
-        generatorSequence<LoadableEventPointer[], EventPacket>(
-          (pointers) => cacheFirstSequence(rxNostr, pointers, options, this.log),
+        generatorSequence<LoadableEventPointer[], NostrEvent>(
+          (pointers) =>
+            cacheFirstSequence(
+              request,
+              pointers,
+              { cacheRequest: this.cacheRequest, extraRelays: this.extraRelays },
+              this.log,
+            ),
           // there will always be more events, never complete
           false,
         ),
       ),
     );
+
+    this.cacheRequest = opts?.cacheRequest;
+    this.extraRelays = opts?.extraRelays;
   }
 }

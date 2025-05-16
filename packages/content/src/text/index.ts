@@ -5,4 +5,3 @@ export * from "./emoji.js";
 export * from "./parser.js";
 export * from "./hashtag.js";
 export * from "./gallery.js";
-export * from "./lightning.js";

@@ -1,5 +1,35 @@
 # applesauce-core
 
+## 1.0.0
+
+### Major Changes
+
+- e4d9453: Convert queries to simple methods instead of `key`, and `run` fields
+
+### Minor Changes
+
+- 8aa3aea: Add `matchMutes` and `createMutedWordsRegExp` methods
+- cb96f33: Add `mergeContacts` method
+- 1624ca1: Add `getRelaysFromList` method
+- 1624ca1: Add `FavoriteRelays`, `FavoriteRelaySets`, `SearchRelays`, and `BlockedRelays` queries
+- cb96f33: Add `mergeBookmarks` method
+- e548779: Add `type` field to comment pointers
+- 1624ca1: Add `hidden` flag to common list helpers
+- cb96f33: Add `QueryStore.contacts` and `QueryStore.mutes` methods
+- cb96f33: Add `getContacts`, `getPublicContacts` and `getHiddenContacts` methods
+- cb96f33: Add `mergeMutes` method
+- cb96f33: Add `mergeEventPointers`, `mergeAddressPointers`, and `mergeProfilePointers` NIP-19 methods
+
+### Patch Changes
+
+- d8dc5c2: Break IEventStore interface into two parts
+
+## 0.12.1
+
+### Patch Changes
+
+- a3b9585: Fix EventStore.inserts emitting when old replaceable events where added to the store
+
 ## 0.12.0
 
 ### Minor Changes

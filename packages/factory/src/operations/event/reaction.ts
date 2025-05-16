@@ -1,5 +1,5 @@
 import { NostrEvent } from "nostr-tools";
-import { isParameterizedReplaceableKind } from "nostr-tools/kinds";
+import { isAddressableKind } from "nostr-tools/kinds";
 import { Emoji, getTagValue } from "applesauce-core/helpers";
 
 import { EventOperation } from "../../event-factory.js";
@@ -35,7 +35,7 @@ export function includeReactionTags(event: NostrEvent): EventOperation {
       relays: pubkeyHint ? [pubkeyHint] : undefined,
     });
 
-    if (isParameterizedReplaceableKind(event.kind)) {
+    if (isAddressableKind(event.kind)) {
       // include "a" tag
       const identifier = getTagValue(event, "d");
       if (identifier)

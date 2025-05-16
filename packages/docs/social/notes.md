@@ -4,7 +4,7 @@
 
 ### Content
 
-The [applesauce-content](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_content.html) package provides a set of utilities for parsing note content.
+The [applesauce-content](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce-content.html) package provides a set of utilities for parsing note content.
 
 ```ts
 import { getParsedContent } from "applesauce-content/text";
@@ -33,7 +33,7 @@ console.log(ats);
 
 ### Replies
 
-The [getNip10References](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_core.Helpers.getNip10References.html) method can be used to parse the [NIP-10](https://github.com/nostr-protocol/nips/blob/master/10.md) tags in a kind 1 reply
+The [getNip10References](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-core.Helpers.getNip10References.html) method can be used to parse the [NIP-10](https://github.com/nostr-protocol/nips/blob/master/10.md) tags in a kind 1 reply
 
 ```js
 import { getNip10References } from "applesauce-core/helpers";
@@ -62,7 +62,7 @@ const event = {
 console.log(getNip10References(event));
 ```
 
-Should return a [ThreadReferences](https://hzrd149.github.io/applesauce/typedoc/types/applesauce_core.Helpers.ThreadReferences.html) object
+Should return a [ThreadReferences](https://hzrd149.github.io/applesauce/typedoc/types/applesauce-core.Helpers.ThreadReferences.html) object
 
 ```json
 {
@@ -77,7 +77,7 @@ Should return a [ThreadReferences](https://hzrd149.github.io/applesauce/typedoc/
 
 ## Loading
 
-Generally the best way to load bulk notes is to use a [TimelineLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_loaders.TimelineLoader.html) class
+Generally the best way to load bulk notes is to use a [TimelineLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-loaders.TimelineLoader.html) class
 
 ```ts
 const pubkeys = ["<pubkey1>", "<pubkey2>"];
@@ -115,7 +115,7 @@ loader.next({
 
 ## Factory
 
-The [NoteBlueprint](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_factory.Blueprints.NoteBlueprint.html) blueprint can be used to create a kind 1 note
+The [NoteBlueprint](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-factory.Blueprints.NoteBlueprint.html) blueprint can be used to create a kind 1 note
 
 ```ts
 import { NoteBlueprint } from "applesauce-factory/blueprints";
@@ -129,7 +129,7 @@ const note = await factory.create(NoteBlueprint, "hello world :smile:", {
 });
 ```
 
-The [NoteReplyBlueprint](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_factory.Blueprints.NoteReplyBlueprint.html) can be used to create a kind 1 reply
+The [NoteReplyBlueprint](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-factory.Blueprints.NoteReplyBlueprint.html) can be used to create a kind 1 reply
 
 ::: info
 The `NoteReplyBlueprint` can only be used to create replies for kind 1 events. if you need replies to other kinds of events you should use [Comments](./comments.md)

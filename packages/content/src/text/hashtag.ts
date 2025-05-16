@@ -2,7 +2,7 @@ import { Transformer } from "unified";
 import { getHashtagTag } from "applesauce-core/helpers/hashtag";
 
 import { Hashtag, Root } from "../nast/types.js";
-import Expressions from "../helpers/regexp.js";
+import { Tokens } from "../helpers/regexp.js";
 import { findAndReplace } from "../nast/find-and-replace.js";
 
 export function hashtags(): Transformer<Root> {
@@ -12,7 +12,7 @@ export function hashtags(): Transformer<Root> {
 
     findAndReplace(tree, [
       [
-        Expressions.hashtag,
+        Tokens.hashtag,
         (_: string, $1: string) => {
           try {
             const tag = getHashtagTag(event, $1);

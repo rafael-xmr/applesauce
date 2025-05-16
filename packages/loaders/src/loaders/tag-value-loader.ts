@@ -1,13 +1,12 @@
-import { createRxOneshotReq, EventPacket, RxNostr } from "rx-nostr";
-import { bufferTime, filter, map, merge, mergeMap, tap } from "rxjs";
-import { Filter } from "nostr-tools";
-import { markFromCache } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
+import { markFromCache, mergeRelaySets } from "applesauce-core/helpers";
+import { Filter, NostrEvent } from "nostr-tools";
+import { bufferTime, filter, merge, mergeMap, tap } from "rxjs";
 
-import { CacheRequest, Loader, RelayFilterMap } from "./loader.js";
-import { distinctRelaysBatch } from "../operators/distinct-relays.js";
-import { getDefaultReadRelays } from "../helpers/rx-nostr.js";
 import { unique } from "../helpers/array.js";
+import { completeOnEOSE } from "../operators/complete-on-eose.js";
+import { distinctRelaysBatch } from "../operators/distinct-relays.js";
+import { CacheRequest, Loader, NostrRequest, RelayFilterMap } from "./loader.js";
 
 export type TabValuePointer = {
   /** The value of the tag to load */
@@ -36,13 +35,21 @@ export type TagValueLoaderOptions = {
 
   /** Method used to load from the cache */
   cacheRequest?: CacheRequest;
+  /** An array of relays to always fetch from */
+  extraRelays?: string[];
 };
 
-export class TagValueLoader extends Loader<TabValuePointer, EventPacket> {
+export class TagValueLoader extends Loader<TabValuePointer, NostrEvent> {
   name: string;
   protected log: typeof logger = logger.extend("TagValueLoader");
 
-  constructor(rxNostr: RxNostr, tagName: string, opts?: TagValueLoaderOptions) {
+  /** A method to load events from a local cache */
+  cacheRequest?: CacheRequest;
+
+  /** An array of relays to always fetch from */
+  extraRelays?: string[];
+
+  constructor(request: NostrRequest, tagName: string, opts?: TagValueLoaderOptions) {
     const filterTag: `#${string}` = `#${tagName}`;
 
     super((source) =>
@@ -62,7 +69,8 @@ export class TagValueLoader extends Loader<TabValuePointer, EventPacket> {
 
           // build request map for relays
           const requestMap = pointers.reduce<RelayFilterMap>((map, pointer) => {
-            const relays = pointer.relays ?? getDefaultReadRelays(rxNostr);
+            const relays = mergeRelaySets(pointer.relays, this.extraRelays);
+
             for (const relay of relays) {
               if (!map[relay]) {
                 // create new filter for relay
@@ -78,27 +86,24 @@ export class TagValueLoader extends Loader<TabValuePointer, EventPacket> {
           }, {});
 
           let fromCache = 0;
-          const cacheRequest = opts
-            ?.cacheRequest?.([{ ...baseFilter, [filterTag]: unique(pointers.map((p) => p.value)) }])
-            .pipe(
-              // mark the event as from the cache
-              tap({
-                next: (event) => {
-                  markFromCache(event);
-                  fromCache++;
-                },
-                complete: () => {
-                  if (fromCache > 0) this.log(`Loaded ${fromCache} from cache`);
-                },
-              }),
-              // convert to event packets
-              map((e) => ({ event: e, from: "", subId: "replaceable-loader", type: "EVENT" }) as EventPacket),
-            );
+          const cacheRequest = this?.cacheRequest?.([
+            { ...baseFilter, [filterTag]: unique(pointers.map((p) => p.value)) },
+          ]).pipe(
+            // mark the event as from the cache
+            tap({
+              next: (event) => {
+                markFromCache(event);
+                fromCache++;
+              },
+              complete: () => {
+                if (fromCache > 0) this.log(`Loaded ${fromCache} from cache`);
+              },
+            }),
+          );
 
-          const requests = Object.entries(requestMap).map(([relay, filters]) => {
-            const req = createRxOneshotReq({ filters });
-            return rxNostr.use(req, { on: { relays: [relay] } });
-          });
+          const requests = Object.entries(requestMap).map(([relay, filters]) =>
+            request([relay], filters).pipe(completeOnEOSE()),
+          );
 
           this.log(`Requesting ${pointers.length} tag values from ${requests.length} relays`);
 
@@ -106,6 +111,10 @@ export class TagValueLoader extends Loader<TabValuePointer, EventPacket> {
         }),
       ),
     );
+
+    // Set options
+    this.cacheRequest = opts?.cacheRequest;
+    this.extraRelays = opts?.extraRelays;
 
     // create a unique logger for this instance
     this.name = opts?.name ?? "";

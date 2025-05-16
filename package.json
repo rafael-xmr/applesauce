@@ -13,20 +13,22 @@
     "test:browser": "vitest"
   },
   "dependencies": {
-    "@changesets/cli": "^2.28.1",
+    "@changesets/cli": "^2.29.2",
     "typedoc": "^0.27.9"
   },
   "devDependencies": {
-    "@vitest/browser": "^3.0.8",
+    "@changesets/changelog-git": "^0.2.1",
+    "@changesets/types": "^6.1.0",
+    "@vitest/browser": "^3.1.2",
     "@vitest/coverage-v8": "2.1.8",
-    "playwright": "^1.51.0",
+    "playwright": "^1.52.0",
     "prettier": "^3.5.3",
-    "turbo": "^2.4.4",
-    "typescript": "^5.8.2",
-    "vitest": "^3.0.8"
+    "turbo": "^2.5.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.2"
   },
-  "packageManager": "pnpm@9.14.4",
   "engines": {
     "node": ">=20"
-  }
+  },
+  "packageManager": "pnpm@9.14.4"
 }

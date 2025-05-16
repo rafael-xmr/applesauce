@@ -1,11 +1,11 @@
 import { MediaAttachment, getSha256FromURL } from "applesauce-core/helpers/file-metadata";
 
-import Expressions from "./regexp.js";
+import { Tokens } from "./regexp.js";
 
 /** Returns all URLs in a content string that contain a sha256 hash */
 export function getMediaAttachmentURLsFromContent(content: string): MediaAttachment[] {
   return (
-    Array.from(content.matchAll(Expressions.link))
+    Array.from(content.matchAll(Tokens.link))
       .map((match) => match[0])
       // filter out invalid URLs
       .filter((str) => URL.canParse(str))

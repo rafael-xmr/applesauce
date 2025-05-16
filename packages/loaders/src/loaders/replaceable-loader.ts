@@ -1,11 +1,9 @@
-import { tap, Observable, filter, bufferTime, map } from "rxjs";
-import { createRxOneshotReq, EventPacket, RxNostr } from "rx-nostr";
-import { getEventUID, markFromCache, mergeRelaySets } from "applesauce-core/helpers";
 import { logger } from "applesauce-core";
+import { getEventUID, markFromCache, mergeRelaySets } from "applesauce-core/helpers";
 import { nanoid } from "nanoid";
+import { NostrEvent } from "nostr-tools";
+import { bufferTime, filter, map, Observable, tap } from "rxjs";
 
-import { CacheRequest, Loader } from "./loader.js";
-import { generatorSequence } from "../operators/generator-sequence.js";
 import {
   consolidateAddressPointers,
   createFiltersFromAddressPointers,
@@ -14,25 +12,27 @@ import {
   isLoadableAddressPointer,
   LoadableAddressPointer,
 } from "../helpers/address-pointer.js";
-import { getDefaultReadRelays } from "../helpers/rx-nostr.js";
+import { completeOnEOSE } from "../operators/complete-on-eose.js";
 import { distinctRelaysBatch } from "../operators/distinct-relays.js";
+import { generatorSequence } from "../operators/generator-sequence.js";
+import { CacheRequest, Loader, NostrRequest } from "./loader.js";
 
 /** A generator that tries to load the address pointers from the cache first, then tries the relays */
 function* cacheFirstSequence(
-  rxNostr: RxNostr,
+  request: NostrRequest,
   pointers: LoadableAddressPointer[],
   log: typeof logger,
-  opts?: { cacheRequest?: CacheRequest; lookupRelays?: string[] },
-): Generator<Observable<EventPacket>, undefined, EventPacket[]> {
+  opts?: { cacheRequest?: CacheRequest; lookupRelays?: string[]; extraRelays?: string[] },
+): Generator<Observable<NostrEvent>, undefined, NostrEvent[]> {
   const id = nanoid(4);
 
   let remaining = Array.from(pointers);
   const pointerRelays = Array.from(getRelaysFromPointers(pointers));
 
   // handle previous step results and decide if to exit
-  const handleResults = (results: EventPacket[]) => {
+  const handleResults = (results: NostrEvent[]) => {
     if (results.length) {
-      const coordinates = new Set(results.map((p) => getEventUID(p.event)));
+      const coordinates = new Set(results.map((event) => getEventUID(event)));
 
       // if there where results, filter out any pointers that where found
       remaining = remaining.filter((pointer) => {
@@ -59,22 +59,18 @@ function* cacheFirstSequence(
     const results = yield opts.cacheRequest(filters).pipe(
       // mark the event as from the cache
       tap((event) => markFromCache(event)),
-      // convert to event packets
-      map((e) => ({ event: e, from: "", subId: "replaceable-loader", type: "EVENT" }) as EventPacket),
     );
 
     if (handleResults(results)) return;
   }
 
-  // load from pointer relays and default relays
-  const defaultRelays = getDefaultReadRelays(rxNostr);
-  const remoteRelays = mergeRelaySets(pointerRelays, defaultRelays);
-  if (remoteRelays.length > 0) {
-    log(`[${id}] Requesting`, remoteRelays, remaining);
+  // load from pointer relays and extra relays
+  const mergedRelays = mergeRelaySets(pointerRelays, opts?.extraRelays);
+  if (mergedRelays.length > 0) {
+    log(`[${id}] Requesting`, mergedRelays, remaining);
 
     const filters = createFiltersFromAddressPointers(remaining);
-    const req = createRxOneshotReq({ filters, rxReqId: id });
-    const results = yield rxNostr.use(req, { on: { relays: remoteRelays } });
+    const results = yield request(mergedRelays, filters).pipe(completeOnEOSE());
 
     if (handleResults(results)) return;
   }
@@ -87,8 +83,7 @@ function* cacheFirstSequence(
       log(`[${id}] Request from lookup`, relays, remaining);
 
       const filters = createFiltersFromAddressPointers(remaining);
-      const req = createRxOneshotReq({ filters, rxReqId: id });
-      const results = yield rxNostr.use(req, { on: { relays } });
+      const results = yield request(relays, filters).pipe(completeOnEOSE());
 
       if (handleResults(results)) return;
     }
@@ -105,9 +100,11 @@ export type ReplaceableLoaderOptions = {
   cacheRequest?: CacheRequest;
   /** Fallback lookup relays to check when event cant be found */
   lookupRelays?: string[];
+  /** An array of relays to always fetch from */
+  extraRelays?: string[];
 };
 
-export class ReplaceableLoader extends Loader<LoadableAddressPointer, EventPacket> {
+export class ReplaceableLoader extends Loader<LoadableAddressPointer, NostrEvent> {
   log: typeof logger = logger.extend("ReplaceableLoader");
 
   /** A method used to load events from a local cache */
@@ -115,7 +112,10 @@ export class ReplaceableLoader extends Loader<LoadableAddressPointer, EventPacke
   /** Fallback lookup relays to check when event cant be found */
   lookupRelays?: string[];
 
-  constructor(rxNostr: RxNostr, opts?: ReplaceableLoaderOptions) {
+  /** An array of relays to always fetch from */
+  extraRelays?: string[];
+
+  constructor(request: NostrRequest, opts?: ReplaceableLoaderOptions) {
     super((source) => {
       return source.pipe(
         // filter out invalid pointers
@@ -131,11 +131,12 @@ export class ReplaceableLoader extends Loader<LoadableAddressPointer, EventPacke
         // ignore empty buffer
         filter((buffer) => buffer.length > 0),
         // check cache, relays, lookup relays in that order
-        generatorSequence<LoadableAddressPointer[], EventPacket>(
+        generatorSequence<LoadableAddressPointer[], NostrEvent>(
           (pointers) =>
-            cacheFirstSequence(rxNostr, pointers, this.log, {
+            cacheFirstSequence(request, pointers, this.log, {
               cacheRequest: this.cacheRequest,
               lookupRelays: this.lookupRelays,
+              extraRelays: this.extraRelays,
             }),
           // there will always be more events, never complete
           false,
@@ -146,5 +147,6 @@ export class ReplaceableLoader extends Loader<LoadableAddressPointer, EventPacke
     // set options
     this.cacheRequest = opts?.cacheRequest;
     this.lookupRelays = opts?.lookupRelays;
+    this.extraRelays = opts?.extraRelays;
   }
 }

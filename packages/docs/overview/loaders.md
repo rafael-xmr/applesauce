@@ -41,7 +41,7 @@ replaceable.next({ kind: 0, pubkey: "<pubkey>", relays: ["wss://relay.example.co
 
 ## Loading from cache
 
-Most of the loaders class can take a [cacheRequest](https://hzrd149.github.io/applesauce/typedoc/types/applesauce_loaders.CacheRequest.html) method that can be used to load events from a local cache. the method should return an rxjs `Observable<NostrEvent>` that completes
+Most of the loaders class can take a [cacheRequest](https://hzrd149.github.io/applesauce/typedoc/types/applesauce-loaders.CacheRequest.html) method that can be used to load events from a local cache. the method should return an rxjs `Observable<NostrEvent>` that completes
 
 ```js
 function cacheRequest(filters: Filter[]) {
@@ -169,7 +169,7 @@ for(let i = 0; i < 100: i++){
 
 ## Timeline loader
 
-The [TimelineLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_loaders.TimelineLoader.html) class should be used to load any more than 500 events
+The [TimelineLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-loaders.TimelineLoader.html) class should be used to load any more than 500 events
 
 ```js
 import { TimelineLoader } from "applesauce-loaders";
@@ -199,7 +199,7 @@ setTimeout(() => {
 
 ## Single event loader
 
-The [SingleEventLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_loaders.SingleEventLoader.html) class can be used to batch load individual events. its useful for loading parent replies and quoted events
+The [SingleEventLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-loaders.SingleEventLoader.html) class can be used to batch load individual events. its useful for loading parent replies and quoted events
 
 ```js
 import { SingleEventLoader } from "applesauce-loaders";
@@ -220,7 +220,7 @@ eventLoader.next({
 
 ## Tag value loader
 
-The [TagValueLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_loaders.TagValueLoader.html) class can be used to load batches of events with an indexable set to a certain value
+The [TagValueLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-loaders.TagValueLoader.html) class can be used to load batches of events with an indexable set to a certain value
 
 This can be used to load zaps, reactions, wiki pages, etc
 

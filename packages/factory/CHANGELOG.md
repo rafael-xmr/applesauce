@@ -1,5 +1,35 @@
 # applesauce-factory
 
+## 1.1.0
+
+### Minor Changes
+
+- b7ff4f6: Add `removeSingletonTag` tag operation
+
+### Patch Changes
+
+- b7ff4f6: Fix `setListTitle`, `setListImage`, and `setListDescription` not removing tags
+
+## 1.0.0
+
+### Patch Changes
+
+- Updated dependencies
+  - applesauce-core@1.0.0
+  - applesauce-content@1.0.0
+
+## 0.12.2
+
+### Patch Changes
+
+- e4c6632: Fix `EventFactory.modify` copying symbols to new draft event
+
+## 0.12.1
+
+### Patch Changes
+
+- 925bf01: Fix `addOutboxRelay` and `addInboxRelay` operations adding both inbox and outbox relays
+
 ## 0.12.0
 
 ### Minor Changes
@@ -12,18 +42,7 @@
 
 - bf53581: Add a few more tests
 - 4aba6cc: Allow undefined in `modifyPublicTags` and `modifyHiddenTags`
-- Updated dependencies [6882991]
-- Updated dependencies [e176601]
-- Updated dependencies [06263df]
-- Updated dependencies [5e95ed5]
-- Updated dependencies [91621b5]
-- Updated dependencies [3780d5e]
-- Updated dependencies [91621b5]
-- Updated dependencies [06263df]
-- Updated dependencies [91621b5]
-- Updated dependencies [0c6251d]
-- Updated dependencies [f92f10c]
-- Updated dependencies [06263df]
+- Updated dependencies
   - applesauce-core@0.12.0
   - applesauce-content@0.12.0
 

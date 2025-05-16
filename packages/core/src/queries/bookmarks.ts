@@ -1,31 +1,34 @@
 import { kinds } from "nostr-tools";
 import { map } from "rxjs/operators";
 
-import { isHiddenTagsLocked } from "../helpers/index.js";
-import { Bookmarks, getBookmarks, getHiddenBookmarks } from "../helpers/bookmarks.js";
+import { Bookmarks, getBookmarks, getHiddenBookmarks, getPublicBookmarks } from "../helpers/bookmarks.js";
 import { Query } from "../query-store/index.js";
+import { listenLatestUpdates } from "../observable/index.js";
 
+/** A query that returns all the bookmarks of a user */
 export function UserBookmarkQuery(pubkey: string): Query<Bookmarks | undefined> {
-  return {
-    key: pubkey,
-    run: (store) => store.replaceable(kinds.Mutelist, pubkey).pipe(map((event) => event && getBookmarks(event))),
-  };
+  return (events) =>
+    events.replaceable(kinds.Mutelist, pubkey).pipe(
+      // listen for event updates (hidden tags unlocked)
+      listenLatestUpdates(events),
+      // Get all bookmarks
+      map((event) => event && getBookmarks(event)),
+    );
 }
 
-export function UserHiddenBookmarkQuery(
-  pubkey: string,
-): Query<(Bookmarks & { locked: false }) | { locked: true } | undefined> {
-  return {
-    key: pubkey,
-    run: (store) =>
-      store.replaceable(kinds.Mutelist, pubkey).pipe(
-        map((event) => {
-          if (!event) return undefined;
+/** A query that returns all the public bookmarks of a user */
+export function UserPublicBookmarkQuery(pubkey: string): Query<Bookmarks | undefined> {
+  return (events) =>
+    events.replaceable(kinds.Mutelist, pubkey).pipe(map((event) => event && getPublicBookmarks(event)));
+}
 
-          const bookmarks = getHiddenBookmarks(event);
-          if (isHiddenTagsLocked(event) || !bookmarks) return { locked: true };
-          return { locked: false, ...bookmarks };
-        }),
-      ),
-  };
+/** A query that returns all the hidden bookmarks of a user */
+export function UserHiddenBookmarkQuery(pubkey: string): Query<Bookmarks | null | undefined> {
+  return (events) =>
+    events.replaceable(kinds.Mutelist, pubkey).pipe(
+      // listen for event updates (hidden tags unlocked)
+      listenLatestUpdates(events),
+      // Get hidden bookmarks
+      map((event) => event && (getHiddenBookmarks(event) ?? null)),
+    );
 }

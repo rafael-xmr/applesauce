@@ -10,10 +10,10 @@ npm install applesauce-react
 
 To start using applesauce with react you must add some of the providers to your react root
 
-- If you want to use the `useStoreQuery` hook you must add the [QueryStoreProvider](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.QueryStoreProvider.html)
-- If you want to use the `useEventFactory` hook you must add the [FactoryProvider](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.FactoryProvider.html)
-- If you want to use the `useAccountManager` or `useActiveAccount` hook you must add the [AccountsProvider](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.AccountsProvider.html)
-- If you want to use the `useEventStore` hook you must add the `EventStoreProvider` or [QueryStoreProvider](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.QueryStoreProvider.html)
+- If you want to use the `useStoreQuery` hook you must add the [QueryStoreProvider](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-react.QueryStoreProvider.html)
+- If you want to use the `useEventFactory` hook you must add the [FactoryProvider](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-react.FactoryProvider.html)
+- If you want to use the `useAccountManager` or `useActiveAccount` hook you must add the [AccountsProvider](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-react.AccountsProvider.html)
+- If you want to use the `useEventStore` hook you must add the `EventStoreProvider` or [QueryStoreProvider](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-react.QueryStoreProvider.html)
 
 ## Simple setup
 

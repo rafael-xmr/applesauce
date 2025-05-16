@@ -1,4 +1,4 @@
-import { NostrConnectConnectionMethods, NostrConnectSigner, SimpleSigner } from "applesauce-signers";
+import { NostrConnectSigner, SimpleSigner } from "applesauce-signers";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 
 import { BaseAccount } from "../account.js";
@@ -30,20 +30,10 @@ export class NostrConnectAccount<Metadata extends unknown> extends BaseAccount<
     });
   }
 
-  /** This is called when NostrConnectAccount.fromJSON needs new connection methods for NostrConnectSigner */
-  static createConnectionMethods(): NostrConnectConnectionMethods {
-    throw new Error(
-      "Cant create NostrConnectAccount without either passing in connection methods or setting NostrConnectAccount.createConnectionMethods",
-    );
-  }
-
   static fromJSON<Metadata extends unknown>(
     json: SerializedAccount<NostrConnectAccountSignerData, Metadata>,
-    connection?: NostrConnectConnectionMethods,
   ): NostrConnectAccount<Metadata> {
-    connection = connection || NostrConnectAccount.createConnectionMethods();
     const signer = new NostrConnectSigner({
-      ...connection,
       relays: json.signer.relays,
       pubkey: json.pubkey,
       remote: json.signer.remote,

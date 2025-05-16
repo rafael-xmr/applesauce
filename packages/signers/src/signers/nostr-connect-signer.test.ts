@@ -5,30 +5,24 @@ import { SimpleSigner } from "./simple-signer.js";
 
 describe("NostrConnectSigner", () => {
   describe("connection", () => {
-    it("should call onSubOpen with filters", async () => {
+    it("should call subscription method with filters", async () => {
       const relays = ["wss://relay.signer.com"];
-      const onSubOpen = vi.fn(async () => {});
-      const onSubClose = vi.fn(async () => {});
-      const onPublishEvent = vi.fn(async () => {});
+      const subscription = vi.fn().mockReturnValue({ subscribe: vi.fn() });
+      const publish = vi.fn(async () => {});
       const client = new SimpleSigner();
       const remote = new SimpleSigner();
 
       const signer = new NostrConnectSigner({
-        onSubOpen,
-        onSubClose,
-        onPublishEvent,
         relays,
         remote: await remote.getPublicKey(),
         signer: client,
+        subscriptionMethod: subscription,
+        publishMethod: publish,
       });
 
       signer.connect();
 
-      expect(onSubOpen).toHaveBeenCalledWith(
-        [{ "#p": [await client.getPublicKey()], kinds: [24133] }],
-        relays,
-        expect.any(Function),
-      );
+      expect(subscription).toHaveBeenCalledWith(relays, [{ "#p": [await client.getPublicKey()], kinds: [24133] }]);
     });
   });
 });

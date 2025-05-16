@@ -1,5 +1,21 @@
 # applesauce-loaders
 
+## 1.0.0
+
+### Major Changes
+
+- 49bd6c1: Remove dependency on rx-nostr
+- 54d73c4: Removed `RequestLoader` class
+
+### Minor Changes
+
+- 6aa9eb0: Add `extraRelays` array to common loaders
+
+### Patch Changes
+
+- Updated dependencies
+  - applesauce-core@1.0.0
+
 ## 0.12.0
 
 ### Minor Changes
@@ -8,18 +24,7 @@
 
 ### Patch Changes
 
-- Updated dependencies [6882991]
-- Updated dependencies [e176601]
-- Updated dependencies [06263df]
-- Updated dependencies [5e95ed5]
-- Updated dependencies [91621b5]
-- Updated dependencies [3780d5e]
-- Updated dependencies [91621b5]
-- Updated dependencies [06263df]
-- Updated dependencies [91621b5]
-- Updated dependencies [0c6251d]
-- Updated dependencies [f92f10c]
-- Updated dependencies [06263df]
+- Updated dependencies
   - applesauce-core@0.12.0
 
 ## 0.11.0

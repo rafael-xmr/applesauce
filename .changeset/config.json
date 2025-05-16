@@ -1,22 +1,25 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.0.3/schema.json",
-  "changelog": "@changesets/cli/changelog",
+  "changelog": "./changelog.mjs",
   "commit": false,
   "fixed": [],
   "linked": [
     [
       "applesauce-accounts",
+      "applesauce-actions",
       "applesauce-content",
       "applesauce-core",
+      "applesauce-dvm",
       "applesauce-factory",
       "applesauce-loaders",
       "applesauce-react",
       "applesauce-relay",
-      "applesauce-signers"
+      "applesauce-signers",
+      "applesauce-solidjs",
     ]
   ],
   "access": "public",
   "baseBranch": "master",
-  "updateInternalDependencies": "patch",
+  "updateInternalDependencies": "minor",
   "ignore": ["applesauce-docs", "applesauce-examples"]
 }

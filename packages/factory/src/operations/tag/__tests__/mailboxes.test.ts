@@ -3,7 +3,7 @@ import { addInboxRelay, addOutboxRelay, removeInboxRelay, removeOutboxRelay } fr
 
 describe("addOutboxRelay", () => {
   it('should add a new "r" tag', () => {
-    expect(addOutboxRelay("wss://outbox.com")([], {})).toEqual([["r", "wss://outbox.com/"]]);
+    expect(addOutboxRelay("wss://outbox.com")([], {})).toEqual([["r", "wss://outbox.com/", "write"]]);
   });
 
   it('should update "read" tag', () => {
@@ -27,7 +27,7 @@ describe("removeOutboxRelay", () => {
 
 describe("addInboxRelay", () => {
   it('should add a new "r" tag', () => {
-    expect(addInboxRelay("wss://inbox.com")([], {})).toEqual([["r", "wss://inbox.com/"]]);
+    expect(addInboxRelay("wss://inbox.com")([], {})).toEqual([["r", "wss://inbox.com/", "read"]]);
   });
 
   it('should update "write" tag', () => {

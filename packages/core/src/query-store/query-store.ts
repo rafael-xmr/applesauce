@@ -1,11 +1,11 @@
 import {
-	// debounceTime,
-	filter,
-	finalize,
-	type Observable,
-	ReplaySubject,
-	share,
-	timer,
+  filter,
+  finalize,
+  firstValueFrom,
+  type Observable,
+  ReplaySubject,
+  share,
+  timer,
 } from "rxjs";
 import type { Filter, NostrEvent } from "nostr-tools";
 import hash_sum from "hash-sum";
@@ -14,149 +14,155 @@ import type { AddressPointer, EventPointer } from "nostr-tools/nip19";
 import type { IEventStore } from "../event-store/interface.js";
 
 import * as Queries from "../queries/index.js";
-import { getObservableValue } from "../observable/get-observable-value.js";
 import { withImmediateValueOrDefault } from "../observable/with-immediate-value.js";
 
-export type Query<T extends unknown> = {
-	/** A unique key for this query. this is used to detect duplicate queries */
-	key: string;
-	/** The meat of the query, this should return an Observable that subscribes to the eventStore in some way */
-	run: (events: IEventStore, store: QueryStore) => Observable<T>;
+export type Query<T extends unknown> = (
+  events: IEventStore,
+  store: QueryStore,
+) => Observable<T>;
+
+export type QueryConstructor<T extends unknown, Args extends Array<any>> = ((
+  ...args: Args
+) => Query<T>) & {
+  getKey?: (...args: Args) => string;
 };
 
-export type QueryConstructor<T extends unknown, Args extends Array<any>> = (
-	...args: Args
-) => Query<T>;
-
 export class QueryStore {
-	static Queries = Queries;
+  static Queries = Queries;
 
-	store: IEventStore;
-	constructor(store: IEventStore) {
-		if (!store) throw new Error("EventStore required");
-		this.store = store;
-	}
+  store: IEventStore;
+  constructor(store: IEventStore) {
+    if (!store) throw new Error("EventStore required");
+    this.store = store;
+  }
 
-	/** A directory of all active queries */
-	queries = new Map<
-		QueryConstructor<any, any[]>,
-		Map<string, Observable<any>>
-	>();
+  /** A directory of all active queries */
+  queries = new Map<
+    QueryConstructor<any, any[]>,
+    Map<string, Observable<any>>
+  >();
 
-	/** How long a query should be kept "warm" while nothing is subscribed to it */
-	queryKeepWarmTimeout = 60_000;
+  /** How long a query should be kept "warm" while nothing is subscribed to it */
+  queryKeepWarmTimeout = 60_000;
 
-	/** Debounce time in milliseconds to batch store updates (adjustable) */
-	queryDebounceTime = 500;
+  /** Creates a cached query */
+  createQuery<T extends unknown, Args extends Array<any>>(
+    queryConstructor: QueryConstructor<T, Args>,
+    ...args: Args
+  ): Observable<T> {
+    let observables = this.queries.get(queryConstructor);
+    if (!observables) {
+      observables = new Map();
+      this.queries.set(queryConstructor, observables);
+    }
 
-	/** Creates a cached query */
-	createQuery<T extends unknown, Args extends Array<any>>(
-		queryConstructor: QueryConstructor<T, Args>,
-		...args: Args
-	): Observable<T | undefined> {
-		let observables = this.queries.get(queryConstructor);
-		if (!observables) {
-			observables = new Map();
-			this.queries.set(queryConstructor, observables);
-		}
+    const key = queryConstructor.getKey
+      ? queryConstructor.getKey(...args)
+      : hash_sum(args);
 
-		const key = hash_sum(args);
-		let observable: Observable<T | undefined> | undefined =
-			observables.get(key);
-		if (!observable) {
-			const cleanup = () => {
-				if (observables.get(key) === observable) observables.delete(key);
-			};
+    let observable: Observable<T | undefined> | undefined =
+      observables.get(key);
 
-			observable = queryConstructor(...args)
-				.run(this.store, this)
-				.pipe(
-					// Debounce emissions to avoid reacting to every single store update
-					// debounceTime(this.queryDebounceTime),
-					// Always emit undefined so the observable is sync
-					withImmediateValueOrDefault(undefined),
-					// Remove the observable when unsubscribed
-					finalize(cleanup),
-					// Share a single observable for all components
-					share({
-						connector: () => new ReplaySubject(1),
-						resetOnComplete: () => timer(this.queryKeepWarmTimeout),
-						resetOnRefCountZero: () => timer(this.queryKeepWarmTimeout),
-					}),
-				);
+    if (!observable) {
+      const cleanup = () => {
+        if (observables.get(key) === observable) observables.delete(key);
+      };
 
-			// Set debug fields
-			Reflect.set(observable, "queryArgs", args);
+      observable = queryConstructor(...args)(this.store, this).pipe(
+        // always emit undefined so the observable is sync
+        withImmediateValueOrDefault(undefined),
+        // remove the observable when its unsubscribed
+        finalize(cleanup),
+        // only create a single observable for all components
+        share({
+          connector: () => new ReplaySubject(1),
+          resetOnComplete: () => timer(this.queryKeepWarmTimeout),
+          resetOnRefCountZero: () => timer(this.queryKeepWarmTimeout),
+        }),
+      );
 
-			observables.set(key, observable);
-		}
+      // set debug fields
+      Reflect.set(observable, "queryArgs", args);
 
-		return observable;
-	}
+      observables.set(key, observable);
+    }
 
-	/** Creates a query and waits for the next value */
-	async executeQuery<T extends unknown, Args extends Array<any>>(
-		queryConstructor: QueryConstructor<T, Args>,
-		...args: Args
-	): Promise<T> {
-		const query = this.createQuery(queryConstructor, ...args).pipe(
-			filter((v) => v !== undefined),
-		);
+    return observable as Observable<T>;
+  }
 
-		return getObservableValue(query);
-	}
+  /** Creates a query and waits for the next value */
+  async executeQuery<T extends unknown, Args extends Array<any>>(
+    queryConstructor: QueryConstructor<T, Args>,
+    ...args: Args
+  ): Promise<T> {
+    const query = this.createQuery(queryConstructor, ...args).pipe(
+      filter((v) => v !== undefined),
+    );
 
-	/** Creates a SingleEventQuery */
-	event(id: string) {
-		return this.createQuery(Queries.SingleEventQuery, id);
-	}
+    return firstValueFrom(query);
+  }
 
-	/** Creates a MultipleEventsQuery */
-	events(ids: string[]) {
-		return this.createQuery(Queries.MultipleEventsQuery, ids);
-	}
+  /** Creates a SingleEventQuery */
+  event(id: string) {
+    return this.createQuery(Queries.SingleEventQuery, id);
+  }
 
-	/** Creates a ReplaceableQuery */
-	replaceable(kind: number, pubkey: string, d?: string) {
-		return this.createQuery(Queries.ReplaceableQuery, kind, pubkey, d);
-	}
+  /** Creates a MultipleEventsQuery */
+  events(ids: string[]) {
+    return this.createQuery(Queries.MultipleEventsQuery, ids);
+  }
 
-	/** Creates a ReplaceableSetQuery */
-	replaceableSet(
-		pointers: { kind: number; pubkey: string; identifier?: string }[],
-	) {
-		return this.createQuery(Queries.ReplaceableSetQuery, pointers);
-	}
+  /** Creates a ReplaceableQuery */
+  replaceable(kind: number, pubkey: string, d?: string) {
+    return this.createQuery(Queries.ReplaceableQuery, kind, pubkey, d);
+  }
 
-	/** Creates a TimelineQuery */
-	timeline(filters: Filter | Filter[], keepOldVersions?: boolean) {
-		return this.createQuery(Queries.TimelineQuery, filters, keepOldVersions);
-	}
+  /** Creates a ReplaceableSetQuery */
+  replaceableSet(
+    pointers: { kind: number; pubkey: string; identifier?: string }[],
+  ) {
+    return this.createQuery(Queries.ReplaceableSetQuery, pointers);
+  }
 
-	/** Creates a ProfileQuery */
-	profile(pubkey: string) {
-		return this.createQuery(Queries.ProfileQuery, pubkey);
-	}
+  /** Creates a TimelineQuery */
+  timeline(filters: Filter | Filter[], keepOldVersions?: boolean) {
+    return this.createQuery(Queries.TimelineQuery, filters, keepOldVersions);
+  }
 
-	/** Creates a ReactionsQuery */
-	reactions(event: NostrEvent) {
-		return this.createQuery(Queries.ReactionsQuery, event);
-	}
+  /** Creates a ProfileQuery */
+  profile(pubkey: string) {
+    return this.createQuery(Queries.ProfileQuery, pubkey);
+  }
 
-	/** Creates a MailboxesQuery */
-	mailboxes(pubkey: string) {
-		return this.createQuery(Queries.MailboxesQuery, pubkey);
-	}
+  /** Creates a ContactsQuery */
+  contacts(pubkey: string) {
+    return this.createQuery(Queries.ContactsQuery, pubkey);
+  }
 
-	/** Creates a query for a user's blossom servers */
-	blossomServers(pubkey: string) {
-		return this.createQuery(Queries.UserBlossomServersQuery, pubkey);
-	}
+  /** Creates a MuteQuery */
+  mutes(pubkey: string) {
+    return this.createQuery(Queries.MuteQuery, pubkey);
+  }
 
-	/** Creates a ThreadQuery */
-	thread(root: string | EventPointer | AddressPointer) {
-		return this.createQuery(Queries.ThreadQuery, root);
-	}
+  /** Creates a ReactionsQuery */
+  reactions(event: NostrEvent) {
+    return this.createQuery(Queries.ReactionsQuery, event);
+  }
+
+  /** Creates a MailboxesQuery */
+  mailboxes(pubkey: string) {
+    return this.createQuery(Queries.MailboxesQuery, pubkey);
+  }
+
+  /** Creates a query for a users blossom servers */
+  blossomServers(pubkey: string) {
+    return this.createQuery(Queries.UserBlossomServersQuery, pubkey);
+  }
+
+  /** Creates a ThreadQuery */
+  thread(root: string | EventPointer | AddressPointer) {
+    return this.createQuery(Queries.ThreadQuery, root);
+  }
 }
 
 export { Queries };

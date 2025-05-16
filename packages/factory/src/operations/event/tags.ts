@@ -7,23 +7,19 @@ import {
   unlockHiddenTags,
 } from "applesauce-core/helpers";
 import { EventOperation, TagOperation } from "../../event-factory.js";
-import { ensureNamedValueTag, ensureSingletonTag } from "../../helpers/tag.js";
+import { addNameValueTag, setSingletonTag } from "../tag/common.js";
 
-/** Includes only a single instance of tag */
+/** Includes only a single instance of tag in an events public tags */
 export function includeSingletonTag(tag: [string, ...string[]], replace = true): EventOperation {
-  return (draft) => {
-    return { ...draft, tags: ensureSingletonTag(draft.tags, tag, replace) };
-  };
+  return modifyPublicTags(setSingletonTag(tag, replace));
 }
 
-/** Includes only a single name / value tag */
+/** Includes only a single name / value tag in an events public tags */
 export function includeNameValueTag(tag: [string, string, ...string[]], replace = true): EventOperation {
-  return (draft) => {
-    return { ...draft, tags: ensureNamedValueTag(draft.tags, tag, replace) };
-  };
+  return modifyPublicTags(addNameValueTag(tag, replace));
 }
 
-/** Includes a NIP-31 alt tag */
+/** Includes a NIP-31 alt tag in an events public tags */
 export function includeAltTag(description: string): EventOperation {
   return includeSingletonTag(["alt", description]);
 }

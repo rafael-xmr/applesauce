@@ -78,6 +78,9 @@ export class AccountManager<Metadata extends unknown = any> {
   removeAccount(account: string | IAccount<any, any, Metadata>) {
     const id = typeof account === "string" ? account : account.id;
     this.accounts$.next(this.accounts$.value.filter((a) => a.id !== id));
+
+    // if the removed account was active, clear the active account
+    if (this.active$.value?.id === id) this.active$.next(undefined);
   }
 
   /** Replaces an account with another */

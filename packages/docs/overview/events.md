@@ -2,7 +2,7 @@
 
 The `EventStore` is a reactive in-memory event database
 
-At its core the event store uses the [`Database`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_core.Database.html) class to store and index events
+At its core the event store uses the [`Database`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-core.Database.html) class to store and index events
 
 ## Creating an event store
 
@@ -17,7 +17,7 @@ const eventStore = new EventStore();
 
 ## Adding events
 
-To add events to the event store you can use the [`eventStore.add`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_core.EventStore.html#add) method
+To add events to the event store you can use the [`eventStore.add`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-core.EventStore.html#add) method
 
 Adding events to the event store will update any subscriptions that match that event
 
@@ -190,8 +190,8 @@ fetchEvents({ kinds: [1, 0] }, (event) => {
 
 ## Getting events
 
-If you just want to get an event from the store without subscribing you can use the [`hasEvent`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_core.EventStore.html#hasEvent), or [`hasReplaceable`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_core.EventStore.html#hasReplaceable) methods to check if the event exists and then use the [`getAll`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_core.EventStore.html#getAll), [`getEvent`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_core.EventStore.html#getEvent), and [`getReplaceable`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_core.EventStore.html#getReplaceable) methods to get the event
+If you just want to get an event from the store without subscribing you can use the [`hasEvent`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-core.EventStore.html#hasEvent), or [`hasReplaceable`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-core.EventStore.html#hasReplaceable) methods to check if the event exists and then use the [`getAll`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-core.EventStore.html#getAll), [`getEvent`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-core.EventStore.html#getEvent), and [`getReplaceable`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-core.EventStore.html#getReplaceable) methods to get the event
 
 ## Pruning
 
-The [`eventStore.prune`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_core.EventStore.html#prune) method will do its best to cleanup the event store and remove the oldest events that are not being used by a subscription
+The [`eventStore.prune`](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-core.EventStore.html#prune) method will do its best to cleanup the event store and remove the oldest events that are not being used by a subscription

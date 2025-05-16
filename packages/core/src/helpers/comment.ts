@@ -8,12 +8,14 @@ import { isSafeRelayURL } from "./relays.js";
 export const COMMENT_KIND = 1111;
 
 export type CommentEventPointer = {
+  type: "event";
   id: string;
   kind: number;
   pubkey?: string;
   relay?: string;
 };
 export type CommentAddressPointer = {
+  type: "address";
   // address pointer can have optional event id if there is an "E" or "e" tag
   id?: string;
   kind: number;
@@ -22,9 +24,12 @@ export type CommentAddressPointer = {
   relay?: string;
 };
 
-export type CommentExternalPointer = ExternalPointer<keyof ExternalIdentifiers>;
+export type CommentExternalPointer<T extends keyof ExternalIdentifiers> = ExternalPointer<T> & { type: "external" };
 
-export type CommentPointer = CommentEventPointer | CommentAddressPointer | CommentExternalPointer;
+export type CommentPointer =
+  | CommentEventPointer
+  | CommentAddressPointer
+  | CommentExternalPointer<keyof ExternalIdentifiers>;
 
 export const CommentRootPointerSymbol = Symbol.for("comment-root-pointer");
 export const CommentReplyPointerSymbol = Symbol.for("comment-reply-pointer");
@@ -44,6 +49,7 @@ export function getCommentEventPointer(tags: string[][], root = false): CommentE
     const rootPubkey = root ? tags.find((t) => t[0] === "P")?.[1] : undefined;
 
     const pointer: CommentPointer = {
+      type: "event",
       id: eTag[1],
       kind: parseInt(kind),
       pubkey: eTag[3] || rootPubkey || undefined,
@@ -69,6 +75,7 @@ export function getCommentAddressPointer(tags: string[][], root = false): Commen
 
     const addressPointer = getAddressPointerFromATag(aTag);
     const pointer: CommentAddressPointer = {
+      type: "address",
       id: eTag?.[1],
       pubkey: addressPointer.pubkey,
       identifier: addressPointer.identifier,
@@ -85,14 +92,20 @@ export function getCommentAddressPointer(tags: string[][], root = false): Commen
  * Gets the ExternalPointer from an array of tags
  * @throws
  */
-export function getCommentExternalPointer(tags: string[][], root = false): CommentExternalPointer | null {
+export function getCommentExternalPointer(
+  tags: string[][],
+  root = false,
+): CommentExternalPointer<keyof ExternalIdentifiers> | null {
   const iTag = tags.find((t) => t[0] === (root ? "I" : "i"));
   const kind = tags.find((t) => t[0] === (root ? "K" : "k"))?.[1];
 
   if (iTag) {
     if (!kind) throw new Error("Missing kind tag");
 
-    return getExternalPointerFromTag(iTag);
+    return {
+      type: "external",
+      ...getExternalPointerFromTag(iTag),
+    };
   }
   return null;
 }

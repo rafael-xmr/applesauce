@@ -9,7 +9,7 @@ export default defineConfig({
     nav: [
       { text: "Home", link: "/" },
       { text: "Examples", link: "https://hzrd149.github.io/applesauce/examples" },
-      { text: "Reference", link: "https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_core.html" },
+      { text: "Reference", link: "https://hzrd149.github.io/applesauce/typedoc/index.html" },
     ],
 
     sidebar: [
@@ -28,6 +28,7 @@ export default defineConfig({
           { text: "Queries", link: "/overview/queries" },
           { text: "Helpers", link: "/overview/helpers" },
           { text: "Factory", link: "/overview/factory" },
+          { text: "Relays", link: "/overview/relays" },
           { text: "Loaders", link: "/overview/loaders" },
           { text: "Actions", link: "/overview/actions" },
         ],
@@ -68,6 +69,14 @@ export default defineConfig({
         items: [
           { text: "Text", link: "/content/text" },
           { text: "Markdown", link: "/content/markdown" },
+        ],
+      },
+      {
+        text: "Wallet",
+        items: [
+          { text: "Getting Started", link: "/wallet/getting-started" },
+          { text: "Actions", link: "/wallet/actions" },
+          { text: "Queries", link: "/wallet/queries" },
         ],
       },
     ],

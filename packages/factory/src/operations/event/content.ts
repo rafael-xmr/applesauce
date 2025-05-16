@@ -11,7 +11,9 @@ import { ensureProfilePointerTag } from "../../helpers/common-tags.js";
 /** Override the event content */
 export function setContent(content: string): EventOperation {
   return async (draft) => {
-    return { ...draft, content };
+    draft = { ...draft, content };
+    Reflect.deleteProperty(draft, HiddenContentSymbol);
+    return draft;
   };
 }
 

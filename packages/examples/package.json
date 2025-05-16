@@ -1,34 +1,35 @@
 {
-  "name": "applesauce-examples",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@fontsource/roboto": "^5.1.1",
-    "@mui/material": "^6.4.4",
-    "applesauce-core": "^0.12.0",
-    "applesauce-factory": "^0.12.0",
-    "applesauce-loaders": "^0.12.0",
-    "applesauce-react": "^0.12.0",
-    "nostr-tools": "^2.11.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-use": "^17.6.0",
-    "rx-nostr": "^3.5.0"
-  },
-  "devDependencies": {
-    "@types/react": "^18.3.18",
-    "@types/react-dom": "^18.3.5",
-    "@vitejs/plugin-react-swc": "^3.8.0",
-    "globals": "^15.14.0",
-    "typescript": "^5.8.2",
-    "vite": "^6.1.0"
-  }
+	"name": "applesauce-examples",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc -b && vite build",
+		"preview": "vite preview"
+	},
+	"dependencies": {
+		"@emotion/react": "^11.14.0",
+		"@emotion/styled": "^11.14.0",
+		"@fontsource/roboto": "^5.1.1",
+		"@mui/material": "^6.4.4",
+		"applesauce-core": "link:../core",
+		"applesauce-factory": "link:../factory",
+		"applesauce-loaders": "link:../loaders",
+		"applesauce-react": "link:../react",
+		"nostr-tools": "^2.10.4",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1",
+		"react-use": "^17.6.0",
+		"rx-nostr": "^3.5.0",
+		"rxjs": "^7.8.1"
+	},
+	"devDependencies": {
+		"@types/react": "^18.3.18",
+		"@types/react-dom": "^18.3.5",
+		"@vitejs/plugin-react-swc": "^3.8.0",
+		"globals": "^15.14.0",
+		"typescript": "^5.8.2",
+		"vite": "^6.1.0"
+	}
 }

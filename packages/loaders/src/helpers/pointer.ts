@@ -1,7 +1,9 @@
-export function groupByRelay<T extends { relays?: string[] }>(pointers: T[], defaultKey?: string): Map<string, T[]> {
+import { mergeRelaySets } from "applesauce-core/helpers";
+
+export function groupByRelay<T extends { relays?: string[] }>(pointers: T[], extraRelays?: string[]): Map<string, T[]> {
   let byRelay = new Map<string, T[]>();
   for (const pointer of pointers) {
-    let relays = pointer.relays?.length ? pointer.relays : defaultKey ? [defaultKey] : [];
+    let relays = mergeRelaySets(pointer.relays, extraRelays);
     for (const relay of relays) {
       if (!byRelay.has(relay)) byRelay.set(relay, [pointer]);
       else byRelay.get(relay)?.push(pointer);

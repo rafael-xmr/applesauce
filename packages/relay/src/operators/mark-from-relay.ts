@@ -1,6 +1,6 @@
 import { MonoTypeOperatorFunction, tap } from "rxjs";
-import { SubscriptionResponse } from "../relay.js";
 import { addSeenRelay } from "applesauce-core/helpers";
+import { SubscriptionResponse } from "../types.js";
 
 /** Marks all events as from the relay */
 export function markFromRelay(relay: string): MonoTypeOperatorFunction<SubscriptionResponse> {

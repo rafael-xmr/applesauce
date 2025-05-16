@@ -6,6 +6,8 @@ export type RelayFilterMap<T = Filter> = {
 };
 
 export type CacheRequest = (filters: Filter[]) => Observable<NostrEvent>;
+export type NostrResponse = NostrEvent | "EOSE";
+export type NostrRequest = (relays: string[], filters: Filter[], id?: string) => Observable<NostrResponse>;
 
 export interface ILoader<T, R> extends Subscribable<R> {
   next: (value: T) => void;

@@ -1,16 +1,16 @@
 # Accounts
 
-The [account classes](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce_accounts.Accounts.html) are simple wrappers around various [Signers](../signers/signers.md) and expose a `toJSON` and `fromJSON` method to let you save them to localStorage or indexeddb databases
+The [account classes](https://hzrd149.github.io/applesauce/typedoc/modules/applesauce-accounts.Accounts.html) are simple wrappers around various [Signers](../signers/signers.md) and expose a `toJSON` and `fromJSON` method to let you save them to localStorage or indexeddb databases
 
 ## Built-in account types
 
-- [ExtensionAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_accounts.Accounts.ExtensionAccount.html) is a wrapper around [ExtensionSigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_signers.ExtensionSigner.html)
-- [PasswordAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_accounts.Accounts.PasswordAccount.html) is a wrapper around [PasswordSigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_signers.PasswordSigner.html)
-- [NostrConnectAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_accounts.Accounts.NostrConnectAccount.html) is a wrapper around [NostrConnectSigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_signers.NostrConnectSigner.html)
-- [SimpleAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_accounts.Accounts.SimpleAccount.html) is a wrapper around [SimpleSigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_signers.SimpleSigner.html)
-- [SerialPortAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_accounts.Accounts.SerialPortAccount.html) is a wrapper around [SerialPortSigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_signers.SerialPortSigner.html)
-- [ReadonlyAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_accounts.Accounts.ReadonlyAccount.html) is a wrapper around [ReadonlySigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_signers.ReadonlySigner.html)
-- [AmberClipboardAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_accounts.Accounts.AmberClipboardAccount.html) is a wrapper around [AmberClipboardSigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_signers.AmberClipboardSigner.html)
+- [ExtensionAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-accounts.Accounts.ExtensionAccount.html) is a wrapper around [ExtensionSigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-signers.ExtensionSigner.html)
+- [PasswordAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-accounts.Accounts.PasswordAccount.html) is a wrapper around [PasswordSigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-signers.PasswordSigner.html)
+- [NostrConnectAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-accounts.Accounts.NostrConnectAccount.html) is a wrapper around [NostrConnectSigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-signers.NostrConnectSigner.html)
+- [SimpleAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-accounts.Accounts.SimpleAccount.html) is a wrapper around [SimpleSigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-signers.SimpleSigner.html)
+- [SerialPortAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-accounts.Accounts.SerialPortAccount.html) is a wrapper around [SerialPortSigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-signers.SerialPortSigner.html)
+- [ReadonlyAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-accounts.Accounts.ReadonlyAccount.html) is a wrapper around [ReadonlySigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-signers.ReadonlySigner.html)
+- [AmberClipboardAccount](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-accounts.Accounts.AmberClipboardAccount.html) is a wrapper around [AmberClipboardSigner](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-signers.AmberClipboardSigner.html)
 
 ## Creating new accounts
 
@@ -81,7 +81,7 @@ To disable the request queue set `account.disableQueue = false` directly after c
 
 ## Custom account types
 
-To create your own account type first your going to need to create a new signer class that implements [Nip07Interface](https://hzrd149.github.io/applesauce/typedoc/types/applesauce_signers.Nip07Interface.html)
+To create your own account type first your going to need to create a new signer class that implements [Nip07Interface](https://hzrd149.github.io/applesauce/typedoc/types/applesauce-signers.Nip07Interface.html)
 
 ### Create a new signer class
 

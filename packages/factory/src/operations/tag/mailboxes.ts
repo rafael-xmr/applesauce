@@ -13,10 +13,10 @@ export function addOutboxRelay(url: string | URL): TagOperation {
   return (tags) => {
     const existing = findMatchingRTag(tags, url);
     if (existing) {
-      // if the existing tag is an inbox, update it to both
+      // if the existing tag is an inbox, remove the marker so its both
       if (existing[2] === "read") return tags.map((t) => (t === existing ? ["r", url] : t));
       else return tags;
-    } else return [...tags, ["r", url]];
+    } else return [...tags, ["r", url, "write"]];
   };
 }
 
@@ -41,10 +41,10 @@ export function addInboxRelay(url: string | URL): TagOperation {
   return (tags) => {
     const existing = findMatchingRTag(tags, url);
     if (existing) {
-      // if the existing tag is an outbox, update it to both
+      // if the existing tag is an outbox, remove the marker so its both
       if (existing[2] === "write") return tags.map((t) => (t === existing ? ["r", url] : t));
       else return tags;
-    } else return [...tags, ["r", url]];
+    } else return [...tags, ["r", url, "read"]];
   };
 }
 

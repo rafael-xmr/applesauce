@@ -1,6 +1,6 @@
 # Timelines
 
-The [TimelineLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce_loaders.TimelineLoader.html) class can be used to load a timeline of events.
+The [TimelineLoader](https://hzrd149.github.io/applesauce/typedoc/classes/applesauce-loaders.TimelineLoader.html) class can be used to load a timeline of events.
 
 ```ts
 import { TimelineLoader } from "applesauce-loaders";

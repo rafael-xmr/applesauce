@@ -2,7 +2,7 @@
 
 ## useObservable
 
-The [`useObservable`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.Hooks.useObservable.html) hook is a thing wrapper around the `useObservableState` hook from [observable-hooks](https://observable-hooks.js.org/) that allows `undefined` to be passed
+The [`useObservable`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-react.Hooks.useObservable.html) hook is a thing wrapper around the `useObservableState` hook from [observable-hooks](https://observable-hooks.js.org/) that allows `undefined` to be passed
 
 This is useful for subscribing to observables that are not created yet
 
@@ -20,15 +20,15 @@ const profile = useObservable(profileQuery);
 
 ## useQueryStore
 
-The [`useQueryStore`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.Hooks.useQueryStore.html) hook can be used at access the `QueryStore` from anywhere in the react tree
+The [`useQueryStore`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-react.Hooks.useQueryStore.html) hook can be used at access the `QueryStore` from anywhere in the react tree
 
 ## useEventStore
 
-The [`useEventStore`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.Hooks.useEventStore.html) hook can be used at access the `EventStore` from anywhere in the react tree
+The [`useEventStore`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-react.Hooks.useEventStore.html) hook can be used at access the `EventStore` from anywhere in the react tree
 
 ## useStoreQuery
 
-The [`useStoreQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.Hooks.useStoreQuery.html) hook requires the `QueryStoreProvider` and can be used to create and run a query in the `QueryStore` and subscribe to the results
+The [`useStoreQuery`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-react.Hooks.useStoreQuery.html) hook requires the `QueryStoreProvider` and can be used to create and run a query in the `QueryStore` and subscribe to the results
 
 ```ts
 function UserAvatar({ pubkey }: { pubkey: string }) {
@@ -41,19 +41,19 @@ function UserAvatar({ pubkey }: { pubkey: string }) {
 
 ## useEventFactory
 
-The [`useEventFactory`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.Hooks.useEventFactory.html) hook can be used at access the `EventFactory` from anywhere in the react tree
+The [`useEventFactory`](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-react.Hooks.useEventFactory.html) hook can be used at access the `EventFactory` from anywhere in the react tree
 
 ## useActiveAccount
 
-The [useActiveAccount](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.Hooks.useActiveAccount.html) hook requires the `AccountsProvider` and returns the currently active account or `undefined`
+The [useActiveAccount](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-react.Hooks.useActiveAccount.html) hook requires the `AccountsProvider` and returns the currently active account or `undefined`
 
 ## useAccountManager
 
-The [useAccountManager](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.Hooks.useAccountManager.html) hook requires the `AccountsProvider` and returns the `AccountManager` class
+The [useAccountManager](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-react.Hooks.useAccountManager.html) hook requires the `AccountsProvider` and returns the `AccountManager` class
 
 ## useRenderedContent
 
-The [useRenderedContent](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce_react.Hooks.useRenderedContent.html) hook can be used to parse and render an events `content` into a JSX tree
+The [useRenderedContent](https://hzrd149.github.io/applesauce/typedoc/functions/applesauce-react.Hooks.useRenderedContent.html) hook can be used to parse and render an events `content` into a JSX tree
 
 ::: info
 The components directory should be defined outside of the component itself to avoid unnecessary re-renders
